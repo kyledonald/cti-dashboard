@@ -1,0 +1,10 @@
+.idea/
+.DS_Store
+.env
+*.log
+
+node_modules/
+dist/
+
+backend/node_modules/
+backend/dist/

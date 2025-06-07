@@ -1,0 +1,90 @@
+# openAPI specification version - 2.0 for Google API Gateway.
+swagger: '2.0'
+
+info:
+  title: CTI Dashboard API
+  description: API for managing Cyber Threat Intelligence data for a university project.
+  version: 1.0.0
+
+host: YOUR_API_GATEWAY_HOST_WILL_GO_HERE 
+schemes:
+  - https
+
+produces:
+  - application/json
+
+x-google-backend:
+  address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api
+  protocol: h2
+
+paths:
+  /health:
+    get: 
+      summary: Health Check for the API Gateway and Backend
+      operationId: healthCheckGateway
+      x-google-backend:
+        address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/health
+        protocol: h2
+      responses: 
+        '200':
+          description: API is healthy!
+
+  /server-time:
+    get:
+      summary: Get current server time from the backend
+      operationId: getServerTimeGateway
+      x-google-backend:
+        address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/server-time
+        protocol: h2
+      responses:
+        '200':
+          description: Current server time in ISO format.
+
+  /firestore-test:
+    get:
+      summary: Test connection to Firestore by creating/fetching a test document
+      operationId: testFirestoreGateway
+      x-google-backend:
+        address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/firestore-test
+        protocol: h2
+      responses:
+        '200':
+          description: Test document fetched successfully.
+        '201':
+          description: Test document created and fetched successfully.
+        '500':
+          description: Internal Server Error due to Firestore access issue.
+
+  # /users:
+  #   get:
+  #     summary: Retrieve a list of users
+  #     operationId: listUsers
+  #     x-google-backend:
+  #       address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/users
+  #       protocol: h2
+  #     responses:
+  #       '200':
+  #         description: A list of user objects.
+  #
+  #   post:
+  #     summary: Create a new user
+  #     operationId: createUser
+  #     x-google-backend:
+  #       address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/users
+  #       protocol: h2
+  #     parameters: # Define what the request body should look like
+  #       - name: user
+  #         in: body
+  #         required: true
+  #         schema:
+  #           type: object
+  #           properties:
+  #             firstName: { type: string }
+  #             lastName: { type: string }
+  #             email: { type: string }
+  #             role: { type: string }
+  #     responses:
+  #       '201':
+  #         description: User created successfully.
+  #       '400':
+  #         description: Invalid input.
