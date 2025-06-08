@@ -1,90 +1,147 @@
-# openAPI specification version - 2.0 for Google API Gateway.
-swagger: '2.0'
+# openapi-spec.yaml (Corrected)
 
+swagger: '2.0'
 info:
   title: CTI Dashboard API
-  description: API for managing Cyber Threat Intelligence data for a university project.
+  description: API for managing Cyber Threat Intelligence data.
   version: 1.0.0
-
-host: YOUR_API_GATEWAY_HOST_WILL_GO_HERE 
+host: YOUR_API_GATEWAY_HOST_WILL_GO_HERE
 schemes:
   - https
-
 produces:
   - application/json
 
+# --- KEY CHANGE 1: Define a SINGLE backend for your entire API ---
+# This simplifies everything. We tell the gateway where the function lives
+# and how to forward requests to it.
 x-google-backend:
   address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api
+  # --- KEY CHANGE 2: Use APPEND_PATH_TO_ADDRESS ---
+  # This is the magic setting. It takes the incoming path (e.g., /organizations/123)
+  # and appends it to the address above. The result is a request to:
+  # https://.../api/organizations/123
+  # This perfectly matches how your Express app is structured.
+  path_translation: APPEND_PATH_TO_ADDRESS
   protocol: h2
 
 paths:
+  # --- All paths below will now inherit the global x-google-backend ---
+  # --- This makes the config much cleaner and less error-prone.   ---
+
   /health:
-    get: 
+    get:
       summary: Health Check for the API Gateway and Backend
       operationId: healthCheckGateway
-      x-google-backend:
-        address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/health
-        protocol: h2
-      responses: 
+      # No x-google-backend needed here, it's inherited.
+      responses:
         '200':
-          description: API is healthy!
+          description: OK
 
   /server-time:
     get:
       summary: Get current server time from the backend
       operationId: getServerTimeGateway
-      x-google-backend:
-        address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/server-time
-        protocol: h2
       responses:
         '200':
-          description: Current server time in ISO format.
+          description: OK
 
   /firestore-test:
     get:
-      summary: Test connection to Firestore by creating/fetching a test document
+      summary: Test Firestore Connection
       operationId: testFirestoreGateway
-      x-google-backend:
-        address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/firestore-test
-        protocol: h2
       responses:
         '200':
           description: Test document fetched successfully.
         '201':
           description: Test document created and fetched successfully.
         '500':
-          description: Internal Server Error due to Firestore access issue.
+          description: Internal Server Error.
 
-  # /users:
-  #   get:
-  #     summary: Retrieve a list of users
-  #     operationId: listUsers
-  #     x-google-backend:
-  #       address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/users
-  #       protocol: h2
-  #     responses:
-  #       '200':
-  #         description: A list of user objects.
-  #
-  #   post:
-  #     summary: Create a new user
-  #     operationId: createUser
-  #     x-google-backend:
-  #       address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api/users
-  #       protocol: h2
-  #     parameters: # Define what the request body should look like
-  #       - name: user
-  #         in: body
-  #         required: true
-  #         schema:
-  #           type: object
-  #           properties:
-  #             firstName: { type: string }
-  #             lastName: { type: string }
-  #             email: { type: string }
-  #             role: { type: string }
-  #     responses:
-  #       '201':
-  #         description: User created successfully.
-  #       '400':
-  #         description: Invalid input.
+  # --- Organizations API Paths ---
+  /organizations:
+    post:
+      summary: Create a new organization
+      operationId: createOrganization
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name: { type: string }
+              description: { type: string }
+            required:
+              - name
+      responses:
+        '201':
+          description: Organization created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      summary: Get all organizations
+      operationId: listOrganizations
+      responses:
+        '200':
+          description: A list of organizations
+
+  /organizations/{organizationId}:
+    get:
+      summary: Get a specific organization by ID
+      operationId: getOrganizationById
+      parameters:
+        - name: organizationId
+          # --- KEY CHANGE 3: This MUST be 'path' ---
+          # The parameter is in the URL path, not a query string.
+          # This was the direct cause of your error.
+          in: path
+          required: true
+          type: string
+          description: ID of the organization to retrieve
+      responses:
+        '200':
+          description: Organization data
+        '404':
+          description: Organization not found
+
+    put:
+      summary: Update an existing organization
+      operationId: updateOrganization
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          type: string
+          description: ID of the organization to update
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name: { type: string }
+              description: { type: string }
+              status: { type: string }
+      responses:
+        '200':
+          description: Organization updated successfully
+        '404':
+          description: Organization not found
+        '400':
+          description: Invalid input
+
+    delete:
+      summary: Delete an organization
+      operationId: deleteOrganization
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          type: string
+          description: ID of the organization to delete
+      responses:
+        '204':
+          description: Organization deleted successfully
+        '404':
+          description: Organization not found
