@@ -1,28 +1,50 @@
+// backend/src/index.ts (MAIN APP FILE)
 import express from 'express';
 import { Firestore, FieldValue } from '@google-cloud/firestore';
-import * as functions from 'firebase-functions'; // <<< ADD THIS IMPORT
+import * as functions from 'firebase-functions';
+import { organizationRouter } from './routes/organization.routes';
+import { userRouter } from './routes/user.routes'; // <<< NEW IMPORT
 
 // firestore config
-const db = new Firestore({
-  projectId: process.env.GCP_PROJECT,
-  databaseId: 'cti-db', // Assuming this is your database ID. Confirm in console.
-});
+let firestoreConfig: any = {
+  // projectId is picked up automatically by the library based on firebase init or GCP_PROJECT env var
+  // databaseId will be conditionally set
+};
 
-// express app setup
+if (process.env.FUNCTIONS_EMULATOR) {
+  console.log(
+    'Running in FUNCTIONS_EMULATOR environment. Connecting to local Firestore emulator.',
+  );
+  firestoreConfig.host = 'localhost:8080'; // Firestore emulator default port
+  firestoreConfig.ssl = false; // Disable SSL for local emulator connection
+  firestoreConfig.credentials = {
+    client_email: 'firebase-emulator',
+    private_key: 'firebase-emulator',
+  }; // Dummy credentials for local
+  firestoreConfig.databaseId = '(default)'; // Set to (default) for emulator
+} else {
+  console.log(
+    `Running in PRODUCTION environment. Connecting to GCP Firestore for project: ${process.env.GCP_PROJECT}`,
+  );
+  firestoreConfig.projectId = process.env.GCP_PROJECT;
+  firestoreConfig.databaseId = 'cti-db'; // Set to 'cti-db' for production
+}
+
+export const db = new Firestore(firestoreConfig); // Make db accessible globally for services
+
+// --- Express App Setup ---
 const app = express();
 app.use(express.json());
 
-// health check endpoint
+// --- API Routes ---
 app.get('/health', (req, res) => {
   res.status(200).send('API is healthy!');
 });
 
-// server time endpoint
 app.get('/server-time', (req, res) => {
   res.status(200).json({ currentTime: new Date().toISOString() });
 });
 
-// connectivity test
 app.get('/firestore-test', async (req, res) => {
   try {
     const testCollectionRef = db.collection('testCollection');
@@ -54,152 +76,11 @@ app.get('/firestore-test', async (req, res) => {
   }
 });
 
-// Organizations API
+// --- Organization API (using router) ---
+app.use('/organizations', organizationRouter(db));
 
-// Create a new organization
-app.post('/organizations', async (req, res) => {
-  try {
-    const { name, description } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ error: 'Organization name is required.' });
-    }
-
-    const organizationRef = db.collection('organizations').doc();
-    const organizationId = organizationRef.id;
-
-    const newOrganization = {
-      organizationId: organizationId,
-      name: name,
-      description: description || null,
-      status: 'active',
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    await organizationRef.set(newOrganization);
-    console.log(`Organization created: ${organizationId}`);
-    res.status(201).json({
-      message: 'Organization created successfully',
-      organization: newOrganization,
-    });
-  } catch (error: any) {
-    console.error('Error creating organization:', error);
-    res
-      .status(500)
-      .json({ error: 'Failed to create organization', details: error.message });
-  }
-});
-
-// GET /organizations: Get all organizations
-app.get('/organizations', async (req, res) => {
-  try {
-    console.log('Received GET request for all organizations.');
-    const organizationsRef = db.collection('organizations');
-    const snapshot = await organizationsRef.orderBy('name').get();
-
-    const organizations: any[] = [];
-    snapshot.forEach((doc) => {
-      organizations.push(doc.data());
-    });
-
-    res.status(200).json({ organizations: organizations });
-  } catch (error: any) {
-    console.error('Error fetching all organizations:', error);
-    res
-      .status(500)
-      .json({ error: 'Failed to fetch organizations', details: error.message });
-  }
-});
-
-// GET /organizations/{id}: Get a single organization by ID (using path parameter)
-app.get('/organizations/:organizationId', async (req, res) => {
-  try {
-    const { organizationId } = req.params;
-
-    console.log(
-      `Received GET request for organizationId: "${organizationId}" (from path param)`,
-    );
-    console.log(`Type of organizationId: ${typeof organizationId}`);
-    if (organizationId && organizationId.length === 0) {
-      console.log('organizationId is an empty string!');
-    } else if (!organizationId) {
-      console.log('organizationId is null or undefined (missing path param).');
-      return res
-        .status(400)
-        .json({ error: 'Organization ID path parameter is required.' });
-    }
-
-    const organizationRef = db.collection('organizations').doc(organizationId);
-    const doc = await organizationRef.get();
-
-    if (!doc.exists) {
-      console.log(
-        `Organization with ID "${organizationId}" not found in Firestore.`,
-      );
-      return res.status(404).json({ error: 'Organization not found.' });
-    }
-
-    res.status(200).json({ organization: doc.data() });
-  } catch (error: any) {
-    console.error('Error fetching organization by ID:', error);
-    res
-      .status(500)
-      .json({ error: 'Failed to fetch organization', details: error.message });
-  }
-});
-
-// PUT /organizations/{id}: Update an organization
-app.put('/organizations/:organizationId', async (req, res) => {
-  try {
-    const { organizationId } = req.params;
-    const { name, description, status } = req.body;
-
-    const organizationRef = db.collection('organizations').doc(organizationId);
-    const doc = await organizationRef.get();
-
-    if (!doc.exists) {
-      return res.status(404).json({ error: 'Organization not found.' });
-    }
-
-    const updateData: any = { updatedAt: FieldValue.serverTimestamp() };
-    if (name !== undefined) updateData.name = name;
-    if (description !== undefined) updateData.description = description;
-    if (status !== undefined) updateData.status = status;
-
-    await organizationRef.update(updateData);
-    console.log(`Organization updated: ${organizationId}`);
-    res.status(200).json({ message: 'Organization updated successfully' });
-  } catch (error: any) {
-    console.error('Error updating organization:', error);
-    res
-      .status(500)
-      .json({ error: 'Failed to update organization', details: error.message });
-  }
-});
-
-// DELETE /organizations/{id}: Delete an organization
-app.delete('/organizations/:organizationId', async (req, res) => {
-  try {
-    const { organizationId } = req.params;
-    const organizationRef = db.collection('organizations').doc(organizationId);
-    const doc = await organizationRef.get();
-
-    if (!doc.exists) {
-      return res.status(404).json({ error: 'Organization not found.' });
-    }
-
-    await organizationRef.delete();
-    console.log(`Organization deleted: ${organizationId}`);
-    res.status(204).send();
-  } catch (error: any) {
-    console.error('Error deleting organization:', error);
-    res
-      .status(500)
-      .json({ error: 'Failed to delete organization', details: error.message });
-  }
-});
+// --- User API (using router) ---
+app.use('/users', userRouter(db)); // <<< NEW: Use the user router
 
 // Main entry point for the Cloud Function.
-// NEW: Explicitly wrap the Express app as an HTTP function for the emulator.
-module.exports.api = functions.https.onRequest(app); // <<< CHANGE THIS LINE
+module.exports.api = functions.https.onRequest(app);
