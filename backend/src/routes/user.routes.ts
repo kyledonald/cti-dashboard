@@ -1,4 +1,3 @@
-// backend/src/routes/user.routes.ts
 import { Router } from 'express';
 import { Firestore } from '@google-cloud/firestore';
 import { UserController } from '../controllers/user.controller';

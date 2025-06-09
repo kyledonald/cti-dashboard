@@ -1,4 +1,3 @@
-// backend/src/models/user.model.ts
 import { FieldValue } from '@google-cloud/firestore';
 
 export interface User {
@@ -7,10 +6,10 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  profilePictureUrl?: string; // Optional
-  role: 'admin' | 'editor' | 'viewer'; // Enforced roles
-  organizationId: string; // Foreign Key to Organization
-  status: 'active' | 'inactive'; // e.g., to disable accounts
+  profilePictureUrl?: string;
+  role: 'admin' | 'editor' | 'viewer';
+  organizationId: string;
+  status: 'active' | 'inactive';
   createdAt: FieldValue | FirebaseFirestore.Timestamp;
   lastLoginAt: FieldValue | FirebaseFirestore.Timestamp;
   updatedAt: FieldValue | FirebaseFirestore.Timestamp;

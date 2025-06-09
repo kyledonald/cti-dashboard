@@ -1,11 +1,8 @@
-// backend/src/routes/organization.routes.ts
 import { Router } from 'express';
-import { Firestore } from '@google-cloud/firestore'; // Import Firestore type
+import { Firestore } from '@google-cloud/firestore';
 import { OrganizationController } from '../controllers/organization.controller';
 import { OrganizationService } from '../services/organization.service';
 
-// Change: Make this a function that returns a configured router
-// It will receive the db instance as an argument.
 export const organizationRouter = (db: Firestore) => {
   const router = Router();
   const organizationService = new OrganizationService(db); // Instantiate service with db
@@ -29,5 +26,5 @@ export const organizationRouter = (db: Firestore) => {
     organizationController.deleteOrganization(req, res),
   );
 
-  return router; // Return the configured router
+  return router;
 };

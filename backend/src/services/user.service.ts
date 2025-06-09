@@ -1,4 +1,3 @@
-// backend/src/services/user.service.ts
 import { Firestore, FieldValue } from '@google-cloud/firestore';
 import { User, CreateUserDTO, UpdateUserDTO } from '../models/user.model';
 
@@ -24,9 +23,9 @@ export class UserService {
       profilePictureUrl: userData.profilePictureUrl,
       role: userData.role,
       organizationId: userData.organizationId,
-      status: 'active', // Default status for new users
+      status: 'active',
       createdAt: FieldValue.serverTimestamp(),
-      lastLoginAt: FieldValue.serverTimestamp(), // Set on creation, updated on login
+      lastLoginAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     };
 
@@ -37,7 +36,6 @@ export class UserService {
   async getAllUsers(organizationId?: string): Promise<User[]> {
     let query: FirebaseFirestore.Query = this.collection;
     if (organizationId) {
-      // If organizationId is provided, filter users by organization
       query = query.where('organizationId', '==', organizationId);
     }
     const snapshot = await query.orderBy('lastName').get();

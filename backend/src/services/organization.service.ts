@@ -1,4 +1,3 @@
-// backend/src/services/organization.service.ts
 import { Firestore, FieldValue } from '@google-cloud/firestore';
 import {
   Organization,
@@ -25,7 +24,9 @@ export class OrganizationService {
       organizationId: organizationId,
       name: orgData.name,
       description: orgData.description || null,
-      status: 'active', // Default status
+      status: 'active',
+      nationality: orgData.nationality ?? null,
+      industry: orgData.industry ?? null,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     };
@@ -61,7 +62,7 @@ export class OrganizationService {
     const doc = await organizationRef.get();
 
     if (!doc.exists) {
-      return false; // Organization not found
+      return false;
     }
 
     const dataToUpdate: any = { updatedAt: FieldValue.serverTimestamp() };
@@ -70,6 +71,10 @@ export class OrganizationService {
       dataToUpdate.description = updateData.description;
     if (updateData.status !== undefined)
       dataToUpdate.status = updateData.status;
+    if (updateData.nationality !== undefined)
+      dataToUpdate.nationality = updateData.nationality;
+    if (updateData.industry !== undefined)
+      dataToUpdate.industry = updateData.industry;
 
     await organizationRef.update(dataToUpdate);
     return true;
@@ -80,9 +85,9 @@ export class OrganizationService {
     const doc = await organizationRef.get();
 
     if (!doc.exists) {
-      return false; // Organization not found
+      return false;
     }
-    // TODO: Add a check if there are users in this organization before deleting (as per your model)
+    // TODO: Add a check if there are users in the organization before deleting
     await organizationRef.delete();
     return true;
   }

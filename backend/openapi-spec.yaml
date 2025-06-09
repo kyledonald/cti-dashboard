@@ -10,8 +10,8 @@ produces:
   - application/json
 
 x-google-backend:
-  address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api # Your Cloud Function's base URL
-  path_translation: APPEND_PATH_TO_ADDRESS # The magic setting
+  address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api
+  path_translation: APPEND_PATH_TO_ADDRESS
   protocol: h2
 
 paths:
@@ -57,6 +57,8 @@ paths:
             properties:
               name: { type: string }
               description: { type: string }
+              nationality: { type: string }
+              industry: { type: string }
             required:
               - name
       responses:
@@ -106,6 +108,8 @@ paths:
               name: { type: string }
               description: { type: string }
               status: { type: string }
+              nationality: { type: string }
+              industry: { type: string }
       responses:
         '200':
           description: Organization updated successfully
@@ -146,7 +150,7 @@ paths:
               firstName: { type: string }
               lastName: { type: string }
               profilePictureUrl: { type: string }
-              role: { type: string, enum: ['admin', 'editor', 'viewer'] } # Example enum
+              role: { type: string, enum: ['admin', 'editor', 'viewer'] }
               organizationId: { type: string }
             required:
               - googleId
@@ -233,3 +237,96 @@ paths:
           description: User deleted successfully
         '404':
           description: User not found
+
+  # --- Threat Actors API Paths ---
+  /threat-actors:
+    post:
+      summary: Create a new threat actor
+      operationId: createThreatActor
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name: { type: string }
+              description: { type: string }
+              aliases: { type: array, items: { type: string } }
+              targetIndustries: { type: array, items: { type: string } }
+              associatedCves: { type: array, items: { type: string } }
+              countryOfOrigin: { type: string }
+            required:
+              - name
+      responses:
+        '201':
+          description: Threat actor created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      summary: Get all threat actors
+      operationId: listThreatActors
+      responses:
+        '200':
+          description: A list of threat actors
+
+  /threat-actors/{threatActorId}:
+    get:
+      summary: Get a specific threat actor by ID
+      operationId: getThreatActorById
+      parameters:
+        - name: threatActorId
+          in: path
+          required: true
+          type: string
+          description: ID of the threat actor to retrieve
+      responses:
+        '200':
+          description: Threat actor data
+        '404':
+          description: Threat actor not found
+
+    put:
+      summary: Update an existing threat actor
+      operationId: updateThreatActor
+      parameters:
+        - name: threatActorId
+          in: path
+          required: true
+          type: string
+          description: ID of the threat actor to update
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name: { type: string }
+              description: { type: string }
+              aliases: { type: array, items: { type: string } }
+              targetIndustries: { type: array, items: { type: string } }
+              associatedCves: { type: array, items: { type: string } }
+              countryOfOrigin: { type: string }
+      responses:
+        '200':
+          description: Threat actor updated successfully
+        '404':
+          description: Threat actor not found
+        '400':
+          description: Invalid input
+
+    delete:
+      summary: Delete a threat actor
+      operationId: deleteThreatActor
+      parameters:
+        - name: threatActorId
+          in: path
+          required: true
+          type: string
+          description: ID of the threat actor to delete
+      responses:
+        '204':
+          description: Threat actor deleted successfully
+        '404':
+          description: Threat actor not found

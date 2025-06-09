@@ -3,7 +3,8 @@ import express from 'express';
 import { Firestore, FieldValue } from '@google-cloud/firestore';
 import * as functions from 'firebase-functions';
 import { organizationRouter } from './routes/organization.routes';
-import { userRouter } from './routes/user.routes'; // <<< NEW IMPORT
+import { userRouter } from './routes/user.routes';
+import { threatActorRouter } from './routes/threat_actor.routes';
 
 // firestore config
 let firestoreConfig: any = {
@@ -81,6 +82,9 @@ app.use('/organizations', organizationRouter(db));
 
 // --- User API (using router) ---
 app.use('/users', userRouter(db)); // <<< NEW: Use the user router
+
+// --- Threat Actor API (using router) ---
+app.use('/threat-actors', threatActorRouter(db));
 
 // Main entry point for the Cloud Function.
 module.exports.api = functions.https.onRequest(app);
