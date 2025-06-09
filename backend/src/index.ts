@@ -1,43 +1,37 @@
-// backend/src/index.ts (MAIN APP FILE)
 import express from 'express';
 import { Firestore, FieldValue } from '@google-cloud/firestore';
 import * as functions from 'firebase-functions';
 import { organizationRouter } from './routes/organization.routes';
 import { userRouter } from './routes/user.routes';
 import { threatActorRouter } from './routes/threat_actor.routes';
+import { incidentRouter } from './routes/incident.routes';
 
-// firestore config
-let firestoreConfig: any = {
-  // projectId is picked up automatically by the library based on firebase init or GCP_PROJECT env var
-  // databaseId will be conditionally set
-};
+let firestoreConfig: any = {};
 
 if (process.env.FUNCTIONS_EMULATOR) {
   console.log(
     'Running in FUNCTIONS_EMULATOR environment. Connecting to local Firestore emulator.',
   );
-  firestoreConfig.host = 'localhost:8080'; // Firestore emulator default port
-  firestoreConfig.ssl = false; // Disable SSL for local emulator connection
+  firestoreConfig.host = 'localhost:8080';
+  firestoreConfig.ssl = false;
   firestoreConfig.credentials = {
     client_email: 'firebase-emulator',
     private_key: 'firebase-emulator',
-  }; // Dummy credentials for local
-  firestoreConfig.databaseId = '(default)'; // Set to (default) for emulator
+  };
+  firestoreConfig.databaseId = '(default)';
 } else {
   console.log(
     `Running in PRODUCTION environment. Connecting to GCP Firestore for project: ${process.env.GCP_PROJECT}`,
   );
   firestoreConfig.projectId = process.env.GCP_PROJECT;
-  firestoreConfig.databaseId = 'cti-db'; // Set to 'cti-db' for production
+  firestoreConfig.databaseId = 'cti-db';
 }
 
-export const db = new Firestore(firestoreConfig); // Make db accessible globally for services
+export const db = new Firestore(firestoreConfig);
 
-// --- Express App Setup ---
 const app = express();
 app.use(express.json());
 
-// --- API Routes ---
 app.get('/health', (req, res) => {
   res.status(200).send('API is healthy!');
 });
@@ -77,14 +71,12 @@ app.get('/firestore-test', async (req, res) => {
   }
 });
 
-// --- Organization API (using router) ---
 app.use('/organizations', organizationRouter(db));
 
-// --- User API (using router) ---
-app.use('/users', userRouter(db)); // <<< NEW: Use the user router
+app.use('/users', userRouter(db));
 
-// --- Threat Actor API (using router) ---
 app.use('/threat-actors', threatActorRouter(db));
 
-// Main entry point for the Cloud Function.
+app.use('/incidents', incidentRouter(db));
+
 module.exports.api = functions.https.onRequest(app);

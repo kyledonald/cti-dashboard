@@ -330,3 +330,132 @@ paths:
           description: Threat actor deleted successfully
         '404':
           description: Threat actor not found
+
+  # --- Incidents API Paths ---
+  /incidents:
+    post:
+      summary: Create a new incident
+      operationId: createIncident
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title: { type: string }
+              description: { type: string }
+              status:
+                {
+                  type: string,
+                  enum:
+                    ['Open', 'Triaged', 'In Progress', 'Resolved', 'Closed'],
+                }
+              priority:
+                { type: string, enum: ['Low', 'Medium', 'High', 'Critical'] }
+              type: { type: string }
+              cveIds: { type: array, items: { type: string } }
+              threatActorIds: { type: array, items: { type: string } }
+              reportedByUserId: { type: string }
+              reportedByUserName: { type: string }
+              assignedToUserId: { type: string } # Can be null or undefined
+              assignedToUserName: { type: string } # Can be null or undefined
+              organizationId: { type: string }
+            required:
+              - title
+              - description
+              - status
+              - priority
+              - reportedByUserId
+              - reportedByUserName
+              - organizationId
+      responses:
+        '201':
+          description: Incident created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      summary: Get all incidents
+      operationId: listIncidents
+      parameters:
+        - name: organizationId
+          in: query
+          required: false
+          type: string
+          description: Optional filter by organization ID
+      responses:
+        '200':
+          description: A list of incidents
+
+  /incidents/{incidentId}:
+    get:
+      summary: Get a specific incident by ID
+      operationId: getIncidentById
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          type: string
+          description: ID of the incident to retrieve
+      responses:
+        '200':
+          description: Incident data
+        '404':
+          description: Incident not found
+
+    put:
+      summary: Update an existing incident
+      operationId: updateIncident
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          type: string
+          description: ID of the incident to update
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title: { type: string }
+              description: { type: string }
+              resolutionNotes: { type: string }
+              status:
+                {
+                  type: string,
+                  enum:
+                    ['Open', 'Triaged', 'In Progress', 'Resolved', 'Closed'],
+                }
+              priority:
+                { type: string, enum: ['Low', 'Medium', 'High', 'Critical'] }
+              type: { type: string }
+              cveIds: { type: array, items: { type: string } }
+              threatActorIds: { type: array, items: { type: string } }
+              assignedToUserId: { type: string }
+              assignedToUserName: { type: string }
+              dateResolved: { type: string, format: 'date-time' } # ISO 8601 string
+            # No 'required' for put, as all fields are optional for update
+      responses:
+        '200':
+          description: Incident updated successfully
+        '404':
+          description: Incident not found
+        '400':
+          description: Invalid input
+
+    delete:
+      summary: Delete an incident
+      operationId: deleteIncident
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          type: string
+          description: ID of the incident to delete
+      responses:
+        '204':
+          description: Incident deleted successfully
+        '404':
+          description: Incident not found
