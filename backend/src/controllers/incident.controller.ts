@@ -13,7 +13,6 @@ export class IncidentController {
     try {
       const incidentData: CreateIncidentDTO = req.body;
 
-      // Basic validation (can expand with Zod/Joi later)
       if (
         !incidentData.title ||
         !incidentData.description ||
@@ -29,12 +28,10 @@ export class IncidentController {
       }
       // TODO: Add authorization: Users can only create incidents for their own organization
       const newIncident = await this.service.createIncident(incidentData);
-      res
-        .status(201)
-        .json({
-          message: 'Incident created successfully',
-          incident: newIncident,
-        });
+      res.status(201).json({
+        message: 'Incident created successfully',
+        incident: newIncident,
+      });
     } catch (error: any) {
       console.error('Error in createIncident controller:', error);
       res
@@ -45,7 +42,7 @@ export class IncidentController {
 
   async getAllIncidents(req: Request, res: Response) {
     try {
-      const { organizationId } = req.query; // Optional: filter by organization
+      const { organizationId } = req.query; // filter by organization
       // TODO: Add authorization: Users can only see incidents from their own organization or admins can see all.
       const incidents = await this.service.getAllIncidents(
         organizationId as string,
@@ -62,7 +59,7 @@ export class IncidentController {
   async getIncidentById(req: Request, res: Response) {
     try {
       const { incidentId } = req.params;
-      // TODO: Add authorization: Users can only view incidents from their own organization or if they are assigned.
+      // TODO: Add authorization: Users can only view incidents from their own organization.
       const incident = await this.service.getIncidentById(incidentId);
 
       if (!incident) {

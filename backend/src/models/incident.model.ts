@@ -1,4 +1,3 @@
-// backend/src/models/incident.model.ts
 import { FieldValue } from '@google-cloud/firestore';
 
 export interface Incident {
@@ -6,9 +5,9 @@ export interface Incident {
   title: string;
   description: string;
   resolutionNotes?: string | null;
-  status: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed'; // Enum
-  priority: 'Low' | 'Medium' | 'High' | 'Critical'; // Enum
-  type?: string | null; // <<< FIX: Allow null for 'type'
+  status: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
+  priority: 'Low' | 'Medium' | 'High' | 'Critical';
+  type?: string | null;
   cveIds?: string[];
   threatActorIds?: string[];
   reportedByUserId: string;
@@ -17,7 +16,7 @@ export interface Incident {
   assignedToUserName?: string | null;
   organizationId: string;
   dateCreated: FieldValue | FirebaseFirestore.Timestamp;
-  dateResolved?: FieldValue | FirebaseFirestore.Timestamp | null; // <<< FIX: Allow null for 'dateResolved'
+  dateResolved?: FieldValue | FirebaseFirestore.Timestamp | null;
   lastUpdatedAt: FieldValue | FirebaseFirestore.Timestamp;
 }
 
@@ -26,7 +25,7 @@ export interface CreateIncidentDTO {
   description: string;
   status: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  type?: string | null; // <<< FIX: Allow null for 'type' in DTO
+  type?: string | null;
   cveIds?: string[];
   threatActorIds?: string[];
   reportedByUserId: string;
@@ -40,10 +39,10 @@ export interface UpdateIncidentDTO {
   resolutionNotes?: string | null;
   status?: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority?: 'Low' | 'Medium' | 'High' | 'Critical';
-  type?: string | null; // <<< FIX: Allow null for 'type' in DTO
+  type?: string | null;
   cveIds?: string[];
   threatActorIds?: string[];
   assignedToUserId?: string | null;
   assignedToUserName?: string | null;
-  dateResolved?: FieldValue | null; // <<< FIX: Allow FieldValue or null for update, and it's optional
+  dateResolved?: FieldValue | null;
 }

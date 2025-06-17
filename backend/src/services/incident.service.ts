@@ -1,4 +1,3 @@
-// backend/src/services/incident.service.ts
 import { Firestore, FieldValue } from '@google-cloud/firestore';
 import {
   Incident,
@@ -23,19 +22,19 @@ export class IncidentService {
       incidentId: incidentId,
       title: incidentData.title,
       description: incidentData.description,
-      resolutionNotes: null, // Null by default on creation
+      resolutionNotes: null,
       status: incidentData.status,
       priority: incidentData.priority,
-      type: incidentData.type, // <<< FIX: Removed ?? null. Let it be undefined if not provided.
+      type: incidentData.type,
       cveIds: incidentData.cveIds ?? [],
       threatActorIds: incidentData.threatActorIds ?? [],
       reportedByUserId: incidentData.reportedByUserId,
       reportedByUserName: incidentData.reportedByUserName,
-      assignedToUserId: null, // Null by default on creation
-      assignedToUserName: null, // Null by default on creation
+      assignedToUserId: null,
+      assignedToUserName: null,
       organizationId: incidentData.organizationId,
       dateCreated: FieldValue.serverTimestamp(),
-      dateResolved: null, // Null by default on creation
+      dateResolved: null,
       lastUpdatedAt: FieldValue.serverTimestamp(),
     };
 
@@ -70,7 +69,7 @@ export class IncidentService {
   ): Promise<boolean> {
     const incidentRef = this.collection.doc(incidentId);
     const doc = await incidentRef.get();
-    const currentIncident = doc.data() as Incident; // Get current data to check old status
+    const currentIncident = doc.data() as Incident;
 
     if (!doc.exists) {
       return false;
@@ -83,18 +82,14 @@ export class IncidentService {
     if (updateData.resolutionNotes !== undefined)
       dataToUpdate.resolutionNotes = updateData.resolutionNotes;
 
-    // Handle status and dateResolved (CRITICAL FIX)
     if (updateData.status !== undefined) {
       dataToUpdate.status = updateData.status;
-      // If status changes to 'Resolved' and it wasn't resolved before, set dateResolved
       if (
         updateData.status === 'Resolved' &&
         currentIncident.status !== 'Resolved'
       ) {
         dataToUpdate.dateResolved = FieldValue.serverTimestamp();
-      }
-      // If status changes from 'Resolved' to anything else, explicitly clear dateResolved (set to null)
-      else if (
+      } else if (
         updateData.status !== 'Resolved' &&
         currentIncident.status === 'Resolved'
       ) {
@@ -102,10 +97,8 @@ export class IncidentService {
       }
     }
 
-    // Always apply dateResolved from DTO if it was explicitly sent (even if null)
-    // This is the clean way to handle optional update fields in TypeScript
     if (updateData.dateResolved !== undefined) {
-      dataToUpdate.dateResolved = updateData.dateResolved; // Assigns FieldValue.serverTimestamp() or null
+      dataToUpdate.dateResolved = updateData.dateResolved;
     }
 
     if (updateData.priority !== undefined)

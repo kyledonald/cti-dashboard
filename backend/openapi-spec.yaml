@@ -358,8 +358,8 @@ paths:
               threatActorIds: { type: array, items: { type: string } }
               reportedByUserId: { type: string }
               reportedByUserName: { type: string }
-              assignedToUserId: { type: string } # Can be null or undefined
-              assignedToUserName: { type: string } # Can be null or undefined
+              assignedToUserId: { type: string }
+              assignedToUserName: { type: string }
               organizationId: { type: string }
             required:
               - title
@@ -435,8 +435,7 @@ paths:
               threatActorIds: { type: array, items: { type: string } }
               assignedToUserId: { type: string }
               assignedToUserName: { type: string }
-              dateResolved: { type: string, format: 'date-time' } # ISO 8601 string
-            # No 'required' for put, as all fields are optional for update
+              dateResolved: { type: string, format: 'date-time' }
       responses:
         '200':
           description: Incident updated successfully
