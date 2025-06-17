@@ -59,6 +59,7 @@ paths:
               description: { type: string }
               nationality: { type: string }
               industry: { type: string }
+              usedSoftware: { type: array, items: { type: string } }
             required:
               - name
       responses:
@@ -110,6 +111,7 @@ paths:
               status: { type: string }
               nationality: { type: string }
               industry: { type: string }
+              usedSoftware: { type: array, items: { type: string } }
       responses:
         '200':
           description: Organization updated successfully
@@ -458,3 +460,35 @@ paths:
           description: Incident deleted successfully
         '404':
           description: Incident not found
+
+  # --- CVE API Paths ---
+  /cves/latest:
+    get:
+      summary: Get a list of the latest CVEs
+      operationId: getLatestCves
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          type: integer
+          format: int32
+          description: Number of latest CVEs to retrieve (default 10)
+      responses:
+        '200':
+          description: A list of CVEs
+
+  /cves/{cveId}:
+    get:
+      summary: Get a specific CVE by ID
+      operationId: getCveById
+      parameters:
+        - name: cveId
+          in: path
+          required: true
+          type: string
+          description: ID of the CVE to retrieve (e.g., CVE-2023-1234)
+      responses:
+        '200':
+          description: CVE data
+        '404':
+          description: CVE not found

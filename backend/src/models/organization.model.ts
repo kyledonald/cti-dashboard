@@ -7,6 +7,7 @@ export interface Organization {
   status: 'active' | 'inactive';
   nationality?: string | null;
   industry?: string | null;
+  usedSoftware?: string[]; 
   createdAt: FieldValue | FirebaseFirestore.Timestamp;
   updatedAt: FieldValue | FirebaseFirestore.Timestamp;
 }
@@ -16,6 +17,7 @@ export interface CreateOrganizationDTO {
   description?: string;
   nationality?: string;
   industry?: string;
+  usedSoftware?: string[]; 
 }
 
 export interface UpdateOrganizationDTO {
@@ -24,4 +26,5 @@ export interface UpdateOrganizationDTO {
   status?: 'active' | 'inactive';
   nationality?: string | null;
   industry?: string | null;
+  usedSoftware?: string[]; 
 }

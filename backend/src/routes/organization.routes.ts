@@ -5,10 +5,10 @@ import { OrganizationService } from '../services/organization.service';
 
 export const organizationRouter = (db: Firestore) => {
   const router = Router();
-  const organizationService = new OrganizationService(db); // Instantiate service with db
+  const organizationService = new OrganizationService(db);
   const organizationController = new OrganizationController(
     organizationService,
-  ); // Instantiate controller with service
+  );
 
   router.post('/', (req, res) =>
     organizationController.createOrganization(req, res),

@@ -14,9 +14,7 @@ export class OrganizationService {
     this.collection = db.collection('organizations');
   }
 
-  async createOrganization(
-    orgData: CreateOrganizationDTO,
-  ): Promise<Organization> {
+  async createOrganization(orgData: CreateOrganizationDTO): Promise<Organization> {
     const organizationRef = this.collection.doc();
     const organizationId = organizationRef.id;
 
@@ -27,6 +25,7 @@ export class OrganizationService {
       status: 'active',
       nationality: orgData.nationality ?? null,
       industry: orgData.industry ?? null,
+      usedSoftware: orgData.usedSoftware ?? [],
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     };
@@ -54,10 +53,7 @@ export class OrganizationService {
     return doc.data() as Organization;
   }
 
-  async updateOrganization(
-    organizationId: string,
-    updateData: UpdateOrganizationDTO,
-  ): Promise<boolean> {
+  async updateOrganization(organizationId: string, updateData: UpdateOrganizationDTO): Promise<boolean> {
     const organizationRef = this.collection.doc(organizationId);
     const doc = await organizationRef.get();
 
@@ -67,14 +63,11 @@ export class OrganizationService {
 
     const dataToUpdate: any = { updatedAt: FieldValue.serverTimestamp() };
     if (updateData.name !== undefined) dataToUpdate.name = updateData.name;
-    if (updateData.description !== undefined)
-      dataToUpdate.description = updateData.description;
-    if (updateData.status !== undefined)
-      dataToUpdate.status = updateData.status;
-    if (updateData.nationality !== undefined)
-      dataToUpdate.nationality = updateData.nationality;
-    if (updateData.industry !== undefined)
-      dataToUpdate.industry = updateData.industry;
+    if (updateData.description !== undefined) dataToUpdate.description = updateData.description;
+    if (updateData.status !== undefined) dataToUpdate.status = updateData.status;
+    if (updateData.nationality !== undefined) dataToUpdate.nationality = updateData.nationality;
+    if (updateData.industry !== undefined) dataToUpdate.industry = updateData.industry;
+    if (updateData.usedSoftware !== undefined) dataToUpdate.usedSoftware = updateData.usedSoftware;
 
     await organizationRef.update(dataToUpdate);
     return true;

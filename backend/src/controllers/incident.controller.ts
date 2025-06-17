@@ -1,12 +1,16 @@
 import { Request, Response } from 'express';
 import { IncidentService } from '../services/incident.service';
 import { CreateIncidentDTO, UpdateIncidentDTO } from '../models/incident.model';
+import { CVEService } from '../services/cve.service'; 
+import { CVEResponse } from '../models/cve.model'; 
 
 export class IncidentController {
   private service: IncidentService;
+  private cveService: CVEService;
 
-  constructor(service: IncidentService) {
+  constructor(service: IncidentService, cveService: CVEService) {
     this.service = service;
+    this.cveService = cveService;
   }
 
   async createIncident(req: Request, res: Response) {
@@ -59,18 +63,23 @@ export class IncidentController {
   async getIncidentById(req: Request, res: Response) {
     try {
       const { incidentId } = req.params;
-      // TODO: Add authorization: Users can only view incidents from their own organization.
       const incident = await this.service.getIncidentById(incidentId);
 
       if (!incident) {
         return res.status(404).json({ error: 'Incident not found.' });
       }
-      res.status(200).json({ incident: incident });
+
+      let cveDetails: CVEResponse[] = [];
+      if (incident.cveIds && incident.cveIds.length > 0) {
+        const fetchPromises = incident.cveIds.map(id => this.cveService.getCVEById(id));
+        const results = await Promise.all(fetchPromises);
+        cveDetails = results.filter(cve => cve !== null) as CVEResponse[];
+      }
+
+      res.status(200).json({ incident: incident, cveDetails: cveDetails });
     } catch (error: any) {
       console.error('Error in getIncidentById controller:', error);
-      res
-        .status(500)
-        .json({ error: 'Failed to fetch incident', details: error.message });
+      res.status(500).json({ error: 'Failed to fetch incident details', details: error.message });
     }
   }
 

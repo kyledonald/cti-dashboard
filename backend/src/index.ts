@@ -5,6 +5,7 @@ import { organizationRouter } from './routes/organization.routes';
 import { userRouter } from './routes/user.routes';
 import { threatActorRouter } from './routes/threat_actor.routes';
 import { incidentRouter } from './routes/incident.routes';
+import { cveRouter } from './routes/cve.routes';
 
 let firestoreConfig: any = {};
 
@@ -78,5 +79,7 @@ app.use('/users', userRouter(db));
 app.use('/threat-actors', threatActorRouter(db));
 
 app.use('/incidents', incidentRouter(db));
+
+app.use('/cves', cveRouter());
 
 module.exports.api = functions.https.onRequest(app);
