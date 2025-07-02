@@ -54,9 +54,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check organization access requirement
   if (requireOrgAccess && !permissions.hasOrgAccess) {
-    // If user is unassigned, show unassigned screen
+    // If user is unassigned, redirect to welcome page
     if (user.role === 'unassigned') {
-      return fallback || <UnassignedUserScreen />;
+      return fallback || <Navigate to="/welcome" replace />;
     }
     // If user has a role but no org access, show org required page
     return fallback || <Navigate to="/organization-required" replace />;
@@ -100,31 +100,4 @@ const UnauthorizedAccess: React.FC<{ message: string }> = ({ message }) => (
   </div>
 );
 
-// Unassigned user screen
-const UnassignedUserScreen: React.FC = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="text-center max-w-md mx-auto p-6">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/20">
-          <svg className="h-10 w-10 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Waiting for Organization Assignment</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Please wait for an organization administrator to add you to their organization to access the dashboard.
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-500">
-          An organization admin will add you and assign you to their team.
-        </p>
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>What's next?</strong><br />
-            An organization admin will invite you and assign you to their team. 
-            You'll receive access to incidents, threat intelligence, and other security data.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}; 
+ 

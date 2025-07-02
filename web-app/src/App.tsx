@@ -42,12 +42,12 @@ function App() {
         </Routes>
       ) : (
         <Routes>
-          {user.role === 'unassigned' ? (
-            // Unassigned users get redirected to welcome page
-            <>
-              <Route path="/welcome" element={<WelcomePage />} />
-              <Route path="*" element={<Navigate to="/welcome" replace />} />
-            </>
+          {/* Welcome page for unassigned users who specifically need to create/join an org */}
+          <Route path="/welcome" element={<WelcomePage />} />
+          
+          {user.role === 'unassigned' && !user.organizationId ? (
+            // Only redirect unassigned users with no org to welcome
+            <Route path="*" element={<Navigate to="/welcome" replace />} />
           ) : (
             // Main App Routes - With sidebar/header
             <Route path="*" element={

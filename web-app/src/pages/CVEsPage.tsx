@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cvesApi, type ShodanCVE } from '../api';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -9,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 const CVEsPage: React.FC = () => {
   const permissions = usePermissions();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [cves, setCves] = useState<ShodanCVE[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -119,6 +121,22 @@ const CVEsPage: React.FC = () => {
     const existingDismissedData = loadDismissedCVEData();
     const updatedDismissedData = existingDismissedData.filter(cve => cve.cve !== cveId);
     saveDismissedCVEData(updatedDismissedData);
+  };
+
+  // Create incident from CVE
+  const createIncidentFromCVE = (cve: ShodanCVE) => {
+    // Store the CVE data in sessionStorage to pass to incidents page
+    const incidentData = {
+      cveId: cve.cve,
+      description: cve.summary,
+      cvssScore: cve.cvss3?.score || cve.cvss || 0,
+      isKev: cve.kev || false
+    };
+    
+    sessionStorage.setItem('createIncidentFromCVE', JSON.stringify(incidentData));
+    
+    // Navigate to incidents page
+    navigate('/incidents');
   };
 
   // Filter and sort CVEs based on search term, tab, and sort preference
@@ -449,6 +467,7 @@ const CVEsPage: React.FC = () => {
                               <Button 
                                 variant="outline" 
                                 size="sm"
+                                onClick={() => createIncidentFromCVE(cve)}
                                 className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 dark:bg-green-900/20 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/30 dark:hover:border-green-600"
                               >
                                 Create Incident

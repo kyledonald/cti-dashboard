@@ -122,30 +122,34 @@ export interface UpdateUserDTO {
 export interface Incident {
   incidentId: string;
   title: string;
-  description?: string;
-  status: 'Open' | 'In Progress' | 'Resolved' | 'Closed';
+  description: string;
+  status: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  organizationId?: string;
-  assignedTo?: string;
+  organizationId: string;
   dateCreated: any;
   lastUpdatedAt: any;
-  reportedByUserId?: string;
-  reportedByUserName?: string;
-  assignedToUserId?: string;
-  assignedToUserName?: string;
-  type?: string;
+  reportedByUserId: string;
+  reportedByUserName: string;
+  assignedToUserId?: string | null;
+  assignedToUserName?: string | null;
+  type?: string | null;
   cveIds?: string[];
   threatActorIds?: string[];
-  resolutionNotes?: string;
-  dateResolved?: any;
+  resolutionNotes?: string | null;
+  dateResolved?: any | null;
 }
 
 export interface CreateIncidentDTO {
   title: string;
-  description?: string;
+  description: string;
+  status: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  organizationId?: string;
-  assignedTo?: string;
+  type?: string | null;
+  cveIds?: string[];
+  threatActorIds?: string[];
+  reportedByUserId: string;
+  reportedByUserName: string;
+  organizationId: string;
 }
 
 export interface ThreatActor {
@@ -275,12 +279,27 @@ export const usersApi = {
   },
 };
 
+// Define UpdateIncidentDTO interface
+export interface UpdateIncidentDTO {
+  title?: string;
+  description?: string;
+  resolutionNotes?: string | null;
+  status?: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
+  priority?: 'Low' | 'Medium' | 'High' | 'Critical';
+  type?: string | null;
+  cveIds?: string[];
+  threatActorIds?: string[];
+  assignedToUserId?: string | null;
+  assignedToUserName?: string | null;
+  dateResolved?: any | null;
+}
+
 // Incidents API
 export const incidentsApi = {
   getAll: () => retryRequest(() => api.get('/incidents')).then(res => extractData<Incident>(res.data, 'incidents')),
   getById: (id: string) => retryRequest(() => api.get(`/incidents/${id}`)).then(res => res.data),
   create: (data: CreateIncidentDTO) => retryRequest(() => api.post('/incidents', data)).then(res => res.data),
-  update: (id: string, data: Partial<CreateIncidentDTO>) => retryRequest(() => api.put(`/incidents/${id}`, data)).then(res => res.data),
+  update: (id: string, data: UpdateIncidentDTO) => retryRequest(() => api.put(`/incidents/${id}`, data)).then(res => res.data),
   delete: (id: string) => retryRequest(() => api.delete(`/incidents/${id}`)).then(res => res.data),
 };
 
@@ -355,55 +374,7 @@ export const cvesApi = {
       
     } catch (error) {
       console.error('Error fetching CVEs from Shodan:', error);
-      
-      // Fallback to mock data if Shodan API is not available
-      const mockCves: ShodanCVE[] = [
-        {
-          cve: "CVE-2024-12345",
-          summary: "Critical remote code execution vulnerability in Microsoft Edge allowing unauthenticated attackers to execute arbitrary code.",
-          cvss3: { score: 9.8, vector: "" },
-          kev: true,
-          published: "2024-12-01T10:00:00Z",
-          modified: "2024-12-15T14:30:00Z",
-          references: [
-            "https://nvd.nist.gov/vuln/detail/CVE-2024-12345",
-            "https://example.com/security-advisory"
-          ],
-          extractedVendors: ["Microsoft"]
-        },
-        {
-          cve: "CVE-2024-11111",
-          summary: "High severity SQL injection vulnerability in Apache Tomcat database management system affecting multiple versions.",
-          cvss3: { score: 8.1, vector: "" },
-          kev: false,
-          published: "2024-11-28T08:15:00Z",
-          modified: "2024-12-10T16:45:00Z",
-          references: [
-            "https://nvd.nist.gov/vuln/detail/CVE-2024-11111"
-          ],
-          extractedVendors: ["Apache"]
-        },
-        {
-          cve: "CVE-2024-22222",
-          summary: "Authentication bypass vulnerability in Cisco enterprise security appliance allowing unauthorized access to sensitive data.",
-          cvss3: { score: 7.5, vector: "" },
-          kev: false,
-          published: "2024-11-25T12:00:00Z",
-          modified: "2024-11-25T12:00:00Z",
-          references: [
-            "https://nvd.nist.gov/vuln/detail/CVE-2024-22222"
-          ],
-          extractedVendors: ["Cisco"]
-        }
-      ];
-
-      // Filter by CVSS score for fallback data
-      const filteredCves = mockCves.filter(cve => {
-        const score = cve.cvss3?.score || cve.cvss || 0;
-        return score >= minCvssScore;
-      });
-
-      return filteredCves.slice(0, limit);
+      throw new Error('Failed to fetch CVE data from Shodan API. Please check your internet connection and try again.');
     }
   }
 };
