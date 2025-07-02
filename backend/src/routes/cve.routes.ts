@@ -8,6 +8,7 @@ export const cveRouter = () => {
   const cveController = new CVEController(cveService);
 
   router.get('/latest', (req, res) => cveController.getLatestCVEs(req, res));
+  router.get('/latest/filtered', (req, res) => cveController.getLatestCVEsFiltered(req, res));
   router.get('/:cveId', (req, res) => cveController.getCVEById(req, res));
 
   return router;

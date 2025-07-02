@@ -5,6 +5,31 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
+// Password complexity validation
+const validatePasswordComplexity = (password: string): { isValid: boolean; message: string } => {
+  if (password.length < 8) {
+    return { isValid: false, message: 'Password must be at least 8 characters long.' };
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    return { isValid: false, message: 'Password must contain at least one uppercase letter.' };
+  }
+  
+  if (!/[a-z]/.test(password)) {
+    return { isValid: false, message: 'Password must contain at least one lowercase letter.' };
+  }
+  
+  if (!/[0-9]/.test(password)) {
+    return { isValid: false, message: 'Password must contain at least one number.' };
+  }
+  
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return { isValid: false, message: 'Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?).' };
+  }
+  
+  return { isValid: true, message: '' };
+};
+
 const LoginPage: React.FC = () => {
   const { user, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +40,7 @@ const LoginPage: React.FC = () => {
   // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
@@ -40,9 +66,35 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     
+    // Validation for signup
+    if (isSignUp) {
+      if (password !== confirmPassword) {
+        setError('Passwords do not match. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Password complexity validation
+      const passwordValidation = validatePasswordComplexity(password);
+      if (!passwordValidation.isValid) {
+        setError(passwordValidation.message);
+        setIsLoading(false);
+        return;
+      }
+    }
+    
     try {
       if (isSignUp) {
         await signUpWithEmail(email, password, firstName, lastName);
+        // Clear form after successful signup
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setFirstName('');
+        setLastName('');
+        // Wait for auth state to update, then refresh
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        window.location.reload();
       } else {
         await signInWithEmail(email, password);
       }
@@ -161,12 +213,46 @@ const LoginPage: React.FC = () => {
                 
                 <Input
                   type="password"
-                  placeholder="Password"
+                  placeholder={isSignUp ? "Password (8+ chars, uppercase, lowercase, number, special char)" : "Password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={isSignUp ? 8 : 6}
                 />
+                
+                                  {isSignUp && (
+                    <Input
+                      type="password"
+                      placeholder="Confirm Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                  )}
+                
+                {isSignUp && (
+                  <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                    <p className="font-medium">Password requirements:</p>
+                    <ul className="space-y-1 ml-4">
+                      <li className={`${password.length >= 8 ? 'text-green-600 dark:text-green-400' : ''}`}>
+                        • At least 8 characters
+                      </li>
+                      <li className={`${/[A-Z]/.test(password) ? 'text-green-600 dark:text-green-400' : ''}`}>
+                        • One uppercase letter
+                      </li>
+                      <li className={`${/[a-z]/.test(password) ? 'text-green-600 dark:text-green-400' : ''}`}>
+                        • One lowercase letter
+                      </li>
+                      <li className={`${/[0-9]/.test(password) ? 'text-green-600 dark:text-green-400' : ''}`}>
+                        • One number
+                      </li>
+                      <li className={`${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) ? 'text-green-600 dark:text-green-400' : ''}`}>
+                        • One special character
+                      </li>
+                    </ul>
+                  </div>
+                )}
                 
                 <Button
                   type="submit"
@@ -184,7 +270,11 @@ const LoginPage: React.FC = () => {
                 </span>{' '}
                 <button
                   type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setConfirmPassword('');
+                    setError(null);
+                  }}
                   className="text-primary hover:underline"
                 >
                   {isSignUp ? 'Sign In' : 'Sign Up'}

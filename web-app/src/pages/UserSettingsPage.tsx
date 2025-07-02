@@ -102,6 +102,20 @@ const UserSettingsPage: React.FC = () => {
 
     setLoading(true);
     try {
+      // Check if user is an admin and if there are other users in the organization
+      if (user.role === 'admin' && user.organizationId) {
+        const allUsers = await usersApi.getAll();
+        const orgUsers = allUsers.filter((u: any) => u.organizationId === user.organizationId);
+        const otherAdmins = orgUsers.filter((u: any) => u.role === 'admin' && u.userId !== user.userId);
+        const otherUsers = orgUsers.filter((u: any) => u.userId !== user.userId);
+
+        if (otherUsers.length > 0 && otherAdmins.length === 0) {
+          showMessage('error', 'You cannot delete your account as you are the only admin. Please promote another user to admin first, or remove all other users from the organization.');
+          setLoading(false);
+          return;
+        }
+      }
+
       // Re-authenticate user
       const credential = EmailAuthProvider.credential(firebaseUser.email, deleteConfirmPassword);
       await reauthenticateWithCredential(firebaseUser, credential);
@@ -127,6 +141,8 @@ const UserSettingsPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+
 
   if (!user) {
     return <div>Loading...</div>;
@@ -337,6 +353,8 @@ const UserSettingsPage: React.FC = () => {
         )}
       </div>
 
+
+
       {/* Delete Account */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-l-4 border-red-500">
         <div className="flex items-center justify-between mb-6">
@@ -372,6 +390,9 @@ const UserSettingsPage: React.FC = () => {
                   <ul className="text-red-700 dark:text-red-300 space-y-1">
                     <li>• All your data will be permanently removed</li>
                     <li>• You will lose access to all organizations</li>
+                    {user.role === 'admin' && user.organizationId && (
+                      <li>• If you are the only admin, you must promote another user to admin first</li>
+                    )}
                     <li>• This action cannot be undone</li>
                   </ul>
                 </div>

@@ -8,10 +8,12 @@ import { Input } from '../components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Trash2, Edit, Save, X } from 'lucide-react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useNotifications } from '../contexts/NotificationContext';
 
 const OrganizationPage: React.FC = () => {
   const { user } = useAuth();
   const permissions = usePermissions();
+  const { addOrganizationNotification, scheduleNotification, scheduledNotifications, cancelScheduledNotification } = useNotifications();
   
   // Organization states
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -47,6 +49,20 @@ const OrganizationPage: React.FC = () => {
   // Delete organization states
   const [showDeleteOrgConfirm, setShowDeleteOrgConfirm] = useState(false);
   const [deleteOrgLoading, setDeleteOrgLoading] = useState(false);
+
+  // Notification states
+  const [customTitle, setCustomTitle] = useState('');
+  const [customMessage, setCustomMessage] = useState('');
+  const [notificationPriority, setNotificationPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [schedulingNotification, setSchedulingNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  
+  // Advanced scheduling states
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleTime, setScheduleTime] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [showScheduledNotifications, setShowScheduledNotifications] = useState(false);
 
   // Load organization data
   useEffect(() => {
@@ -120,8 +136,9 @@ const OrganizationPage: React.FC = () => {
           await usersApi.update(user.userId, { 
             organizationId: newOrg.organizationId 
           });
-          // Refresh user context to update organizationId
-          window.location.reload(); // Simple refresh for now
+          // Wait for state to update, then refresh
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          window.location.reload();
         }
       }
       setEditingOrg(false);
@@ -325,6 +342,107 @@ const OrganizationPage: React.FC = () => {
     }
   };
 
+  // Notification functions
+  const showNotificationMessage = (type: 'success' | 'error', text: string) => {
+    setNotificationMessage({ type, text });
+    setTimeout(() => setNotificationMessage(null), 5000);
+  };
+
+  const triggerPasswordReminder = () => {
+    addOrganizationNotification({
+      type: 'password_reminder',
+      title: 'Password Security Reminder',
+      message: 'This is a reminder to change your account password as part of our password rotation policy.',
+      priority: 'medium',
+      actionUrl: '/settings',
+      actionText: 'Update Password'
+    });
+    showNotificationMessage('success', 'Password reminder notification sent to organization!');
+  };
+
+  const handleUserSelection = (userId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedUsers(prev => [...prev, userId]);
+    } else {
+      setSelectedUsers(prev => prev.filter(id => id !== userId));
+      setSelectAll(false);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectAll(checked);
+    if (checked) {
+      setSelectedUsers(users.map(u => u.userId));
+    } else {
+      setSelectedUsers([]);
+    }
+  };
+
+  const sendCustomNotification = async () => {
+    if (!customTitle.trim() || !customMessage.trim()) {
+      showNotificationMessage('error', 'Please fill in both title and message');
+      return;
+    }
+
+    if (selectedUsers.length === 0) {
+      showNotificationMessage('error', 'Please select at least one user to notify');
+      return;
+    }
+
+    setSchedulingNotification(true);
+    try {
+      const scheduleDateTime = scheduleDate && scheduleTime 
+        ? new Date(`${scheduleDate}T${scheduleTime}`) 
+        : null;
+
+      if (scheduleDateTime && scheduleDateTime <= new Date()) {
+        showNotificationMessage('error', 'Scheduled time must be in the future');
+        setSchedulingNotification(false);
+        return;
+      }
+
+      if (scheduleDateTime) {
+        // Schedule the notification
+        scheduleNotification({
+          type: 'system',
+          title: customTitle,
+          message: customMessage,
+          priority: notificationPriority,
+          scheduledFor: scheduleDateTime,
+          targetUsers: selectedUsers,
+        });
+      } else {
+        // Send immediately
+        addOrganizationNotification({
+          type: 'system',
+          title: customTitle,
+          message: customMessage,
+          priority: notificationPriority,
+        });
+      }
+
+      // Reset form
+      setCustomTitle('');
+      setCustomMessage('');
+      setNotificationPriority('medium');
+      setScheduleDate('');
+      setScheduleTime('');
+      setSelectedUsers([]);
+      setSelectAll(false);
+      
+      const userCount = selectedUsers.length;
+      const scheduleText = scheduleDateTime 
+        ? ` scheduled for ${scheduleDateTime.toLocaleString()}`
+        : '';
+      
+      showNotificationMessage('success', `Custom notification ${scheduleDateTime ? 'scheduled' : 'sent'} for ${userCount} user${userCount > 1 ? 's' : ''}${scheduleText}!`);
+    } catch (error) {
+      showNotificationMessage('error', 'Failed to schedule notification');
+    } finally {
+      setSchedulingNotification(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -344,10 +462,7 @@ const OrganizationPage: React.FC = () => {
       {/* Organization Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4m0 0V9a2 2 0 012-2h2a2 2 0 012 2v12" />
-            </svg>
+          <CardTitle>
             {organization ? 'Organization Settings' : 'Organization Details'}
           </CardTitle>
         </CardHeader>
@@ -482,7 +597,10 @@ const OrganizationPage: React.FC = () => {
             </label>
             <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <span className="text-gray-600 dark:text-gray-400 text-sm">
-                {user?.organizationId || 'Not assigned to organization'}
+                {editingOrg 
+                  ? (user?.organizationId || 'Not assigned to organization')
+                  : (user?.organizationId ? '••••••••••••••••••••' : 'Not assigned to organization')
+                }
               </span>
             </div>
           </div>
@@ -493,10 +611,7 @@ const OrganizationPage: React.FC = () => {
       {organization && (
         <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-            </svg>
+          <CardTitle>
             User Management
           </CardTitle>
         </CardHeader>
@@ -580,6 +695,273 @@ const OrganizationPage: React.FC = () => {
             </div>
           )}
         </CardContent>
+        </Card>
+      )}
+
+      {/* Schedule Notifications - Only show if organization exists */}
+      {organization && (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Schedule Notifications (Admin Only)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {notificationMessage && (
+              <div className={`p-3 rounded-lg border ${
+                notificationMessage.type === 'success' 
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+                  : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
+              }`}>
+                <p className="text-sm">{notificationMessage.text}</p>
+              </div>
+            )}
+
+            {/* Password Reminder Section */}
+            <div className="space-y-3">
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Quick Org Actions</h4>
+                <Button 
+                  onClick={triggerPasswordReminder} 
+                  className="bg-yellow-600 text-white hover:bg-yellow-700 border-yellow-600 hover:border-yellow-700"
+                >
+                  Trigger Password Reset Reminder
+                </Button>
+              </div>
+            </div>
+
+            {/* Custom Notification Section */}
+            <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Custom Notification</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Send a custom notification to selected org members.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Title
+                  </label>
+                  <Input
+                    value={customTitle}
+                    onChange={(e) => setCustomTitle(e.target.value)}
+                    placeholder="Notification title..."
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Message
+                  </label>
+                  <textarea
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value)}
+                    placeholder="Notification message..."
+                    rows={3}
+                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Priority
+                  </label>
+                  <select
+                    value={notificationPriority}
+                    onChange={(e) => setNotificationPriority(e.target.value as 'low' | 'medium' | 'high')}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                  </select>
+                </div>
+
+                {/* Schedule Section */}
+                <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <h5 className="font-medium text-gray-900 dark:text-white">Schedule (Optional)</h5>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Date
+                      </label>
+                      <Input
+                        type="date"
+                        value={scheduleDate}
+                        onChange={(e) => setScheduleDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full [color-scheme:light] dark:[color-scheme:dark]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Time
+                      </label>
+                      <Input
+                        type="time"
+                        value={scheduleTime}
+                        onChange={(e) => setScheduleTime(e.target.value)}
+                        className="w-full [color-scheme:light] dark:[color-scheme:dark]"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Leave empty to send immediately
+                  </p>
+                </div>
+
+                {/* User Selection Section */}
+                <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-medium text-gray-900 dark:text-white">Select Recipients</h5>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        disabled={loading || users.length === 0}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Select All</span>
+                    </label>
+                  </div>
+                  
+                  <div className="max-h-40 overflow-y-auto space-y-2 p-2 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    {loading ? (
+                      <div className="flex items-center justify-center py-4">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">Loading users...</div>
+                      </div>
+                    ) : users.length === 0 ? (
+                      <div className="flex items-center justify-center py-4">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">No users found in organization</div>
+                      </div>
+                    ) : (
+                      users.map((orgUser) => (
+                        <label key={orgUser.userId} className="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.includes(orgUser.userId)}
+                            onChange={(e) => handleUserSelection(orgUser.userId, e.target.checked)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <div className="flex items-center space-x-2">
+                            <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                              {orgUser.profilePictureUrl ? (
+                                <img 
+                                  src={orgUser.profilePictureUrl} 
+                                  alt={`${orgUser.firstName} ${orgUser.lastName}`}
+                                  className="w-6 h-6 rounded-full"
+                                />
+                              ) : (
+                                <span className="text-blue-600 dark:text-blue-400 font-medium text-xs">
+                                  {orgUser.firstName[0]}{orgUser.lastName[0]}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {orgUser.firstName} {orgUser.lastName}
+                            </span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
+                              orgUser.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300' :
+                              orgUser.role === 'editor' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300' :
+                              'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                            }`}>
+                              {orgUser.role}
+                            </span>
+                          </div>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                  
+                  {selectedUsers.length > 0 && (
+                    <p className="text-xs text-blue-600 dark:text-blue-400">
+                      {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected
+                    </p>
+                  )}
+                </div>
+
+                <Button 
+                  onClick={sendCustomNotification}
+                  disabled={loading || schedulingNotification || !customTitle.trim() || !customMessage.trim() || selectedUsers.length === 0}
+                  className="w-full"
+                >
+                  {loading ? 'Loading users...' : 
+                   schedulingNotification ? 'Scheduling...' : 
+                   scheduleDate && scheduleTime ? 'Schedule Notification' : 'Send Notification'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Scheduled Notifications - Only show if organization exists and user has scheduled notifications */}
+      {organization && scheduledNotifications.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => setShowScheduledNotifications(!showScheduledNotifications)}
+            >
+              <span>Scheduled Notifications ({scheduledNotifications.length})</span>
+              <svg 
+                className={`w-5 h-5 transition-transform ${showScheduledNotifications ? 'rotate-180' : ''}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </CardTitle>
+          </CardHeader>
+          {showScheduledNotifications && (
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Notifications scheduled to be sent automatically.
+              </p>
+              
+              <div className="space-y-3">
+                {scheduledNotifications.map((sn) => (
+                  <div key={sn.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-medium text-gray-900 dark:text-white">{sn.title}</h4>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            sn.priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300' :
+                            sn.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300' :
+                            'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+                          }`}>
+                            {sn.priority}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{sn.message}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                          <span>Scheduled: {sn.scheduledFor.toLocaleString()}</span>
+                          <span>Recipients: {sn.targetUsers.length}</span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          cancelScheduledNotification(sn.id);
+                          showNotificationMessage('success', 'Scheduled notification cancelled');
+                        }}
+                        className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/20"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          )}
         </Card>
       )}
 

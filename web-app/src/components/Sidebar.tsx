@@ -13,7 +13,6 @@ interface SidebarProps {
 interface NavItem {
   name: string;
   path: string;
-  icon: React.ReactNode;
   description: string;
   requirePermission?: keyof ReturnType<typeof usePermissions>;
 }
@@ -28,68 +27,44 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     {
       name: 'Dashboard',
       path: '/dashboard',
-      description: 'Overview and key metrics',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v3H8V5z" />
-        </svg>
-      ),
+      description: 'Overview and analytics',
+      requirePermission: 'canViewOrgData',
     },
     {
       name: 'Incidents',
       path: '/incidents',
       description: 'Security incidents and responses',
       requirePermission: 'canViewIncidents',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
-      ),
     },
     {
       name: 'Threat Actors',
       path: '/threat-actors',
       description: 'Known threat actors and groups',
       requirePermission: 'canViewThreatActors',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
     },
     {
       name: 'CVEs',
       path: '/cves',
       description: 'Common vulnerabilities and exposures',
       requirePermission: 'canViewCVEs',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      ),
+    },
+    {
+      name: 'My Software',
+      path: '/my-software',
+      description: 'Manage your software inventory',
+      requirePermission: 'canViewMySoftware',
     },
     {
       name: 'Users',
       path: '/users',
       description: 'Organization directory',
       requirePermission: 'canViewOrgUsers',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-        </svg>
-      ),
     },
     {
       name: 'Organization',
       path: '/organization',
       description: 'Organization management',
       requirePermission: 'canEditOrgSettings',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4m0 0V9a2 2 0 012-2h2a2 2 0 012 2v12" />
-        </svg>
-      ),
     },
   ];
 
@@ -141,44 +116,50 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         lg:relative lg:z-auto
       `}>
         {/* Header */}
-        <div className="flex items-center justify-between h-[4.5rem] px-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between h-[4.5rem] px-4">
           {!isCollapsed && (
-            <div className="flex items-center space-x-2">
+            <Link 
+              to="/dashboard" 
+              className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer"
+              onClick={() => window.innerWidth < 1024 && onClose()}
+            >
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
               <span className="font-bold text-lg text-gray-900 dark:text-white">CTI Dashboard</span>
-            </div>
+            </Link>
           )}
           
-          {/* Collapse button */}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <svg className={`w-4 h-4 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
-          </button>
+          <div className="flex items-center space-x-2">
+            {/* Collapse button */}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="hidden lg:flex p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <svg className={`w-4 h-4 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+            </button>
 
-          {/* Mobile close button */}
-          <button
-            onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            {/* Mobile close button */}
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
           <div className="space-y-2">
-                        {navItems.filter(shouldShowNavItem).map((item) => {
+            {navItems.filter(shouldShowNavItem).map((item) => {
               const disabled = isNavItemDisabled(item);
               
               if (disabled) {
@@ -196,9 +177,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         : item.name === 'Organization' ? 'Requires admin permissions' : 'Requires organization assignment'
                     }
                   >
-                    <span className="flex-shrink-0 text-gray-400 dark:text-gray-600">
-                      {item.icon}
-                    </span>
                     {!isCollapsed && (
                       <div className="ml-3 flex-1 min-w-0">
                         <span className="block truncate">{item.name}</span>
@@ -231,9 +209,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   `}
                   title={isCollapsed ? `${item.name} - ${item.description}` : undefined}
                 >
-                  <span className={`flex-shrink-0 ${isActive(item.path) ? 'text-blue-600 dark:text-blue-400' : ''}`}>
-                    {item.icon}
-                  </span>
                   {!isCollapsed && (
                     <div className="ml-3 flex-1 min-w-0">
                       <span className="block truncate">{item.name}</span>

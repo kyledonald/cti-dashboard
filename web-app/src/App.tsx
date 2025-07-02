@@ -4,6 +4,7 @@ import { useTheme } from './contexts/ThemeContext.tsx';
 import { useAuth } from './contexts/AuthContext.tsx';
 import { UserProfile } from './components/UserProfile';
 import { Sidebar } from './components/Sidebar';
+import NotificationBell from './components/NotificationBell';
 import { ProtectedRoute, OrgRoute } from './components/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage.tsx';
 import OrganizationPage from './pages/OrganizationPage.tsx';
@@ -12,9 +13,10 @@ import UsersPage from './pages/UsersPage.tsx';
 import ThreatActorsPage from './pages/ThreatActorsPage.tsx';
 import IncidentsPage from './pages/IncidentsPage.tsx';
 import CVEsPage from './pages/CVEsPage.tsx';
+import MySoftwarePage from './pages/MySoftwarePage.tsx';
 import LoginPage from './pages/LoginPage.tsx';
 import LandingPage from './pages/LandingPage.tsx';
-import UnassignedUserPage from './pages/UnassignedUserPage.tsx';
+import WelcomePage from './pages/WelcomePage.tsx';
 import UserSettingsPage from './pages/UserSettingsPage.tsx';
 
 function App() {
@@ -41,8 +43,11 @@ function App() {
       ) : (
         <Routes>
           {user.role === 'unassigned' ? (
-            // Unassigned users get a special page for all routes
-            <Route path="*" element={<UnassignedUserPage />} />
+            // Unassigned users get redirected to welcome page
+            <>
+              <Route path="/welcome" element={<WelcomePage />} />
+              <Route path="*" element={<Navigate to="/welcome" replace />} />
+            </>
           ) : (
             // Main App Routes - With sidebar/header
             <Route path="*" element={
@@ -65,7 +70,7 @@ function App() {
                       </svg>
                     </button>
                     
-                    {/* Right side - Theme toggle and user profile */}
+                    {/* Right side - Theme toggle, notifications, and user profile */}
                     <div className="flex items-center space-x-4 ml-auto">
                       {/* Theme Toggle */}
                       <button
@@ -83,6 +88,9 @@ function App() {
                           </svg>
                         )}
                       </button>
+                      
+                      {/* Notification Bell */}
+                      <NotificationBell />
                       
                       {/* User Profile */}
                       <UserProfile />
@@ -108,6 +116,8 @@ function App() {
                     
                     {/* Special Pages */}
                     <Route path="/organization-required" element={<OrganizationRequiredPage />} />
+                    
+                    <Route path="/my-software" element={<OrgRoute><MySoftwarePage /></OrgRoute>} />
                     
                     <Route path="*" element={<Navigate to="/dashboard" />} />
                   </Routes>

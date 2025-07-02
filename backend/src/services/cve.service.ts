@@ -13,6 +13,26 @@ function isCustomAxiosError(error: any): error is CustomAxiosError {
   return (error as CustomAxiosError).isAxiosError === true;
 }
 
+// New interface to match frontend ShodanCVE
+export interface ShodanCVE {
+  cve: string;
+  summary: string;
+  cvss?: number;
+  cvss3?: {
+    score: number;
+    vector: string;
+  };
+  epss?: number;
+  kev?: boolean;
+  published: string;
+  modified: string;
+  references: string[];
+  cpe?: string[];
+  cwe?: string[];
+  vendors?: string[];
+  products?: string[];
+}
+
 export class CVEService {
   private SHODAN_CVE_API_BASE_URL = 'https://cvedb.shodan.io';
 
@@ -72,6 +92,57 @@ export class CVEService {
     } catch (error: any) {
       console.error('Error fetching latest CVEs from Shodan:', error.message);
       throw new Error(`Failed to fetch latest CVE data from Shodan: ${error.message}`);
+    }
+  }
+
+  // New method to get latest CVEs with CVSS filtering
+  async getLatestCVEsWithFilter(minCvssScore: number = 7.5, limit: number = 10): Promise<ShodanCVE[]> {
+    try {
+      // Fetch more CVEs than needed to account for filtering
+      const response = await axios.get(`${this.SHODAN_CVE_API_BASE_URL}/cves?latest&limit=${limit * 3}`);
+      
+      const responseData = response.data as any;
+      let cvesData: any[];
+      
+      // Handle the actual Shodan API response format
+      if (responseData.cves && Array.isArray(responseData.cves)) {
+        cvesData = responseData.cves;
+      } else if (Array.isArray(responseData)) {
+        cvesData = responseData;
+      } else {
+        console.warn('Unexpected response format from Shodan CVE API');
+        return [];
+      }
+
+      const mappedCves: ShodanCVE[] = cvesData.map((cveItem: any) => ({
+        cve: cveItem.cve_id || cveItem.cve,
+        summary: cveItem.summary || '',
+        cvss: cveItem.cvss || undefined,
+        cvss3: cveItem.cvss_v3 ? {
+          score: cveItem.cvss_v3,
+          vector: '' // Shodan doesn't provide vector string in this endpoint
+        } : undefined,
+        epss: cveItem.epss || undefined,
+        kev: cveItem.kev || false,
+        published: cveItem.published_time || new Date().toISOString(),
+        modified: cveItem.modified_time || cveItem.published_time || new Date().toISOString(),
+        references: cveItem.references || [],
+        cpe: cveItem.cpe || undefined,
+        cwe: cveItem.cwe || undefined,
+        vendors: cveItem.vendors || undefined,
+        products: cveItem.products || undefined
+      }));
+
+      // Filter by CVSS score - use cvss_v3 or cvss field
+      const filteredCves = mappedCves.filter(cve => {
+        const score = cve.cvss3?.score || cve.cvss || 0;
+        return score >= minCvssScore;
+      });
+
+      return filteredCves.slice(0, limit);
+    } catch (error: any) {
+      console.error('Error fetching latest CVEs with filter from Shodan:', error.message);
+      throw new Error(`Failed to fetch filtered CVE data from Shodan: ${error.message}`);
     }
   }
 }

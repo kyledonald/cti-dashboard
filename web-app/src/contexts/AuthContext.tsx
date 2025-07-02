@@ -80,9 +80,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingUserData, setPendingUserData] = useState<{ firstName: string; lastName: string } | null>(null);
 
   // Create or update user in backend
-  const createOrUpdateUser = async (firebaseUser: FirebaseUser): Promise<User> => {
+  const createOrUpdateUser = async (firebaseUser: FirebaseUser, overrideNames?: { firstName: string; lastName: string }): Promise<User> => {
     try {
       // Get existing user by Firebase UID
       const existingUsers = await usersApi.getAll();
@@ -112,14 +113,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return existingUser;
       } else {
         // Create new user
-        const displayName = firebaseUser.displayName || '';
-        const nameParts = displayName.split(' ');
+        let firstName: string;
+        let lastName: string;
+        
+        if (overrideNames) {
+          // Use the provided names (from email sign-up)
+          firstName = overrideNames.firstName;
+          lastName = overrideNames.lastName;
+        } else {
+          // Parse from displayName (for Google sign-in)
+          const displayName = firebaseUser.displayName || '';
+          const nameParts = displayName.trim().split(' ').filter(part => part.length > 0);
+          firstName = nameParts[0] || firebaseUser.email!.split('@')[0] || 'User';
+          lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+        }
         
         const userData: CreateUserDTO = {
           googleId: firebaseUser.uid,
           email: firebaseUser.email!,
-          firstName: nameParts[0] || firebaseUser.email!.split('@')[0] || 'User',
-          lastName: nameParts.slice(1).join(' ') || '',
+          firstName,
+          lastName,
           ...(firebaseUser.photoURL && { profilePictureUrl: firebaseUser.photoURL }),
         };
 
@@ -165,21 +178,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (firebaseUser) {
         try {
-          const user = await createOrUpdateUser(firebaseUser);
+          const user = await createOrUpdateUser(firebaseUser, pendingUserData || undefined);
           console.log('Successfully got user from backend:', user);
           setUser(user);
+          // Clear pending data after successful creation
+          setPendingUserData(null);
         } catch (error) {
           console.error('Error handling user auth:', error);
           // Create temporary user to maintain auth flow
-          const displayName = firebaseUser.displayName || '';
-          const nameParts = displayName.split(' ');
+          let firstName: string;
+          let lastName: string;
+          
+          if (pendingUserData) {
+            firstName = pendingUserData.firstName;
+            lastName = pendingUserData.lastName;
+          } else {
+            const displayName = firebaseUser.displayName || '';
+            const nameParts = displayName.trim().split(' ').filter(part => part.length > 0);
+            firstName = nameParts[0] || firebaseUser.email!.split('@')[0] || 'User';
+            lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+          }
           
           const tempUser: User = {
             userId: firebaseUser.uid,
             googleId: firebaseUser.uid,
             email: firebaseUser.email!,
-            firstName: nameParts[0] || firebaseUser.email!.split('@')[0] || 'User',
-            lastName: nameParts.slice(1).join(' ') || '',
+            firstName,
+            lastName,
             ...(firebaseUser.photoURL && { profilePictureUrl: firebaseUser.photoURL }),
             role: 'unassigned',
             status: 'active',
@@ -225,6 +250,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
+      // Store the names for use in onAuthStateChanged
+      setPendingUserData({ firstName, lastName });
+      
       const result = await createUserWithEmailAndPassword(auth, email, password);
       
       // Update the Firebase user profile with display name
@@ -236,6 +264,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Email sign-up successful:', result.user.email);
     } catch (error) {
       console.error('Error signing up with email:', error);
+      // Clear pending data on error
+      setPendingUserData(null);
       const humanError = new Error(getHumanReadableError(error));
       throw humanError;
     }

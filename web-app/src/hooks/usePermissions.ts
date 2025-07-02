@@ -20,6 +20,7 @@ export interface PermissionSet {
   canManageThreatActors: boolean;
   canViewCVEs: boolean;
   canManageCVEs: boolean;
+  canViewMySoftware: boolean; // All assigned users can view/manage their software inventory
   
   // User state checks
   isAssigned: boolean;
@@ -47,6 +48,7 @@ export const usePermissions = (): PermissionSet => {
         canManageThreatActors: false,
         canViewCVEs: false,
         canManageCVEs: false,
+        canViewMySoftware: true, // Allow viewing My Software even without user
         isAssigned: false,
         isOrgAdmin: false,
         isSuperAdmin: false,
@@ -80,6 +82,7 @@ export const usePermissions = (): PermissionSet => {
       canManageThreatActors: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can manage
       canViewCVEs: hasOrgAccess, // All assigned can view
       canManageCVEs: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can manage
+      canViewMySoftware: true, // All roles can view My Software
       
       // User state checks
       isAssigned,

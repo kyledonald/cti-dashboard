@@ -86,31 +86,17 @@ const LandingPage: React.FC = () => {
                 {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl p-8 text-center shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border border-white/20 dark:border-gray-700/20">
-            <div className="h-16 w-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h2m0 0h2a2 2 0 002-2V7a2 2 0 00-2-2h-2m0 0V3a2 2 0 012-2h2a2 2 0 012 2v2M7 7h10M7 7v8a2 2 0 002 2h6a2 2 0 002-2V7M7 7H5a2 2 0 00-2 2v6a2 2 0 002 2h2m0 0h2a2 2 0 002-2V7a2 2 0 00-2-2H9m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2" />
-              </svg>
-            </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Create & Track Incidents</h3>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">Create and track cyber security incidents from detection to resolution</p>
           </div>
 
           <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl p-8 text-center shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border border-white/20 dark:border-gray-700/20">
-            <div className="h-16 w-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Monitor Software Vulnerabilities</h3>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">Monitor and respond to critical software vulnerabilities with real-time tracking</p>
           </div>
 
           <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl p-8 text-center shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border border-white/20 dark:border-gray-700/20">
-            <div className="h-16 w-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-              </svg>
-            </div>
+
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Track Threat Actors</h3>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">Track threat actors and understand attack patterns targeting your industry</p>
           </div>
