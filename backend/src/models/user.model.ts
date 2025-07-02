@@ -7,7 +7,7 @@ export interface User {
   firstName: string;
   lastName: string;
   profilePictureUrl?: string;
-  role: 'admin' | 'editor' | 'viewer';
+  role: 'admin' | 'editor' | 'viewer' | 'unassigned';
   organizationId: string;
   status: 'active' | 'inactive';
   createdAt: FieldValue | FirebaseFirestore.Timestamp;
@@ -21,15 +21,15 @@ export interface CreateUserDTO {
   firstName: string;
   lastName: string;
   profilePictureUrl?: string;
-  role: 'admin' | 'editor' | 'viewer';
-  organizationId: string;
+  role?: 'admin' | 'editor' | 'viewer' | 'unassigned';
+  organizationId?: string;
 }
 
 export interface UpdateUserDTO {
   firstName?: string;
   lastName?: string;
   profilePictureUrl?: string;
-  role?: 'admin' | 'editor' | 'viewer';
+  role?: 'admin' | 'editor' | 'viewer' | 'unassigned';
   organizationId?: string;
   status?: 'active' | 'inactive';
 }

@@ -80,8 +80,28 @@ export class OrganizationService {
     if (!doc.exists) {
       return false;
     }
-    // TODO: Add a check if there are users in the organization before deleting
-    await organizationRef.delete();
+
+    // Clean up users in this organization - set them to unassigned
+    const usersCollection = this.db.collection('users');
+    const usersSnapshot = await usersCollection.where('organizationId', '==', organizationId).get();
+    
+    const batch = this.db.batch();
+    
+    // Update all users to remove organization assignment and set role to unassigned
+    usersSnapshot.forEach((userDoc) => {
+      batch.update(userDoc.ref, {
+        organizationId: '',
+        role: 'unassigned',
+        updatedAt: FieldValue.serverTimestamp()
+      });
+    });
+    
+    // Delete the organization
+    batch.delete(organizationRef);
+    
+    // Execute all operations as a batch
+    await batch.commit();
+    
     return true;
   }
 }

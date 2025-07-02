@@ -34,7 +34,19 @@ const app = express();
 app.use(express.json());
 
 app.get('/health', (req, res) => {
-  res.status(200).send('API is healthy!');
+  res.status(200).json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+app.get('/warmup', (req, res) => {
+  res.status(200).json({ 
+    status: 'warmed', 
+    message: 'Function is now warm',
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.get('/server-time', (req, res) => {

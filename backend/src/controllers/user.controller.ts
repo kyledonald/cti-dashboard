@@ -15,13 +15,9 @@ export class UserController {
 
       if (
         !userData.email ||
-        !userData.googleId ||
-        !userData.firstName ||
-        !userData.lastName ||
-        !userData.role ||
-        !userData.organizationId
+        !userData.googleId
       ) {
-        return res.status(400).json({ error: 'Missing required user fields.' });
+        return res.status(400).json({ error: 'Missing required user fields: email, googleId.' });
       }
 
       // TODO: Add more validation for email format, valid role, existing organizationId
@@ -78,17 +74,35 @@ export class UserController {
       // TODO: Add authorization: Users can only update their own profile (or admins can update any)
       // TODO: Add input validation for fields being updated
 
-      const updated = await this.service.updateUser(userId, updateData);
+      const updatedUser = await this.service.updateUser(userId, updateData);
 
-      if (!updated) {
+      if (!updatedUser) {
         return res.status(404).json({ error: 'User not found.' });
       }
-      res.status(200).json({ message: 'User updated successfully' });
+      res.status(200).json(updatedUser);
     } catch (error: any) {
       console.error('Error in updateUser controller:', error);
       res
         .status(500)
         .json({ error: 'Failed to update user', details: error.message });
+    }
+  }
+
+  async updateLastLogin(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+
+      const updatedUser = await this.service.updateLastLogin(userId);
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+      res.status(200).json(updatedUser);
+    } catch (error: any) {
+      console.error('Error in updateLastLogin controller:', error);
+      res
+        .status(500)
+        .json({ error: 'Failed to update last login', details: error.message });
     }
   }
 

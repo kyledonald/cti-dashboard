@@ -240,6 +240,22 @@ paths:
         '404':
           description: User not found
 
+  /users/{userId}/last-login:
+    put:
+      summary: Update user's last login timestamp
+      operationId: updateUserLastLogin
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: string
+          description: ID of the user to update last login for
+      responses:
+        '200':
+          description: Last login updated successfully
+        '404':
+          description: User not found
+
   # --- Threat Actors API Paths ---
   /threat-actors:
     post:
