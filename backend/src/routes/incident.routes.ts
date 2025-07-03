@@ -15,6 +15,10 @@ export const incidentRouter = (db: Firestore) => {
   router.get('/:incidentId', (req, res) => incidentController.getIncidentById(req, res));
   router.put('/:incidentId', (req, res) => incidentController.updateIncident(req, res));
   router.delete('/:incidentId', (req, res) => incidentController.deleteIncident(req, res));
+  
+  // Comment routes
+  router.post('/:incidentId/comments', (req, res) => incidentController.addComment(req, res));
+  router.delete('/:incidentId/comments/:commentId', (req, res) => incidentController.deleteComment(req, res));
 
   return router;
 };

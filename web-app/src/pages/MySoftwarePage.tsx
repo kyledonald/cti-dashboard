@@ -157,7 +157,7 @@ const MySoftwarePage: React.FC = () => {
               Software Inventory ({softwareList.length})
             </h3>
           </div>
-          {permissions.canEditOrgSettings && (
+          {permissions.canManageSoftwareInventory && (
             <Button onClick={() => setShowAddForm(!showAddForm)}>
               {showAddForm ? 'Cancel' : (softwareList.length > 0 ? 'Edit' : '+ Add Software')}
             </Button>
@@ -167,7 +167,7 @@ const MySoftwarePage: React.FC = () => {
         {!isInventoryCollapsed && (
           <>
             {/* Add Software Form */}
-            {showAddForm && permissions.canEditOrgSettings && (
+            {showAddForm && permissions.canManageSoftwareInventory && (
               <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Add Software (comma-separated)
@@ -219,7 +219,7 @@ const MySoftwarePage: React.FC = () => {
                         {software}
                       </span>
                     </div>
-                    {permissions.canEditOrgSettings && (
+                    {permissions.canManageSoftwareInventory && (
                       <Button
                         variant="outline"
                         size="sm"

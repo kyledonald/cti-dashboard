@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { IncidentService } from '../services/incident.service';
-import { CreateIncidentDTO, UpdateIncidentDTO } from '../models/incident.model';
+import { CreateIncidentDTO, UpdateIncidentDTO, AddCommentDTO } from '../models/incident.model';
 import { CVEService } from '../services/cve.service'; 
 import { CVEResponse } from '../models/cve.model'; 
 
@@ -117,6 +117,62 @@ export class IncidentController {
       res
         .status(500)
         .json({ error: 'Failed to delete incident', details: error.message });
+    }
+  }
+
+  async addComment(req: Request, res: Response) {
+    try {
+      const { incidentId } = req.params;
+      const commentData: AddCommentDTO = req.body;
+
+      if (!commentData.content || !commentData.userId || !commentData.userName) {
+        return res.status(400).json({ error: 'Missing required comment fields.' });
+      }
+
+      // TODO: Add authorization: Users can only add comments to incidents in their organization
+      const updatedIncident = await this.service.addComment(incidentId, commentData);
+
+      if (!updatedIncident) {
+        return res.status(404).json({ error: 'Incident not found.' });
+      }
+
+      res.status(201).json({
+        message: 'Comment added successfully',
+        incident: updatedIncident,
+      });
+    } catch (error: any) {
+      console.error('Error in addComment controller:', error);
+      res.status(500).json({ error: 'Failed to add comment', details: error.message });
+    }
+  }
+
+  async deleteComment(req: Request, res: Response) {
+    try {
+      const { incidentId, commentId } = req.params;
+      const { userId, userRole } = req.body; // In real app, this would come from auth middleware
+
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required.' });
+      }
+
+      // TODO: Add proper authorization middleware
+      // For now, we'll pass the user info in the request body
+      const updatedIncident = await this.service.deleteComment(incidentId, commentId, userId, userRole);
+
+      if (!updatedIncident) {
+        return res.status(404).json({ error: 'Incident or comment not found.' });
+      }
+
+      res.status(200).json({
+        message: 'Comment deleted successfully',
+        incident: updatedIncident,
+      });
+    } catch (error: any) {
+      console.error('Error in deleteComment controller:', error);
+      if (error.message === 'Unauthorized to delete this comment') {
+        return res.status(403).json({ error: error.message });
+      }
+      res.status(500).json({ error: 'Failed to delete comment', details: error.message });
     }
   }
 }

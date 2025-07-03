@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { cvesApi, type ShodanCVE } from '../api';
+import { cvesApi, incidentsApi, type ShodanCVE, type Incident } from '../api';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -12,6 +12,7 @@ const CVEsPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [cves, setCves] = useState<ShodanCVE[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -26,10 +27,16 @@ const CVEsPage: React.FC = () => {
   const itemsPerPage = 5;
   const cveContentRef = useRef<HTMLDivElement>(null);
 
+  // State for NAR with incident closure
+  const [showCloseIncidentConfirm, setShowCloseIncidentConfirm] = useState(false);
+  const [cveToClose, setCveToClose] = useState('');
+  const [incidentToClose, setIncidentToClose] = useState<Incident | null>(null);
+  const [closingIncident, setClosingIncident] = useState(false);
+
   const fetchCVEs = useCallback(async () => {
     try {
       setError(null);
-      const data = await cvesApi.getShodanLatest(minCvssScore, 50); // Fetch 50 CVEs to get more that meet criteria
+      const data = await cvesApi.getShodanLatest(minCvssScore, 150); // Fetch more CVEs to get more recent ones
       
       let filteredData = data;
       
@@ -37,6 +44,13 @@ const CVEsPage: React.FC = () => {
       if (showKevOnly) {
         filteredData = data.filter(cve => cve.kev === true);
       }
+      
+      // Sort by published date (newest first) to ensure we get the latest CVEs
+      filteredData.sort((a, b) => {
+        const dateA = new Date(a.published).getTime();
+        const dateB = new Date(b.published).getTime();
+        return dateB - dateA;
+      });
       
       setCves(filteredData);
       setLastUpdated(new Date());
@@ -47,6 +61,19 @@ const CVEsPage: React.FC = () => {
       setLoading(false);
     }
   }, [minCvssScore, showKevOnly]);
+
+  // Fetch incidents to check for existing CVE incidents
+  const fetchIncidents = useCallback(async () => {
+    if (!user?.organizationId) return;
+    
+    try {
+      const incidentsData = await incidentsApi.getAll();
+      const orgIncidents = incidentsData.filter((inc: Incident) => inc.organizationId === user?.organizationId);
+      setIncidents(orgIncidents);
+    } catch (err) {
+      console.error('Error fetching incidents:', err);
+    }
+  }, [user?.organizationId]);
 
   // Load dismissed CVEs from localStorage (organization-specific)
   useEffect(() => {
@@ -96,6 +123,26 @@ const CVEsPage: React.FC = () => {
   const dismissCVE = (cveId: string) => {
     if (!user?.organizationId) return;
     
+    // Check if there's an existing incident for this CVE
+    const existingIncident = incidents.find(incident => 
+      incident.cveIds && incident.cveIds.includes(cveId)
+    );
+    
+    if (existingIncident) {
+      // Show confirmation dialog asking if they want to close the associated incident
+      setShowCloseIncidentConfirm(true);
+      setCveToClose(cveId);
+      setIncidentToClose(existingIncident);
+    } else {
+      // No existing incident, proceed with normal dismissal
+      performDismissCVE(cveId);
+    }
+  };
+
+  // Perform the actual CVE dismissal
+  const performDismissCVE = (cveId: string) => {
+    if (!user?.organizationId) return;
+    
     const cveToStore = cves.find(cve => cve.cve === cveId);
     if (cveToStore) {
       // Save the full CVE data
@@ -121,6 +168,60 @@ const CVEsPage: React.FC = () => {
     const existingDismissedData = loadDismissedCVEData();
     const updatedDismissedData = existingDismissedData.filter(cve => cve.cve !== cveId);
     saveDismissedCVEData(updatedDismissedData);
+  };
+
+  // Handle closing incident when marking CVE as NAR
+  const handleCloseIncidentConfirm = async () => {
+    if (!incidentToClose || !cveToClose) return;
+    
+    setClosingIncident(true);
+    
+    try {
+      // Update the incident status to "Closed"
+      await incidentsApi.update(incidentToClose.incidentId, {
+        status: 'Closed',
+        resolutionNotes: `Incident closed automatically when CVE ${cveToClose} was marked as No Action Required.`
+      });
+      
+      // Dismiss the CVE
+      performDismissCVE(cveToClose);
+      
+      // Refresh incidents data
+      await fetchIncidents();
+      
+      // Close the dialog
+      setShowCloseIncidentConfirm(false);
+      setCveToClose('');
+      setIncidentToClose(null);
+      
+    } catch (error) {
+      console.error('Error closing incident:', error);
+      // Still dismiss the CVE even if incident update fails
+      performDismissCVE(cveToClose);
+      setShowCloseIncidentConfirm(false);
+      setCveToClose('');
+      setIncidentToClose(null);
+    } finally {
+      setClosingIncident(false);
+    }
+  };
+
+  // Handle dismissing CVE without closing incident
+  const handleDismissWithoutClosing = () => {
+    if (!cveToClose) return;
+    
+    // Just close the dialog without dismissing the CVE
+    // The CVE should remain active since the user chose to keep the incident open
+    setShowCloseIncidentConfirm(false);
+    setCveToClose('');
+    setIncidentToClose(null);
+  };
+
+  // Check if CVE already has an incident
+  const hasExistingIncident = (cveId: string): boolean => {
+    return incidents.some(incident => 
+      incident.cveIds && incident.cveIds.includes(cveId)
+    );
   };
 
   // Create incident from CVE
@@ -202,8 +303,9 @@ const CVEsPage: React.FC = () => {
   useEffect(() => {
     if (user?.organizationId) {
       fetchCVEs();
+      fetchIncidents();
     }
-  }, [fetchCVEs, user?.organizationId]);
+  }, [fetchCVEs, fetchIncidents, user?.organizationId]);
 
 
 
@@ -265,6 +367,29 @@ const CVEsPage: React.FC = () => {
             </p>
           )}
         </div>
+        <Button
+          onClick={() => {
+            setLoading(true);
+            fetchCVEs();
+            fetchIncidents();
+          }}
+          disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              Refreshing...
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh CVEs
+            </>
+          )}
+        </Button>
         <div className="flex gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <label htmlFor="cvss-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -464,14 +589,25 @@ const CVEsPage: React.FC = () => {
                         <div className="flex gap-2">
                           {activeTab === 'active' ? (
                             <>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => createIncidentFromCVE(cve)}
-                                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 dark:bg-green-900/20 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/30 dark:hover:border-green-600"
-                              >
-                                Create Incident
-                              </Button>
+                              {hasExistingIncident(cve.cve) ? (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  disabled
+                                  className="bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
+                                >
+                                  Existing Incident for this CVE
+                                </Button>
+                              ) : (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => createIncidentFromCVE(cve)}
+                                  className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 dark:bg-green-900/20 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/30 dark:hover:border-green-600"
+                                >
+                                  Create Incident
+                                </Button>
+                              )}
                               <Button 
                                 variant="outline" 
                                 size="sm"
@@ -557,6 +693,47 @@ const CVEsPage: React.FC = () => {
           </div>
         </div>
       ) : null}
+
+      {/* NAR with Incident Closure Confirmation Dialog */}
+      {showCloseIncidentConfirm && incidentToClose && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Close Associated Incident?
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              This CVE (<strong>{cveToClose}</strong>) has an existing incident:
+            </p>
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
+              <p className="font-medium text-blue-900 dark:text-blue-100">
+                {incidentToClose.title}
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Status: {incidentToClose.status} | Priority: {incidentToClose.priority}
+              </p>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Would you like to move this incident to the "Closed" column since you're marking the CVE as No Action Required?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleCloseIncidentConfirm}
+                disabled={closingIncident}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                {closingIncident ? 'Closing...' : 'Yes, Close Incident'}
+              </button>
+              <button
+                onClick={handleDismissWithoutClosing}
+                disabled={closingIncident}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors dark:bg-gray-700 dark:hover:bg-gray-600 dark:disabled:bg-gray-800 dark:text-gray-200"
+              >
+                No, Keep Incident Open
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

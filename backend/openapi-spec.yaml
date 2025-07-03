@@ -477,6 +477,70 @@ paths:
         '404':
           description: Incident not found
 
+  /incidents/{incidentId}/comments:
+    post:
+      summary: Add a comment to an incident
+      operationId: addComment
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          type: string
+          description: ID of the incident to add comment to
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              content: { type: string }
+              userId: { type: string }
+              userName: { type: string }
+            required:
+              - content
+              - userId
+              - userName
+      responses:
+        '201':
+          description: Comment added successfully
+        '400':
+          description: Invalid input
+        '404':
+          description: Incident not found
+
+  /incidents/{incidentId}/comments/{commentId}:
+    delete:
+      summary: Delete a comment from an incident
+      operationId: deleteComment
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          type: string
+          description: ID of the incident
+        - name: commentId
+          in: path
+          required: true
+          type: string
+          description: ID of the comment to delete
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              userId: { type: string }
+              userRole: { type: string }
+            required:
+              - userId
+      responses:
+        '200':
+          description: Comment deleted successfully
+        '403':
+          description: Unauthorized to delete this comment
+        '404':
+          description: Incident or comment not found
+
   # --- CVE API Paths ---
   /cves/latest:
     get:

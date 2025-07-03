@@ -1,10 +1,19 @@
 import { FieldValue } from '@google-cloud/firestore';
 
+export interface ResolutionComment {
+  commentId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  timestamp: FieldValue | FirebaseFirestore.Timestamp;
+}
+
 export interface Incident {
   incidentId: string;
   title: string;
   description: string;
-  resolutionNotes?: string | null;
+  resolutionNotes?: string | null; // Keep for backward compatibility
+  resolutionComments?: ResolutionComment[];
   status: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
   type?: string | null;
@@ -36,7 +45,8 @@ export interface CreateIncidentDTO {
 export interface UpdateIncidentDTO {
   title?: string;
   description?: string;
-  resolutionNotes?: string | null;
+  resolutionNotes?: string | null; // Keep for backward compatibility
+  resolutionComments?: ResolutionComment[];
   status?: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority?: 'Low' | 'Medium' | 'High' | 'Critical';
   type?: string | null;
@@ -45,4 +55,11 @@ export interface UpdateIncidentDTO {
   assignedToUserId?: string | null;
   assignedToUserName?: string | null;
   dateResolved?: FieldValue | null;
+}
+
+export interface AddCommentDTO {
+  incidentId: string;
+  content: string;
+  userId: string;
+  userName: string;
 }

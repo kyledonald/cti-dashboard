@@ -25,6 +25,19 @@ export class ThreatActorService {
       name: actorData.name,
       description: actorData.description ?? null,
       aliases: actorData.aliases ?? [],
+      country: actorData.country ?? null,
+      firstSeen: actorData.firstSeen ?? null,
+      lastSeen: actorData.lastSeen ?? null,
+      motivation: actorData.motivation ?? null,
+      sophistication: actorData.sophistication ?? 'Unknown',
+      resourceLevel: actorData.resourceLevel ?? 'Unknown',
+      primaryTargets: actorData.primaryTargets ?? [],
+      attackPatterns: actorData.attackPatterns ?? [],
+      tools: actorData.tools ?? [],
+      malwareFamilies: actorData.malwareFamilies ?? [],
+      isActive: actorData.isActive ?? true,
+      organizationId: actorData.organizationId,
+      // Legacy fields for backwards compatibility
       targetIndustries: actorData.targetIndustries ?? [],
       associatedCves: actorData.associatedCves ?? [],
       countryOfOrigin: actorData.countryOfOrigin ?? null,
@@ -70,6 +83,29 @@ export class ThreatActorService {
       dataToUpdate.description = updateData.description;
     if (updateData.aliases !== undefined)
       dataToUpdate.aliases = updateData.aliases;
+    if (updateData.country !== undefined)
+      dataToUpdate.country = updateData.country;
+    if (updateData.firstSeen !== undefined)
+      dataToUpdate.firstSeen = updateData.firstSeen;
+    if (updateData.lastSeen !== undefined)
+      dataToUpdate.lastSeen = updateData.lastSeen;
+    if (updateData.motivation !== undefined)
+      dataToUpdate.motivation = updateData.motivation;
+    if (updateData.sophistication !== undefined)
+      dataToUpdate.sophistication = updateData.sophistication;
+    if (updateData.resourceLevel !== undefined)
+      dataToUpdate.resourceLevel = updateData.resourceLevel;
+    if (updateData.primaryTargets !== undefined)
+      dataToUpdate.primaryTargets = updateData.primaryTargets;
+    if (updateData.attackPatterns !== undefined)
+      dataToUpdate.attackPatterns = updateData.attackPatterns;
+    if (updateData.tools !== undefined)
+      dataToUpdate.tools = updateData.tools;
+    if (updateData.malwareFamilies !== undefined)
+      dataToUpdate.malwareFamilies = updateData.malwareFamilies;
+    if (updateData.isActive !== undefined)
+      dataToUpdate.isActive = updateData.isActive;
+    // Legacy fields for backwards compatibility
     if (updateData.targetIndustries !== undefined)
       dataToUpdate.targetIndustries = updateData.targetIndustries;
     if (updateData.associatedCves !== undefined)

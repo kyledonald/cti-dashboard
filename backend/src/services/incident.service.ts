@@ -1,8 +1,10 @@
-import { Firestore, FieldValue } from '@google-cloud/firestore';
+import { Firestore, FieldValue, Timestamp } from '@google-cloud/firestore';
 import {
   Incident,
   CreateIncidentDTO,
   UpdateIncidentDTO,
+  AddCommentDTO,
+  ResolutionComment,
 } from '../models/incident.model';
 
 export class IncidentService {
@@ -126,5 +128,79 @@ export class IncidentService {
     }
     await incidentRef.delete();
     return true;
+  }
+
+  async addComment(incidentId: string, commentData: AddCommentDTO): Promise<Incident | null> {
+    const incidentRef = this.collection.doc(incidentId);
+    const doc = await incidentRef.get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    // Create new comment with current timestamp
+    const newComment: ResolutionComment = {
+      commentId: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      userId: commentData.userId,
+      userName: commentData.userName,
+      content: commentData.content,
+      timestamp: Timestamp.now(),
+    };
+
+    // Add comment to the incident using arrayUnion
+    await incidentRef.update({
+      resolutionComments: FieldValue.arrayUnion(newComment),
+      lastUpdatedAt: FieldValue.serverTimestamp(),
+    });
+
+    // Return updated incident
+    const updatedDoc = await incidentRef.get();
+    return updatedDoc.data() as Incident;
+  }
+
+  async deleteComment(
+    incidentId: string, 
+    commentId: string, 
+    userId: string, 
+    userRole?: string
+  ): Promise<Incident | null> {
+    const incidentRef = this.collection.doc(incidentId);
+    const doc = await incidentRef.get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    const incident = doc.data() as Incident;
+    
+    if (!incident.resolutionComments) {
+      return null;
+    }
+
+    // Find the comment to delete
+    const commentToDelete = incident.resolutionComments.find(comment => comment.commentId === commentId);
+    
+    if (!commentToDelete) {
+      return null;
+    }
+
+    // Check permissions: users can delete their own comments, admins can delete any comment
+    const canDelete = commentToDelete.userId === userId || userRole === 'admin';
+    
+    if (!canDelete) {
+      throw new Error('Unauthorized to delete this comment');
+    }
+
+    // Remove the comment
+    const updatedComments = incident.resolutionComments.filter(comment => comment.commentId !== commentId);
+    
+    await incidentRef.update({
+      resolutionComments: updatedComments,
+      lastUpdatedAt: FieldValue.serverTimestamp(),
+    });
+
+    // Return updated incident
+    const updatedDoc = await incidentRef.get();
+    return updatedDoc.data() as Incident;
   }
 }

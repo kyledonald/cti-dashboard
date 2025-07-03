@@ -5,6 +5,19 @@ export interface ThreatActor {
   name: string;
   description?: string | null;
   aliases?: string[];
+  country?: string | null;
+  firstSeen?: string | null;
+  lastSeen?: string | null;
+  motivation?: string | null;
+  sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  primaryTargets?: string[];
+  attackPatterns?: string[];
+  tools?: string[];
+  malwareFamilies?: string[];
+  isActive?: boolean;
+  organizationId?: string;
+  // Legacy fields for backwards compatibility
   targetIndustries?: string[];
   associatedCves?: string[];
   countryOfOrigin?: string | null;
@@ -14,17 +27,42 @@ export interface ThreatActor {
 
 export interface CreateThreatActorDTO {
   name: string;
-  description?: string;
+  description?: string | null;
   aliases?: string[];
+  country?: string | null;
+  firstSeen?: string | null;
+  lastSeen?: string | null;
+  motivation?: string | null;
+  sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  primaryTargets?: string[];
+  attackPatterns?: string[];
+  tools?: string[];
+  malwareFamilies?: string[];
+  isActive?: boolean;
+  organizationId: string;
+  // Legacy fields for backwards compatibility
   targetIndustries?: string[];
   associatedCves?: string[];
-  countryOfOrigin?: string;
+  countryOfOrigin?: string | null;
 }
 
 export interface UpdateThreatActorDTO {
   name?: string;
   description?: string | null;
   aliases?: string[];
+  country?: string | null;
+  firstSeen?: string | null;
+  lastSeen?: string | null;
+  motivation?: string | null;
+  sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  primaryTargets?: string[];
+  attackPatterns?: string[];
+  tools?: string[];
+  malwareFamilies?: string[];
+  isActive?: boolean;
+  // Legacy fields for backwards compatibility
   targetIndustries?: string[];
   associatedCves?: string[];
   countryOfOrigin?: string | null;

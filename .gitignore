@@ -33,3 +33,5 @@ backend/node_modules/
 backend/dist/
 backend/.gcloudignore
 backend/.gitignore
+
+dev-helper.sh

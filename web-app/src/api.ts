@@ -8,7 +8,7 @@ const API_BASE = import.meta.env.DEV
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 1500,
+  timeout: 2500, // 2.5 seconds timeout - balanced for quick response
   headers: {
     'Content-Type': 'application/json',
   },
@@ -119,6 +119,14 @@ export interface UpdateUserDTO {
   status?: 'active' | 'inactive';
 }
 
+export interface ResolutionComment {
+  commentId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  timestamp: any;
+}
+
 export interface Incident {
   incidentId: string;
   title: string;
@@ -136,6 +144,7 @@ export interface Incident {
   cveIds?: string[];
   threatActorIds?: string[];
   resolutionNotes?: string | null;
+  resolutionComments?: ResolutionComment[];
   dateResolved?: any | null;
 }
 
@@ -160,6 +169,18 @@ export interface ThreatActor {
   motivation?: string;
   capabilities?: string[];
   aliases?: string[];
+  organizationId?: string; // Added for organization-specific threat actors
+  // Enhanced fields for modern threat intelligence
+  country?: string;
+  firstSeen?: string;
+  lastSeen?: string;
+  sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  primaryTargets?: string[];
+  attackPatterns?: string[];
+  tools?: string[];
+  malwareFamilies?: string[];
+  isActive?: boolean;
   createdAt: any;
   updatedAt: any;
 }
@@ -171,6 +192,38 @@ export interface CreateThreatActorDTO {
   motivation?: string;
   capabilities?: string[];
   aliases?: string[];
+  organizationId?: string; // Added for organization-specific threat actors
+  // Enhanced fields for modern threat intelligence
+  country?: string;
+  firstSeen?: string;
+  lastSeen?: string;
+  sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  primaryTargets?: string[];
+  attackPatterns?: string[];
+  tools?: string[];
+  malwareFamilies?: string[];
+  isActive?: boolean;
+}
+
+export interface UpdateThreatActorDTO {
+  name?: string;
+  description?: string;
+  nationality?: string;
+  motivation?: string;
+  capabilities?: string[];
+  aliases?: string[];
+  // Enhanced fields for modern threat intelligence
+  country?: string;
+  firstSeen?: string;
+  lastSeen?: string;
+  sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  primaryTargets?: string[];
+  attackPatterns?: string[];
+  tools?: string[];
+  malwareFamilies?: string[];
+  isActive?: boolean;
 }
 
 export interface CVE {
@@ -284,6 +337,7 @@ export interface UpdateIncidentDTO {
   title?: string;
   description?: string;
   resolutionNotes?: string | null;
+  resolutionComments?: ResolutionComment[];
   status?: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority?: 'Low' | 'Medium' | 'High' | 'Critical';
   type?: string | null;
@@ -294,6 +348,13 @@ export interface UpdateIncidentDTO {
   dateResolved?: any | null;
 }
 
+export interface AddCommentDTO {
+  incidentId: string;
+  content: string;
+  userId: string;
+  userName: string;
+}
+
 // Incidents API
 export const incidentsApi = {
   getAll: () => retryRequest(() => api.get('/incidents')).then(res => extractData<Incident>(res.data, 'incidents')),
@@ -301,6 +362,11 @@ export const incidentsApi = {
   create: (data: CreateIncidentDTO) => retryRequest(() => api.post('/incidents', data)).then(res => res.data),
   update: (id: string, data: UpdateIncidentDTO) => retryRequest(() => api.put(`/incidents/${id}`, data)).then(res => res.data),
   delete: (id: string) => retryRequest(() => api.delete(`/incidents/${id}`)).then(res => res.data),
+  addComment: (data: AddCommentDTO) => retryRequest(() => api.post(`/incidents/${data.incidentId}/comments`, data)).then(res => res.data),
+  deleteComment: (incidentId: string, commentId: string, userId: string, userRole: string) => 
+    retryRequest(() => api.delete(`/incidents/${incidentId}/comments/${commentId}`, { 
+      data: { userId, userRole } 
+    })).then(res => res.data),
 };
 
 // Threat Actors API
@@ -318,65 +384,84 @@ export const cvesApi = {
   getById: (id: string) => retryRequest(() => api.get(`/cves/${id}`)).then(res => res.data),
   
   // New function to fetch from Shodan CVE API directly
-  getShodanLatest: async (minCvssScore = 7.5, limit = 10): Promise<ShodanCVE[]> => {
-    try {
-      // Use a CORS proxy to access Shodan API
-      const corsProxy = 'https://api.allorigins.win/raw?url=';
-      const shodanUrl = encodeURIComponent(`https://cvedb.shodan.io/cves?latest&limit=${limit * 2}`);
-      
-      const response = await fetch(`${corsProxy}${shodanUrl}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  getShodanLatest: async (minCvssScore = 8.0, limit = 50): Promise<ShodanCVE[]> => {
+    // Try multiple proxy approaches in order of reliability
+    const proxies = [
+      'https://thingproxy.freeboard.io/fetch/',
+      'https://api.allorigins.win/raw?url='
+    ];
+    
+    for (const corsProxy of proxies) {
+      try {
+        console.log(`Trying proxy: ${corsProxy}`);
+        
+        let url: string;
+                 if (corsProxy.includes('allorigins')) {
+           url = `${corsProxy}${encodeURIComponent(`https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 150)}`)}`;
+         } else {
+           url = `${corsProxy}https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 150)}`;
+         }
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          console.warn(`Proxy ${corsProxy} failed with status: ${response.status}`);
+          continue;
+        }
+
+        const data = await response.json();
+        let cvesData: any[];
+
+        // Handle Shodan API response format
+        if (data.cves && Array.isArray(data.cves)) {
+          cvesData = data.cves;
+        } else if (Array.isArray(data)) {
+          cvesData = data;
+        } else {
+          console.warn(`Unexpected response format from proxy ${corsProxy}`);
+          continue;
+        }
+
+        console.log(`Successfully fetched ${cvesData.length} CVEs from ${corsProxy}`);
+
+        // Map to our interface
+        const mappedCves: ShodanCVE[] = cvesData.map((cveItem: any) => ({
+          cve: cveItem.cve_id || cveItem.cve,
+          summary: cveItem.summary || '',
+          cvss: cveItem.cvss || undefined,
+          cvss3: cveItem.cvss_v3 ? {
+            score: cveItem.cvss_v3,
+            vector: ''
+          } : undefined,
+          kev: cveItem.kev || false,
+          published: cveItem.published_time || new Date().toISOString(),
+          modified: cveItem.modified_time || cveItem.published_time || new Date().toISOString(),
+          references: cveItem.references || [],
+          extractedVendors: extractVendorsFromSummary(cveItem.summary || '')
+        }));
+
+        // Filter by CVSS score
+        const filteredCves = mappedCves.filter(cve => {
+          const score = cve.cvss3?.score || cve.cvss || 0;
+          return score >= minCvssScore;
+        });
+
+        return filteredCves.slice(0, limit);
+
+      } catch (error) {
+        console.warn(`Proxy ${corsProxy} failed:`, error);
+        continue;
       }
-      
-      const data = await response.json();
-      let cvesData: any[];
-      
-      // Handle Shodan API response format
-      if (data.cves && Array.isArray(data.cves)) {
-        cvesData = data.cves;
-      } else if (Array.isArray(data)) {
-        cvesData = data;
-      } else {
-        console.warn('Unexpected response format from Shodan CVE API');
-        cvesData = [];
-      }
-      
-      // Map to our interface
-      const mappedCves: ShodanCVE[] = cvesData.map((cveItem: any) => ({
-        cve: cveItem.cve_id || cveItem.cve,
-        summary: cveItem.summary || '',
-        cvss: cveItem.cvss || undefined,
-        cvss3: cveItem.cvss_v3 ? {
-          score: cveItem.cvss_v3,
-          vector: ''
-        } : undefined,
-        kev: cveItem.kev || false,
-        published: cveItem.published_time || new Date().toISOString(),
-        modified: cveItem.modified_time || cveItem.published_time || new Date().toISOString(),
-        references: cveItem.references || [],
-        extractedVendors: extractVendorsFromSummary(cveItem.summary || '')
-      }));
-      
-      // Filter by CVSS score
-      const filteredCves = mappedCves.filter(cve => {
-        const score = cve.cvss3?.score || cve.cvss || 0;
-        return score >= minCvssScore;
-      });
-      
-      return filteredCves.slice(0, limit);
-      
-    } catch (error) {
-      console.error('Error fetching CVEs from Shodan:', error);
-      throw new Error('Failed to fetch CVE data from Shodan API. Please check your internet connection and try again.');
     }
-  }
+    
+         // If all proxies fail, throw error
+     throw new Error('All CORS proxies failed. Unable to fetch CVE data.');
+   }
 };
 
 // Legacy functions for backward compatibility
