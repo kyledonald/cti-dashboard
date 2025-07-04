@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { usePermissions } from '../hooks/usePermissions';
-import { usersApi, incidentsApi, cvesApi, threatActorsApi } from '../api';
+import { incidentsApi, cvesApi, threatActorsApi } from '../api';
 import { useQuery } from '@tanstack/react-query';
 import { Pie, Line, Bar } from 'react-chartjs-2';
 import {
@@ -17,20 +16,14 @@ import {
   Title,
 } from 'chart.js';
 import { Card } from '../components/ui/card';
-import { Button } from '../components/ui/button';
 import { Link } from 'react-router-dom';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title);
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
-  const permissions = usePermissions();
 
   // Data fetching
-  const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ['users'],
-    queryFn: usersApi.getAll,
-  });
   const { data: incidents = [], isLoading: incidentsLoading } = useQuery({
     queryKey: ['incidents'],
     queryFn: incidentsApi.getAll,
@@ -86,7 +79,6 @@ const DashboardPage: React.FC = () => {
 
   // Org-specific filtering
   const orgId = user?.organizationId;
-  const orgUsers = useMemo(() => users.filter(u => u.organizationId === orgId), [users, orgId]);
   const orgIncidents = useMemo(() => incidents.filter(i => i.organizationId === orgId), [incidents, orgId]);
   const orgThreatActors = useMemo(() => threatActors.filter(ta => !ta.organizationId || ta.organizationId === orgId), [threatActors, orgId]);
 
@@ -137,7 +129,7 @@ const DashboardPage: React.FC = () => {
       .slice(0, 5);
   }, [orgIncidents]);
 
-  const isLoading = usersLoading || incidentsLoading || threatActorsLoading || cvesLoading;
+  const isLoading = incidentsLoading || threatActorsLoading || cvesLoading;
 
   // Chart data
   const pieData = {
@@ -190,6 +182,24 @@ const DashboardPage: React.FC = () => {
     ],
   };
 
+  // Chart options for padding
+  const chartOptions = {
+    plugins: {
+      legend: {
+        labels: {
+          padding: 24, // More space below legend
+        },
+      },
+    },
+    layout: {
+      padding: {
+        top: 24, // More space above chart area
+      },
+    },
+    maintainAspectRatio: false,
+    responsive: true,
+  };
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto p-4">
       <div>
@@ -233,26 +243,26 @@ const DashboardPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Charts Grid - All in one row with better proportions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Charts Grid - Each chart gets its own row */}
+      <div className="space-y-8">
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Incident Status Breakdown</h3>
           <div className="flex justify-center">
-            <div className="w-64 h-64">
-              <Pie data={pieData} />
+            <div className="w-full max-w-2xl h-72 mx-auto">
+              <Pie data={pieData} options={chartOptions} />
             </div>
           </div>
         </Card>
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Incidents Created (Last 6 Months)</h3>
-          <div className="h-64">
-            <Line data={lineData} />
+          <div className="w-full max-w-2xl h-72 mx-auto">
+            <Line data={lineData} options={chartOptions} />
           </div>
         </Card>
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Incidents by Priority</h3>
-          <div className="h-64">
-            <Bar data={barData} />
+          <div className="w-full max-w-2xl h-72 mx-auto">
+            <Bar data={barData} options={chartOptions} />
           </div>
         </Card>
       </div>
@@ -329,6 +339,7 @@ const DashboardPage: React.FC = () => {
                 <Link 
                   key={incident.incidentId || idx} 
                   to={`/incidents?view=${incident.incidentId}`}
+                  replace={false}
                   className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                 >
                   <div className="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">

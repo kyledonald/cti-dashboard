@@ -115,13 +115,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Create new user
         let firstName: string;
         let lastName: string;
-        
         if (overrideNames) {
-          // Use the provided names (from email sign-up)
           firstName = overrideNames.firstName;
           lastName = overrideNames.lastName;
         } else {
-          // Parse from displayName (for Google sign-in)
+          // Parse from displayName (for Google sign-in) or fallback to email prefix
           const displayName = firebaseUser.displayName || '';
           const nameParts = displayName.trim().split(' ').filter(part => part.length > 0);
           firstName = nameParts[0] || firebaseUser.email!.split('@')[0] || 'User';
@@ -225,7 +223,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
       // User will be handled by onAuthStateChanged
     } catch (error) {
       console.error('Error signing in with Google:', error);
@@ -236,7 +234,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       // User will be handled by onAuthStateChanged
     } catch (error) {
       console.error('Error signing in with email:', error);

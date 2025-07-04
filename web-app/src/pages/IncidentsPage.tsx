@@ -10,10 +10,12 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Badge } from '../components/ui/badge';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useLocation } from 'react-router-dom';
 
 const IncidentsPage: React.FC = () => {
   const { user } = useAuth();
   const permissions = usePermissions();
+  const location = useLocation();
   
   // State management
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -148,6 +150,20 @@ const IncidentsPage: React.FC = () => {
       }
     }
   }, [user?.organizationId]);
+
+  // Auto-open incident modal if ?view=INCIDENT_ID is present in the URL
+  useEffect(() => {
+    if (!incidents.length) return;
+    const params = new URLSearchParams(location.search);
+    const viewId = params.get('view');
+    if (viewId) {
+      const incident = incidents.find(i => i.incidentId === viewId);
+      if (incident) {
+        openViewModal(incident);
+      }
+    }
+    // Only run when incidents or location.search changes
+  }, [incidents, location.search]);
 
   // Helper functions
   const getPriorityColor = (priority: string) => {
