@@ -33,10 +33,12 @@ const CVEsPage: React.FC = () => {
   const [incidentToClose, setIncidentToClose] = useState<Incident | null>(null);
   const [closingIncident, setClosingIncident] = useState(false);
 
+  const [refreshCooldown, setRefreshCooldown] = useState(0);
+
   const fetchCVEs = useCallback(async () => {
     try {
       setError(null);
-      const data = await cvesApi.getShodanLatest(minCvssScore, 150); // Fetch more CVEs to get more recent ones
+      const data = await cvesApi.getShodanLatest(minCvssScore, 200); // Fetch more CVEs to get more recent ones
       
       let filteredData = data;
       
@@ -307,6 +309,13 @@ const CVEsPage: React.FC = () => {
     }
   }, [fetchCVEs, fetchIncidents, user?.organizationId]);
 
+  // Cooldown timer effect
+  useEffect(() => {
+    if (refreshCooldown > 0) {
+      const timer = setTimeout(() => setRefreshCooldown(refreshCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [refreshCooldown]);
 
 
   const getSeverityLabel = (score: number): string => {
@@ -372,14 +381,22 @@ const CVEsPage: React.FC = () => {
             setLoading(true);
             fetchCVEs();
             fetchIncidents();
+            setRefreshCooldown(60);
           }}
-          disabled={loading}
+          disabled={loading || refreshCooldown > 0}
           className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
         >
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               Refreshing...
+            </>
+          ) : refreshCooldown > 0 ? (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Cooldown ({refreshCooldown}s)
             </>
           ) : (
             <>

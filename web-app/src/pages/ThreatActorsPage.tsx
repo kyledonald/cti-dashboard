@@ -1,13 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { threatActorsApi, type ThreatActor, type CreateThreatActorDTO, type UpdateThreatActorDTO } from '../api';
+import { threatActorsApi, organizationsApi, type ThreatActor, type CreateThreatActorDTO, type UpdateThreatActorDTO, type Organization } from '../api';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Badge } from '../components/ui/badge';
+import { Search, Plus, Edit, Trash2, Shield, AlertTriangle, Activity } from 'lucide-react';
+
+// Country flag mapping
+const getCountryFlag = (country: string): string => {
+  const countryFlags: { [key: string]: string } = {
+    'China': '🇨🇳', 'Russia': '🇷🇺', 'North Korea': '🇰🇵', 'Iran': '🇮🇷',
+    'United States': '🇺🇸', 'Israel': '🇮🇱', 'United Kingdom': '🇬🇧',
+    'Germany': '🇩🇪', 'France': '🇫🇷', 'South Korea': '🇰🇷',
+    'Japan': '🇯🇵', 'India': '🇮🇳', 'Brazil': '🇧🇷', 'Turkey': '🇹🇷',
+    'Ukraine': '🇺🇦', 'Belarus': '🇧🇾', 'Syria': '🇸🇾', 'Vietnam': '🇻🇳',
+    'Pakistan': '🇵🇰', 'Bangladesh': '🇧🇩', 'Unknown': '🏴‍☠️'
+  };
+  return countryFlags[country] || '🌍';
+};
 
 const ThreatActorsPage: React.FC = () => {
   const { user } = useAuth();
@@ -15,11 +29,12 @@ const ThreatActorsPage: React.FC = () => {
   
   // State management
   const [threatActors, setThreatActors] = useState<ThreatActor[]>([]);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12; // Better for card grid layout
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -51,30 +66,37 @@ const ThreatActorsPage: React.FC = () => {
   const [targetInput, setTargetInput] = useState('');
   // Removed unused state variables
 
-  // Load threat actors
+  // Load threat actors and organization data
   useEffect(() => {
-    const loadThreatActors = async () => {
+    const loadData = async () => {
       if (!user?.organizationId) {
         setLoading(false);
         return;
       }
 
       try {
-        const data = await threatActorsApi.getAll();
-        // Filter by organization (show all if no organizationId set for backwards compatibility)
-        const orgThreatActors = data.filter((ta: ThreatActor) => 
-          !ta.organizationId || ta.organizationId === user?.organizationId
+        // Load threat actors and organization data in parallel
+        const [threatActorsData, organizationData] = await Promise.all([
+          threatActorsApi.getAll(),
+          organizationsApi.getById(user.organizationId)
+        ]);
+
+        // Filter threat actors by organization
+        const orgThreatActors = threatActorsData.filter((ta: ThreatActor) => 
+          ta.organizationId === user?.organizationId
         );
+        
         setThreatActors(orgThreatActors);
+        setOrganization(organizationData);
       } catch (error) {
-        console.error('Error loading threat actors:', error);
+        console.error('Error loading data:', error);
         setError('Failed to load threat actors. Please refresh the page.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadThreatActors();
+    loadData();
   }, [user?.organizationId]);
 
   // Helper functions
@@ -99,6 +121,84 @@ const ThreatActorsPage: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
     }
   };
+
+  // Risk assessment functions
+  const calculateRiskScore = (actor: ThreatActor): number => {
+    let score = 0;
+    
+    // Sophistication scoring
+    switch (actor.sophistication) {
+      case 'Expert': score += 5; break;
+      case 'Advanced': score += 4; break;
+      case 'Intermediate': score += 3; break;
+      case 'Minimal': score += 2; break;
+      default: score += 1;
+    }
+    
+    // Resource level scoring
+    switch (actor.resourceLevel) {
+      case 'Government': score += 5; break;
+      case 'Organization': score += 4; break;
+      case 'Team': score += 3; break;
+      case 'Club': score += 2; break;
+      case 'Contest': score += 2; break;
+      case 'Individual': score += 1; break;
+      default: score += 1;
+    }
+    
+    // Activity bonus
+    if (actor.isActive) score += 2;
+    
+    // Recent activity bonus (within last year)
+    if (actor.lastSeen) {
+      const lastSeenDate = new Date(actor.lastSeen);
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      if (lastSeenDate > oneYearAgo) score += 2;
+    }
+    
+    // Industry/Country targeting bonus (case-insensitive)
+    if (organization && actor.primaryTargets?.length) {
+      const orgIndustry = organization.industry?.toLowerCase();
+      const orgCountry = organization.nationality?.toLowerCase();
+      const actorTargets = actor.primaryTargets.map(target => target.toLowerCase());
+      
+      if (orgIndustry && actorTargets.includes(orgIndustry)) {
+        score += 3;
+      }
+      if (orgCountry && actorTargets.includes(orgCountry)) {
+        score += 2;
+      }
+    }
+    
+    return Math.min(score, 10); // Cap at 10
+  };
+
+  const getRiskColor = (score: number): string => {
+    if (score >= 8) return 'text-red-600 dark:text-red-400';
+    if (score >= 6) return 'text-orange-600 dark:text-orange-400';
+    if (score >= 4) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-green-600 dark:text-green-400';
+  };
+
+  const getRiskLevel = (score: number): string => {
+    if (score >= 8) return 'Critical';
+    if (score >= 6) return 'High';
+    if (score >= 4) return 'Medium';
+    return 'Low';
+  };
+
+  // Statistics calculations using useMemo to handle dependencies properly
+  const statistics = useMemo(() => {
+    const total = threatActors.length;
+    const active = threatActors.filter(ta => ta.isActive).length;
+    
+
+    
+    const highRisk = threatActors.filter(ta => calculateRiskScore(ta) >= 6).length;
+
+    return { total, active, highRisk };
+  }, [threatActors, organization]);
 
   const resetForm = () => {
     setFormData({
@@ -177,7 +277,7 @@ const ThreatActorsPage: React.FC = () => {
       // Reload threat actors
       const data = await threatActorsApi.getAll();
       const orgThreatActors = data.filter((ta: ThreatActor) => 
-        !ta.organizationId || ta.organizationId === user?.organizationId
+        ta.organizationId === user?.organizationId
       );
       setThreatActors(orgThreatActors);
 
@@ -223,7 +323,7 @@ const ThreatActorsPage: React.FC = () => {
       // Reload threat actors
       const data = await threatActorsApi.getAll();
       const orgThreatActors = data.filter((ta: ThreatActor) => 
-        !ta.organizationId || ta.organizationId === user?.organizationId
+        ta.organizationId === user?.organizationId
       );
       setThreatActors(orgThreatActors);
 
@@ -302,7 +402,7 @@ const ThreatActorsPage: React.FC = () => {
   );
 
   // Permission check
-  if (!permissions.canViewIncidents) {
+  if (!permissions.canViewThreatActors) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
@@ -333,242 +433,264 @@ const ThreatActorsPage: React.FC = () => {
     );
   }
 
+
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Threat Actors
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Threat Intelligence
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Monitor and analyze threat actors and their activities
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Monitor threat actors targeting your organization
           </p>
         </div>
-        {permissions.canCreateIncidents && (
-          <Button onClick={openCreateModal} className="flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            New Threat Actor
+        {permissions.canManageThreatActors && (
+          <Button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Threat Actor
           </Button>
         )}
       </div>
 
-      {/* Error message */}
-      {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
-        </div>
-      )}
+      {/* Statistics Dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-4">
+          <div className="flex items-center">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+              <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Actors</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.total}</p>
+            </div>
+          </div>
+        </Card>
 
-      {/* Search and filters */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1">
+        <Card className="p-4">
+          <div className="flex items-center">
+            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+              <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.active}</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center">
+            <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">High Risk</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.highRisk}</p>
+            </div>
+          </div>
+        </Card>
+
+
+      </div>
+
+      {/* Search and Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
-            placeholder="Search threat actors by name, description, aliases, or country..."
+            type="text"
+            placeholder="Search threat actors..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
           />
         </div>
       </div>
 
-      {/* Threat actors list */}
-      {paginatedActors.length > 0 ? (
-        <div className="space-y-4">
-          {paginatedActors.map((actor) => (
-            <Card key={actor.threatActorId} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {actor.name}
-                      </h3>
-                      <Badge className={`text-xs px-2 py-1 ${getSophisticationColor(actor.sophistication || 'Unknown')}`}>
-                        {actor.sophistication || 'Unknown'}
-                      </Badge>
-                      <Badge className={`text-xs px-2 py-1 ${getResourceLevelColor(actor.resourceLevel || 'Unknown')}`}>
-                        {actor.resourceLevel || 'Unknown'}
-                      </Badge>
-                      {!actor.isActive && (
-                        <Badge variant="outline" className="text-xs px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                          Inactive
-                        </Badge>
-                      )}
-                    </div>
-
-                    {actor.description && (
-                      <p className="text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                        {actor.description}
-                      </p>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                      {actor.aliases && actor.aliases.length > 0 && (
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Aliases:</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {actor.aliases.slice(0, 3).map((alias, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {alias}
-                              </Badge>
-                            ))}
-                            {actor.aliases.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{actor.aliases.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {actor.country && (
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Country:</span>
-                          <p className="text-gray-600 dark:text-gray-400">{actor.country}</p>
-                        </div>
-                      )}
-
-                      {actor.motivation && (
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Motivation:</span>
-                          <p className="text-gray-600 dark:text-gray-400">{actor.motivation}</p>
-                        </div>
-                      )}
-
-                      {actor.primaryTargets && actor.primaryTargets.length > 0 && (
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Primary Targets:</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {actor.primaryTargets.slice(0, 2).map((target, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {target}
-                              </Badge>
-                            ))}
-                            {actor.primaryTargets.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{actor.primaryTargets.length - 2} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {actor.tools && actor.tools.length > 0 && (
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Tools:</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {actor.tools.slice(0, 2).map((tool, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {tool}
-                              </Badge>
-                            ))}
-                            {actor.tools.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{actor.tools.length - 2} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                        {actor.firstSeen && (
-                          <span>First seen: {new Date(actor.firstSeen).toLocaleDateString()}</span>
-                        )}
-                        {actor.lastSeen && (
-                          <span>Last seen: {new Date(actor.lastSeen).toLocaleDateString()}</span>
-                        )}
-                      </div>
-                    </div>
+      {/* Threat Actor Cards Grid */}
+      {filteredActors.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {paginatedActors.map((actor) => {
+              const riskScore = calculateRiskScore(actor);
+              
+              // Case-insensitive targeting check
+              const orgIndustry = organization?.industry?.toLowerCase();
+              const orgCountry = organization?.nationality?.toLowerCase();
+              const actorTargets = actor.primaryTargets?.map(target => target.toLowerCase()) || [];
+              const isTargetingOrg = (orgIndustry && actorTargets.includes(orgIndustry)) || 
+                                   (orgCountry && actorTargets.includes(orgCountry));
+              
+              return (
+                <Card key={actor.threatActorId} className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200 border-2 hover:border-blue-300 dark:hover:border-blue-600 flex flex-col h-full">
+                  {/* Country Flag Corner */}
+                  <div className="absolute top-2 right-2 text-2xl opacity-80">
+                    {getCountryFlag(actor.country || 'Unknown')}
                   </div>
-
-                  {permissions.canEditIncidents && (
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditModal(actor)}
-                      >
-                        Edit
-                      </Button>
-                      {permissions.canDeleteIncidents && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => openDeleteConfirm(actor)}
-                        >
-                          Delete
-                        </Button>
-                      )}
+                  {/* Targeting Organization Alert */}
+                  {isTargetingOrg && (
+                    <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      ⚠️ Targeting Our Industry
                     </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <div className="text-6xl mb-4">🕵️</div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No threat actors found
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {searchTerm ? 'No threat actors match your search criteria.' : 'Get started by adding your first threat actor.'}
-              </p>
-              {permissions.canCreateIncidents && !searchTerm && (
-                <Button onClick={openCreateModal}>
-                  Add Threat Actor
+                  <CardContent className="p-6 flex flex-col flex-1">
+                    {/* Header */}
+                    <div className="mb-4">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 pr-8">
+                        {actor.name}
+                      </h3>
+                      {/* Risk Score */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Risk:</span>
+                        <Badge className={`${getRiskColor(riskScore)} bg-transparent border`}>
+                          {getRiskLevel(riskScore)} ({riskScore}/10)
+                        </Badge>
+                      </div>
+                      {/* Status */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className={`w-2 h-2 rounded-full ${actor.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {actor.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Sophistication & Resource Level */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Sophistication</span>
+                        <Badge className={`text-xs ${getSophisticationColor(actor.sophistication || 'Unknown')}`}>{actor.sophistication || 'Unknown'}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Resources</span>
+                        <Badge className={`text-xs ${getResourceLevelColor(actor.resourceLevel || 'Unknown')}`}>{actor.resourceLevel || 'Unknown'}</Badge>
+                      </div>
+                    </div>
+                    {/* Description */}
+                    {actor.description && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">{actor.description}</p>
+                    )}
+                    {/* Aliases */}
+                    {actor.aliases && actor.aliases.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Aliases:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {actor.aliases.slice(0, 3).map((alias, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">{alias}</Badge>
+                          ))}
+                          {actor.aliases.length > 3 && (
+                            <Badge variant="outline" className="text-xs">+{actor.aliases.length - 3} more</Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {/* Primary Targets */}
+                    {actor.primaryTargets && actor.primaryTargets.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Targets:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {actor.primaryTargets.slice(0, 2).map((target, index) => {
+                            const isOurIndustry = target.toLowerCase() === organization?.industry?.toLowerCase();
+                            const isOurCountry = target.toLowerCase() === organization?.nationality?.toLowerCase();
+                            const isTargetingUs = isOurIndustry || isOurCountry;
+                            return (
+                              <Badge key={index} variant="outline" className={`text-xs ${isTargetingUs ? 'border-red-300 text-red-700 dark:border-red-600 dark:text-red-400' : ''}`}>{target}</Badge>
+                            );
+                          })}
+                          {actor.primaryTargets.length > 2 && (
+                            <Badge variant="outline" className="text-xs">+{actor.primaryTargets.length - 2} more</Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {/* Last Seen */}
+                    {actor.lastSeen && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Last seen: {new Date(actor.lastSeen).toLocaleDateString()}</p>
+                    )}
+                    {/* Action Buttons - always at bottom */}
+                    <div className="flex gap-2 mt-auto pt-4">
+                      {permissions.canManageThreatActors && (
+                        <>
+                          <Button variant="outline" size="sm" onClick={() => openEditModal(actor)} className="flex-1"><Edit className="w-3 h-3 mr-1" />Edit</Button>
+                          <Button variant="destructive" size="sm" onClick={() => openDeleteConfirm(actor)} className="px-2"><Trash2 className="w-3 h-3" /></Button>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                Showing <span className="font-medium">{((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredActors.length)}</span> of <span className="font-medium">{filteredActors.length}</span> threat actors
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
                 </Button>
-              )}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = i + 1;
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className={currentPage === page ? "font-bold" : ""}
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
-          </CardContent>
+          )}
+        </>
+      ) : (
+        <Card className="p-12">
+          <div className="text-center">
+            <div className="text-6xl mb-4">🕵️</div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              {searchTerm ? 'No threat actors found' : 'No threat actors yet'}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {searchTerm 
+                ? `No threat actors match "${searchTerm}". Try a different search term.`
+                : 'Start building your threat intelligence by adding known threat actors.'
+              }
+            </p>
+            {permissions.canManageThreatActors && !searchTerm && (
+              <Button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Add First Threat Actor
+              </Button>
+            )}
+          </div>
         </Card>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-            Showing <span className="font-medium">{((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredActors.length)}</span> of <span className="font-medium">{filteredActors.length}</span> threat actors
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentPage(page)}
-                className={currentPage === page ? "font-bold" : ""}
-              >
-                {page}
-              </Button>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-          </div>
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-800 dark:text-red-200">{error}</p>
         </div>
       )}
 

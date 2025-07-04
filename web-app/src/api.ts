@@ -15,7 +15,7 @@ const api = axios.create({
 });
 
 // Retry logic for cold starts
-const retryRequest = async (requestFn: () => Promise<any>, maxRetries = 1, delay = 500): Promise<any> => {
+const retryRequest = async (requestFn: () => Promise<any>, maxRetries = 2, delay = 750): Promise<any> => {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const response = await requestFn();
@@ -43,7 +43,6 @@ api.interceptors.request.use(
       }
     }
     
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error) => {
@@ -52,14 +51,16 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for debugging
+// Response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
-    console.log(`API Response: ${response.status} ${response.config.url}`);
     return response;
   },
   (error) => {
-    console.error('API Response Error:', error.response?.data || error.message);
+    // Only log errors that are not timeouts
+    if (!(error.code === 'ECONNABORTED' || (typeof error.message === 'string' && error.message.includes('timeout')))) {
+      console.error('API Response Error:', error.response?.data || error.message);
+    }
     return Promise.reject(error);
   }
 );
@@ -384,7 +385,7 @@ export const cvesApi = {
   getById: (id: string) => retryRequest(() => api.get(`/cves/${id}`)).then(res => res.data),
   
   // New function to fetch from Shodan CVE API directly
-  getShodanLatest: async (minCvssScore = 8.0, limit = 50): Promise<ShodanCVE[]> => {
+  getShodanLatest: async (minCvssScore = 8.0, limit = 200): Promise<ShodanCVE[]> => {
     // Try multiple proxy approaches in order of reliability
     const proxies = [
       'https://thingproxy.freeboard.io/fetch/',
@@ -393,13 +394,11 @@ export const cvesApi = {
     
     for (const corsProxy of proxies) {
       try {
-        console.log(`Trying proxy: ${corsProxy}`);
-        
         let url: string;
                  if (corsProxy.includes('allorigins')) {
-           url = `${corsProxy}${encodeURIComponent(`https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 150)}`)}`;
+           url = `${corsProxy}${encodeURIComponent(`https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 200)}`)}`;
          } else {
-           url = `${corsProxy}https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 150)}`;
+           url = `${corsProxy}https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 200)}`;
          }
 
         const response = await fetch(url, {
@@ -426,8 +425,6 @@ export const cvesApi = {
           console.warn(`Unexpected response format from proxy ${corsProxy}`);
           continue;
         }
-
-        console.log(`Successfully fetched ${cvesData.length} CVEs from ${corsProxy}`);
 
         // Map to our interface
         const mappedCves: ShodanCVE[] = cvesData.map((cveItem: any) => ({
@@ -470,3 +467,74 @@ export const fetchUsers = usersApi.getAll;
 export const fetchIncidents = incidentsApi.getAll;
 export const fetchThreatActors = threatActorsApi.getAll;
 export const fetchLatestCVEs = cvesApi.getShodanLatest;
+
+// AI Summary function for real-time analysis
+export const generateAISummary = async (incident: Incident, users: User[], threatActors: ThreatActor[]): Promise<string> => {
+  try {
+    // Check if API key is available
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('Gemini API key not found. Please check your .env file.');
+    }
+    
+    // Get assigned user name
+    const assignedUser = users.find(u => u.userId === incident.assignedToUserId);
+    const assignedUserName = assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName}` : 'Unassigned';
+    
+    // Get threat actor names
+    const incidentThreatActors = threatActors.filter(ta => incident.threatActorIds?.includes(ta.threatActorId));
+    const threatActorNames = incidentThreatActors.map(ta => ta.name).join(', ') || 'None identified';
+    
+    // Create the prompt for AI analysis
+    const prompt = `Analyze this cybersecurity incident and provide a concise, business-friendly threat intelligence summary for small and medium enterprises (SMEs).
+
+INCIDENT DETAILS:
+- Title: ${incident.title}
+- Description: ${incident.description}
+- Status: ${incident.status}
+- Priority: ${incident.priority}
+- Type: ${incident.type || 'Not specified'}
+- CVEs: ${incident.cveIds?.join(', ') || 'None'}
+- Threat Actors: ${threatActorNames}
+- Assigned To: ${assignedUserName}
+- Date Created: ${new Date(incident.dateCreated).toLocaleDateString()}
+- Resolution Notes: ${incident.resolutionNotes || 'None'}
+
+Please provide a structured analysis in plain text (no markdown formatting) with these sections:
+
+1. THREAT ASSESSMENT: Brief risk evaluation in simple terms
+2. KEY INDICATORS: Important technical details explained simply
+3. WHAT DOES THIS MEAN FOR ME?: Business impact and implications
+4. IMMEDIATE ACTIONS: What to do right now
+5. WHAT CAN I DO TO PROTECT MYSELF FROM VULNERABILITIES LIKE THIS IN THE FUTURE?: Long-term protection strategies
+
+Keep the response concise (max 400 words) and focus on actionable intelligence for business owners and managers. Use simple, non-technical language where possible.`;
+
+    // Call Google Gemini API
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' + apiKey, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error response:', errorText);
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    console.error('Error generating AI summary:', error);
+    throw new Error('Failed to generate AI summary. Please try again.');
+  }
+};

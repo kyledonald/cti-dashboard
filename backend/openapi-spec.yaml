@@ -572,3 +572,92 @@ paths:
           description: CVE data
         '404':
           description: CVE not found
+  # --- AI Reports API Paths ---
+  /ai-reports:
+    get:
+      summary: Get all AI reports
+      operationId: listAIReports
+      parameters:
+        - name: organizationId
+          in: query
+          required: false
+          type: string
+          description: Optional filter by organization ID
+      responses:
+        '200':
+          description: A list of AI reports
+        '500':
+          description: Internal server error
+
+  /ai-reports/{reportId}:
+    get:
+      summary: Get a specific AI report by ID
+      operationId: getAIReportById
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          type: string
+          description: ID of the AI report to retrieve
+      responses:
+        '200':
+          description: AI report data
+        '404':
+          description: AI report not found
+
+    delete:
+      summary: Delete an AI report
+      operationId: deleteAIReport
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          type: string
+          description: ID of the AI report to delete
+      responses:
+        '200':
+          description: AI report deleted successfully
+        '403':
+          description: Insufficient permissions to delete AI report
+        '404':
+          description: AI report not found
+
+  /ai-reports/incident/{incidentId}:
+    get:
+      summary: Get AI report for a specific incident
+      operationId: getAIReportByIncidentId
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          type: string
+          description: ID of the incident to get AI report for
+      responses:
+        '200':
+          description: AI report data for the incident
+        '404':
+          description: AI report not found for this incident
+
+  /ai-reports/generate/{incidentId}:
+    post:
+      summary: Generate an AI threat report for an incident
+      operationId: generateAIReport
+      parameters:
+        - name: incidentId
+          in: path
+          required: true
+          type: string
+          description: ID of the incident to generate AI report for
+      responses:
+        '201':
+          description: AI report generated successfully
+        '400':
+          description: Invalid input or incident not found
+        '401':
+          description: User not authenticated
+        '403':
+          description: Insufficient permissions to generate AI report
+        '409':
+          description: AI report already exists for this incident
+        '500':
+          description: Failed to generate AI report

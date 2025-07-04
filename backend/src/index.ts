@@ -1,6 +1,10 @@
 import express from 'express';
 import { Firestore, FieldValue } from '@google-cloud/firestore';
 import * as functions from 'firebase-functions';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 import { organizationRouter } from './routes/organization.routes';
 import { userRouter } from './routes/user.routes';
 import { threatActorRouter } from './routes/threat_actor.routes';

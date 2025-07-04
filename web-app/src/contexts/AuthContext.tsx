@@ -158,20 +158,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Prefetch critical endpoints to warm them up
-    const prefetchEndpoints = async () => {
-      try {
-        Promise.allSettled([
-          fetch(`${import.meta.env.DEV ? '/api' : 'https://cti-dashboard-gateway-688kl12y.nw.gateway.dev'}/organizations`),
-          fetch(`${import.meta.env.DEV ? '/api' : 'https://cti-dashboard-gateway-688kl12y.nw.gateway.dev'}/users`),
-          fetch(`${import.meta.env.DEV ? '/api' : 'https://cti-dashboard-gateway-688kl12y.nw.gateway.dev'}/incidents`)
-        ]);
-        console.log('Prefetching endpoints to warm up backend...');
-      } catch (error) {
-        // Ignore prefetch errors
-      }
-    };
+    // const prefetchEndpoints = async () => {
+    //   try {
+    //     Promise.allSettled([
+    //       fetch(`${import.meta.env.DEV ? '/api' : 'https://cti-dashboard-gateway-688kl12y.nw.gateway.dev'}/organizations`),
+    //       fetch(`${import.meta.env.DEV ? '/api' : 'https://cti-dashboard-gateway-688kl12y.nw.gateway.dev'}/users`),
+    //       fetch(`${import.meta.env.DEV ? '/api' : 'https://cti-dashboard-gateway-688kl12y.nw.gateway.dev'}/incidents`)
+    //     ]);
+    //     console.log('Prefetching endpoints to warm up backend...');
+    //   } catch (error) {
+    //     // Ignore prefetch errors
+    //   }
+    // };
 
-    prefetchEndpoints();
+    // prefetchEndpoints();
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setFirebaseUser(firebaseUser);
@@ -179,7 +179,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (firebaseUser) {
         try {
           const user = await createOrUpdateUser(firebaseUser, pendingUserData || undefined);
-          console.log('Successfully got user from backend:', user);
           setUser(user);
           // Clear pending data after successful creation
           setPendingUserData(null);

@@ -78,11 +78,12 @@ const MySoftwarePage: React.FC = () => {
     
     setLoading(true);
     try {
-      const data = await cvesApi.getShodanLatest(7.0, 50); // Get more CVEs to find matches
+      const data = await cvesApi.getShodanLatest(8.0, 200); // Get more CVEs to find matches
       
       const relevant = data.filter(cve => {
         const summary = cve.summary.toLowerCase();
-        return softwareList.some(software => {
+        const score = cve.cvss3?.score || cve.cvss || 0;
+        return score >= 8.0 && softwareList.some(software => {
           const softwareLower = software.toLowerCase();
           return summary.includes(softwareLower);
         });
