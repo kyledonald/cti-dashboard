@@ -14,16 +14,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// Connect to emulator if in development (disabled for now - using production auth)
-// if (import.meta.env.DEV && !auth.emulatorConfig) {
-//   try {
-//     connectAuthEmulator(auth, 'http://localhost:9099');
-//   } catch (error) {
-//     // Emulator already connected or not available
-//     console.log('Auth emulator connection skipped:', error);
-//   }
-// }
-
 export const googleProvider = new GoogleAuthProvider();
 
 // Configure Google provider to get additional user info

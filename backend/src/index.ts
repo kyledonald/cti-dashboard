@@ -57,37 +57,6 @@ app.get('/server-time', (req, res) => {
   res.status(200).json({ currentTime: new Date().toISOString() });
 });
 
-app.get('/firestore-test', async (req, res) => {
-  try {
-    const testCollectionRef = db.collection('testCollection');
-    const testDocRef = testCollectionRef.doc('testDocument');
-
-    const doc = await testDocRef.get();
-
-    if (!doc.exists) {
-      await testDocRef.set({
-        message: 'Hello from Firestore! This is a test document.',
-        createdAt: FieldValue.serverTimestamp(),
-      });
-      console.log('Test document created.');
-      return res.status(201).json({
-        message: 'Test document created and fetched!',
-        data: (await testDocRef.get()).data(),
-      });
-    } else {
-      console.log('Test document fetched.');
-      return res
-        .status(200)
-        .json({ message: 'Test document fetched!', data: doc.data() });
-    }
-  } catch (error: any) {
-    console.error('Error accessing Firestore:', error);
-    res
-      .status(500)
-      .json({ error: 'Failed to access Firestore', details: error.message });
-  }
-});
-
 app.use('/organizations', organizationRouter(db));
 
 app.use('/users', userRouter(db));

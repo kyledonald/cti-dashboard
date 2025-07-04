@@ -227,7 +227,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       // User will be handled by onAuthStateChanged
-      console.log('Google sign-in successful:', result.user.displayName);
     } catch (error) {
       console.error('Error signing in with Google:', error);
       const humanError = new Error(getHumanReadableError(error));
@@ -239,7 +238,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       // User will be handled by onAuthStateChanged
-      console.log('Email sign-in successful:', result.user.email);
     } catch (error) {
       console.error('Error signing in with email:', error);
       const humanError = new Error(getHumanReadableError(error));
@@ -260,7 +258,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
       
       // User creation in backend will be handled by onAuthStateChanged
-      console.log('Email sign-up successful:', result.user.email);
     } catch (error) {
       console.error('Error signing up with email:', error);
       // Clear pending data on error
