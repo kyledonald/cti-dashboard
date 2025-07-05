@@ -332,6 +332,13 @@ const CVEsPage: React.FC = () => {
     return 'low';
   };
 
+  const getSeverityBorderColor = (score: number): string => {
+    if (score >= 9.0) return 'border-l-red-500';
+    if (score >= 7.0) return 'border-l-orange-500';
+    if (score >= 4.0) return 'border-l-yellow-500';
+    return 'border-l-green-500';
+  };
+
   const formatDate = (dateString: string): string => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -548,7 +555,7 @@ const CVEsPage: React.FC = () => {
                 const severityLabel = getSeverityLabel(cvssScore);
 
                 return (
-                  <Card key={cve.cve} className="p-6 hover:shadow-md transition-shadow border-l-4 border-l-red-500">
+                  <Card key={cve.cve} className={`p-6 hover:shadow-md transition-shadow border-l-4 ${getSeverityBorderColor(cvssScore)}`}>
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

@@ -556,6 +556,16 @@ const IncidentsPage: React.FC = () => {
     }
   };
 
+  // Handle "Assign to Me" in modals
+  const handleAssignToMeInModal = () => {
+    if (!user) return;
+    
+    setFormData({
+      ...formData,
+      assignedToUserId: user.userId
+    });
+  };
+
   // Modal handlers
   const openCreateModal = () => {
     resetForm();
@@ -868,18 +878,31 @@ const IncidentsPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Assign To
               </label>
-              <select
-                value={formData.assignedToUserId}
-                onChange={(e) => setFormData({...formData, assignedToUserId: e.target.value})}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">Unassigned</option>
-                {users.filter(user => user.role !== 'viewer').map((user) => (
-                  <option key={user.userId} value={user.userId}>
-                    {user.firstName} {user.lastName} ({user.role})
-                  </option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  value={formData.assignedToUserId}
+                  onChange={(e) => setFormData({...formData, assignedToUserId: e.target.value})}
+                  className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Unassigned</option>
+                  {users.filter(user => user.role !== 'viewer').map((user) => (
+                    <option key={user.userId} value={user.userId}>
+                      {user.firstName} {user.lastName} ({user.role})
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAssignToMeInModal}
+                  className="h-10 px-3 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:border-blue-600"
+                  title="Assign to me"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </Button>
+              </div>
             </div>
 
             <div>
@@ -1453,18 +1476,31 @@ const IncidentsPage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Assign To
                 </label>
-                <select
-                  value={formData.assignedToUserId}
-                  onChange={(e) => setFormData({...formData, assignedToUserId: e.target.value})}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">Unassigned</option>
-                  {users.filter(user => user.role !== 'viewer').map((user) => (
-                    <option key={user.userId} value={user.userId}>
-                      {user.firstName} {user.lastName} ({user.role})
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    value={formData.assignedToUserId}
+                    onChange={(e) => setFormData({...formData, assignedToUserId: e.target.value})}
+                    className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="">Unassigned</option>
+                    {users.filter(user => user.role !== 'viewer').map((user) => (
+                      <option key={user.userId} value={user.userId}>
+                        {user.firstName} {user.lastName} ({user.role})
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAssignToMeInModal}
+                    className="h-10 px-3 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:border-blue-600"
+                    title="Assign to me"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </Button>
+                </div>
               </div>
             </div>
 
