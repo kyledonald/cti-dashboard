@@ -21,15 +21,8 @@ export class UserService {
     let organizationId = userData.organizationId || '';
     let role = userData.role || 'unassigned';
     
-    // Special case: If this is the very first user in the system, make them admin
-    if (!userData.role && !userData.organizationId) {
-      const userCount = await this.getUserCount();
-      if (userCount === 0) {
-        role = 'admin';
-        // First admin user gets assigned to default org for management purposes
-        organizationId = await this.getOrCreateDefaultOrganization();
-      }
-    }
+    // All new users start unassigned, regardless of whether they're first or not
+    // They will get appropriate roles when they create or join an organization
 
     const newUser: User = {
       userId: userId,
@@ -163,35 +156,5 @@ export class UserService {
     return snapshot.size;
   }
 
-  // Helper method to get or create default organization
-  async getOrCreateDefaultOrganization(): Promise<string> {
-    const DEFAULT_ORG_NAME = 'Default Organization';
-    
-    // Try to find existing default organization
-    const snapshot = await this.organizationsCollection
-      .where('name', '==', DEFAULT_ORG_NAME)
-      .limit(1)
-      .get();
-    
-    if (!snapshot.empty) {
-      return snapshot.docs[0].id;
-    }
 
-    // Create default organization if it doesn't exist
-    const orgRef = this.organizationsCollection.doc();
-    const defaultOrg: Organization = {
-      organizationId: orgRef.id,
-      name: DEFAULT_ORG_NAME,
-      description: 'Default organization for new users',
-      status: 'active',
-      nationality: 'Mixed',
-      industry: 'General',
-      usedSoftware: [],
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    await orgRef.set(defaultOrg);
-    return orgRef.id;
-  }
 }

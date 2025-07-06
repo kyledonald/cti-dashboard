@@ -87,16 +87,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Get existing user by Firebase UID
       const existingUsers = await usersApi.getAll();
-      
       // Ensure existingUsers is an array before calling find
       if (!Array.isArray(existingUsers)) {
         console.error('usersApi.getAll() did not return an array:', existingUsers);
         throw new Error('Invalid response format from users API');
       }
-      
       const existingUser = existingUsers.find(u => u.googleId === firebaseUser.uid);
-      
+      // If user exists, but we have pendingUserData (from signup), update their name if needed
       if (existingUser) {
+        // If pendingUserData is present and names differ, update them
+        if (pendingUserData && (
+          (pendingUserData.firstName && existingUser.firstName !== pendingUserData.firstName) ||
+          (pendingUserData.lastName && existingUser.lastName !== pendingUserData.lastName)
+        )) {
+          try {
+            const updatedUser = await usersApi.update(existingUser.userId, {
+              firstName: pendingUserData.firstName,
+              lastName: pendingUserData.lastName,
+            });
+            return updatedUser;
+          } catch (profileUpdateError) {
+            console.error('Profile update failed, returning existing user:', profileUpdateError);
+            return existingUser;
+          }
+        }
         // Update profile picture if it changed
         if (firebaseUser.photoURL && firebaseUser.photoURL !== existingUser.profilePictureUrl) {
           try {
@@ -109,7 +123,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             return existingUser;
           }
         }
-        
         return existingUser;
       } else {
         // Create new user
@@ -118,6 +131,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (overrideNames) {
           firstName = overrideNames.firstName;
           lastName = overrideNames.lastName;
+        } else if (pendingUserData) {
+          firstName = pendingUserData.firstName;
+          lastName = pendingUserData.lastName;
         } else {
           // Parse from displayName (for Google sign-in) or fallback to email prefix
           const displayName = firebaseUser.displayName || '';
@@ -125,7 +141,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           firstName = nameParts[0] || firebaseUser.email!.split('@')[0] || 'User';
           lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
         }
-        
         const userData: CreateUserDTO = {
           googleId: firebaseUser.uid,
           email: firebaseUser.email!,
@@ -133,7 +148,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           lastName,
           ...(firebaseUser.photoURL && { profilePictureUrl: firebaseUser.photoURL }),
         };
-
         const newUser = await usersApi.create(userData);
         return newUser;
       }

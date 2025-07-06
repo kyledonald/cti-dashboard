@@ -37,10 +37,6 @@ export class ThreatActorService {
       malwareFamilies: actorData.malwareFamilies ?? [],
       isActive: actorData.isActive ?? true,
       organizationId: actorData.organizationId,
-      // Legacy fields for backwards compatibility
-      targetIndustries: actorData.targetIndustries ?? [],
-      associatedCves: actorData.associatedCves ?? [],
-      countryOfOrigin: actorData.countryOfOrigin ?? null,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     };
@@ -105,13 +101,6 @@ export class ThreatActorService {
       dataToUpdate.malwareFamilies = updateData.malwareFamilies;
     if (updateData.isActive !== undefined)
       dataToUpdate.isActive = updateData.isActive;
-    // Legacy fields for backwards compatibility
-    if (updateData.targetIndustries !== undefined)
-      dataToUpdate.targetIndustries = updateData.targetIndustries;
-    if (updateData.associatedCves !== undefined)
-      dataToUpdate.associatedCves = updateData.associatedCves;
-    if (updateData.countryOfOrigin !== undefined)
-      dataToUpdate.countryOfOrigin = updateData.countryOfOrigin;
 
     await actorRef.update(dataToUpdate);
     return true;

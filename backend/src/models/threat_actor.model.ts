@@ -17,10 +17,6 @@ export interface ThreatActor {
   malwareFamilies?: string[];
   isActive?: boolean;
   organizationId?: string;
-  // Legacy fields for backwards compatibility
-  targetIndustries?: string[];
-  associatedCves?: string[];
-  countryOfOrigin?: string | null;
   createdAt: FieldValue | FirebaseFirestore.Timestamp;
   updatedAt: FieldValue | FirebaseFirestore.Timestamp;
 }
@@ -41,10 +37,6 @@ export interface CreateThreatActorDTO {
   malwareFamilies?: string[];
   isActive?: boolean;
   organizationId: string;
-  // Legacy fields for backwards compatibility
-  targetIndustries?: string[];
-  associatedCves?: string[];
-  countryOfOrigin?: string | null;
 }
 
 export interface UpdateThreatActorDTO {
@@ -62,8 +54,4 @@ export interface UpdateThreatActorDTO {
   tools?: string[];
   malwareFamilies?: string[];
   isActive?: boolean;
-  // Legacy fields for backwards compatibility
-  targetIndustries?: string[];
-  associatedCves?: string[];
-  countryOfOrigin?: string | null;
 }

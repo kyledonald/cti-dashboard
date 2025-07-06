@@ -391,7 +391,7 @@ const UserSettingsPage: React.FC = () => {
                     <li>• All your data will be permanently removed</li>
                     <li>• You will lose access to all organizations</li>
                     {user.role === 'admin' && user.organizationId && (
-                      <li>• If you are the only admin, you must promote another user to admin first</li>
+                      <li>• If you are the only admin in your organization, you must promote another user, or delete the organization before deleting your account</li>
                     )}
                     <li>• This action cannot be undone</li>
                   </ul>
