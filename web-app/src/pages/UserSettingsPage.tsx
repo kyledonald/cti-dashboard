@@ -56,6 +56,31 @@ const UserSettingsPage: React.FC = () => {
     }
   };
 
+  // Password complexity validation
+  const validatePasswordComplexity = (password: string): { isValid: boolean; message: string } => {
+    if (password.length < 8) {
+      return { isValid: false, message: 'Password must be at least 8 characters long.' };
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one uppercase letter.' };
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one lowercase letter.' };
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one number.' };
+    }
+    
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?).' };
+    }
+    
+    return { isValid: true, message: '' };
+  };
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseUser || !firebaseUser.email) return;
@@ -65,8 +90,10 @@ const UserSettingsPage: React.FC = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
-      showMessage('error', 'Password must be at least 6 characters');
+    // Password complexity validation
+    const passwordValidation = validatePasswordComplexity(newPassword);
+    if (!passwordValidation.isValid) {
+      showMessage('error', passwordValidation.message);
       return;
     }
 
@@ -321,8 +348,29 @@ const UserSettingsPage: React.FC = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 required
-                minLength={6}
+                minLength={8}
               />
+            </div>
+            
+            <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+              <p className="font-medium">Password requirements:</p>
+              <ul className="space-y-1 ml-4">
+                <li className={`${newPassword.length >= 8 ? 'text-green-600 dark:text-green-400' : ''}`}>
+                  • At least 8 characters
+                </li>
+                <li className={`${/[A-Z]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}`}>
+                  • One uppercase letter
+                </li>
+                <li className={`${/[a-z]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}`}>
+                  • One lowercase letter
+                </li>
+                <li className={`${/[0-9]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}`}>
+                  • One number
+                </li>
+                <li className={`${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}`}>
+                  • One special character
+                </li>
+              </ul>
             </div>
             <div className="flex space-x-3">
               <button

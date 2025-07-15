@@ -213,7 +213,7 @@ const LoginPage: React.FC = () => {
                 
                 <Input
                   type="password"
-                  placeholder={isSignUp ? "Password (8+ chars, uppercase, lowercase, number, special char)" : "Password"}
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

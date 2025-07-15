@@ -14,6 +14,7 @@ export class UserService {
   }
 
   async createUser(userData: CreateUserDTO): Promise<User> {
+    console.log('Creating user with data:', userData);
     const userRef = this.collection.doc();
     const userId = userRef.id;
 
@@ -28,7 +29,7 @@ export class UserService {
       userId: userId,
       googleId: userData.googleId,
       email: userData.email,
-      firstName: userData.firstName || userData.email.split('@')[0] || 'User',
+      firstName: userData.firstName || 'User',
       lastName: userData.lastName || '',
       profilePictureUrl: userData.profilePictureUrl || '',
       role: role,
@@ -39,6 +40,7 @@ export class UserService {
       updatedAt: FieldValue.serverTimestamp(),
     };
 
+    console.log('Created user:', newUser);
     await userRef.set(newUser);
     return newUser;
   }
@@ -93,6 +95,7 @@ export class UserService {
     userId: string,
     updateData: UpdateUserDTO,
   ): Promise<User | null> {
+    console.log('Updating user:', userId, 'with data:', updateData);
     const userRef = this.collection.doc(userId);
     const doc = await userRef.get();
 
@@ -113,11 +116,14 @@ export class UserService {
     if (updateData.status !== undefined)
       dataToUpdate.status = updateData.status;
 
+    console.log('Updating user with dataToUpdate:', dataToUpdate);
     await userRef.update(dataToUpdate);
     
     // Fetch and return the updated user
     const updatedDoc = await userRef.get();
-    return updatedDoc.data() as User;
+    const updatedUser = updatedDoc.data() as User;
+    console.log('Updated user result:', updatedUser);
+    return updatedUser;
   }
 
   async updateLastLogin(userId: string): Promise<User | null> {

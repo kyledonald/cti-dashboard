@@ -93,6 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('Invalid response format from users API');
       }
       const existingUser = existingUsers.find(u => u.googleId === firebaseUser.uid);
+      
       // If user exists, but we have pendingUserData (from signup), update their name if needed
       if (existingUser) {
         // If pendingUserData is present and names differ, update them
@@ -101,6 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           (pendingUserData.lastName && existingUser.lastName !== pendingUserData.lastName)
         )) {
           try {
+            console.log('Updating user names from pendingUserData:', pendingUserData);
             const updatedUser = await usersApi.update(existingUser.userId, {
               firstName: pendingUserData.firstName,
               lastName: pendingUserData.lastName,
@@ -141,6 +143,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           firstName = nameParts[0] || firebaseUser.email!.split('@')[0] || 'User';
           lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
         }
+        
+        console.log('Creating new user with names:', { firstName, lastName, pendingUserData, overrideNames });
+        
         const userData: CreateUserDTO = {
           googleId: firebaseUser.uid,
           email: firebaseUser.email!,
@@ -190,7 +195,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (firebaseUser) {
         try {
+          console.log('Auth state changed - Firebase user:', firebaseUser.email, 'Pending data:', pendingUserData);
           const user = await createOrUpdateUser(firebaseUser, pendingUserData || undefined);
+          console.log('User created/updated:', user);
           setUser(user);
           // Clear pending data after successful creation
           setPendingUserData(null);
@@ -259,6 +266,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
+      console.log('Signing up with email - Setting pending data:', { firstName, lastName });
       // Store the names for use in onAuthStateChanged
       setPendingUserData({ firstName, lastName });
       
@@ -269,6 +277,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         displayName: `${firstName} ${lastName}`
       });
       
+      console.log('Firebase user created, display name updated');
       // User creation in backend will be handled by onAuthStateChanged
     } catch (error) {
       console.error('Error signing up with email:', error);

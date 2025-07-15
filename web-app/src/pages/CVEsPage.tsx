@@ -27,13 +27,13 @@ const CVEsPage: React.FC = () => {
   const itemsPerPage = 5;
   const cveContentRef = useRef<HTMLDivElement>(null);
 
-  // State for NAR with incident closure
+        // State for CVE dismissal with incident closure
   const [showCloseIncidentConfirm, setShowCloseIncidentConfirm] = useState(false);
   const [cveToClose, setCveToClose] = useState('');
   const [incidentToClose, setIncidentToClose] = useState<Incident | null>(null);
   const [closingIncident, setClosingIncident] = useState(false);
 
-  const [refreshCooldown, setRefreshCooldown] = useState(0);
+
 
   const fetchCVEs = useCallback(async () => {
     try {
@@ -131,7 +131,7 @@ const CVEsPage: React.FC = () => {
     );
     
     if (existingIncident) {
-      // Show confirmation dialog asking if they want to close the associated incident
+      // Show confirmation dialog asking if they want to close the associated incident when dismissing the CVE
       setShowCloseIncidentConfirm(true);
       setCveToClose(cveId);
       setIncidentToClose(existingIncident);
@@ -309,13 +309,7 @@ const CVEsPage: React.FC = () => {
     }
   }, [fetchCVEs, fetchIncidents, user?.organizationId]);
 
-  // Cooldown timer effect
-  useEffect(() => {
-    if (refreshCooldown > 0) {
-      const timer = setTimeout(() => setRefreshCooldown(refreshCooldown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [refreshCooldown]);
+
 
 
   const getSeverityLabel = (score: number): string => {
@@ -383,37 +377,7 @@ const CVEsPage: React.FC = () => {
             </p>
           )}
         </div>
-        <Button
-          onClick={() => {
-            setLoading(true);
-            fetchCVEs();
-            fetchIncidents();
-            setRefreshCooldown(60);
-          }}
-          disabled={loading || refreshCooldown > 0}
-          className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
-        >
-          {loading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Refreshing...
-            </>
-          ) : refreshCooldown > 0 ? (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Cooldown ({refreshCooldown}s)
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Refresh CVEs
-            </>
-          )}
-        </Button>
+
         <div className="flex gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <label htmlFor="cvss-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -718,7 +682,7 @@ const CVEsPage: React.FC = () => {
         </div>
       ) : null}
 
-      {/* NAR with Incident Closure Confirmation Dialog */}
+      {/* CVE Dismissal with Incident Closure Confirmation Dialog */}
       {showCloseIncidentConfirm && incidentToClose && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
