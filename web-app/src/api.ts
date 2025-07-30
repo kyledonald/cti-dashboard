@@ -14,6 +14,15 @@ const api = axios.create({
   },
 });
 
+// Special API instance for AI summary with longer timeout
+const aiApi = axios.create({
+  baseURL: API_BASE,
+  timeout: 60000, // 60 seconds timeout for AI generation
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 // Retry logic for cold starts
 const retryRequest = async (requestFn: () => Promise<any>, maxRetries = 2, delay = 750): Promise<any> => {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -51,6 +60,27 @@ api.interceptors.request.use(
   }
 );
 
+// Same interceptor for AI API
+aiApi.interceptors.request.use(
+  async (config) => {
+    // Add auth token if user is logged in
+    if (auth.currentUser) {
+      try {
+        const token = await getIdToken(auth.currentUser);
+        config.headers.Authorization = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Error getting auth token:', error);
+      }
+    }
+    
+    return config;
+  },
+  (error) => {
+    console.error('AI API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
@@ -60,6 +90,20 @@ api.interceptors.response.use(
     // Only log errors that are not timeouts
     if (!(error.code === 'ECONNABORTED' || (typeof error.message === 'string' && error.message.includes('timeout')))) {
       console.error('API Response Error:', error.response?.data || error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Same interceptor for AI API
+aiApi.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // Only log errors that are not timeouts
+    if (!(error.code === 'ECONNABORTED' || (typeof error.message === 'string' && error.message.includes('timeout')))) {
+      console.error('AI API Response Error:', error.response?.data || error.message);
     }
     return Promise.reject(error);
   }
@@ -254,29 +298,7 @@ export interface ShodanCVE {
   extractedVendors?: string[];
 }
 
-// Helper function to extract vendor names from CVE summary
-const extractVendorsFromSummary = (summary: string): string[] => {
-  const vendors: string[] = [];
-  const commonVendors = [
-    'Microsoft', 'Apple', 'Google', 'Adobe', 'Oracle', 'IBM', 'SAP', 'Cisco', 'VMware',
-    'Dell', 'HP', 'Intel', 'AMD', 'NVIDIA', 'Qualcomm', 'Samsung', 'LG', 'Sony',
-    'Amazon', 'Facebook', 'Meta', 'Twitter', 'LinkedIn', 'Zoom', 'Slack', 'Dropbox',
-    'WordPress', 'Joomla', 'Drupal', 'Magento', 'Shopify', 'WooCommerce',
-    'Apache', 'Nginx', 'IIS', 'Tomcat', 'Jenkins', 'Docker', 'Kubernetes',
-    'Chrome', 'Firefox', 'Safari', 'Edge', 'Internet Explorer',
-    'Windows', 'Linux', 'macOS', 'iOS', 'Android', 'Ubuntu', 'CentOS', 'RedHat',
-    'Tenda', 'D-Link', 'Netgear', 'Linksys', 'TP-Link', 'ASUS', 'Huawei'
-  ];
-  
-  commonVendors.forEach(vendor => {
-    const regex = new RegExp(`\\b${vendor}\\b`, 'gi');
-    if (regex.test(summary)) {
-      vendors.push(vendor);
-    }
-  });
-  
-  return [...new Set(vendors)]; // Remove duplicates
-};
+
 
 // Helper function to extract data from API responses
 const extractData = <T>(response: any, key: string): T[] => {
@@ -384,81 +406,16 @@ export const cvesApi = {
   getAll: () => retryRequest(() => api.get('/cves')).then(res => res.data),
   getById: (id: string) => retryRequest(() => api.get(`/cves/${id}`)).then(res => res.data),
   
-  // New function to fetch from Shodan CVE API directly
+  // Get latest CVEs from backend (no CORS issues)
   getShodanLatest: async (minCvssScore = 8.0, limit = 200): Promise<ShodanCVE[]> => {
-    // Try multiple proxy approaches in order of reliability
-    const proxies = [
-      'https://thingproxy.freeboard.io/fetch/',
-      'https://api.allorigins.win/raw?url='
-    ];
-    
-    for (const corsProxy of proxies) {
-      try {
-        let url: string;
-                 if (corsProxy.includes('allorigins')) {
-           url = `${corsProxy}${encodeURIComponent(`https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 200)}`)}`;
-         } else {
-           url = `${corsProxy}https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 200)}`;
-         }
-
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          console.warn(`Proxy ${corsProxy} failed with status: ${response.status}`);
-          continue;
-        }
-
-        const data = await response.json();
-        let cvesData: any[];
-
-        // Handle Shodan API response format
-        if (data.cves && Array.isArray(data.cves)) {
-          cvesData = data.cves;
-        } else if (Array.isArray(data)) {
-          cvesData = data;
-        } else {
-          console.warn(`Unexpected response format from proxy ${corsProxy}`);
-          continue;
-        }
-
-        // Map to our interface
-        const mappedCves: ShodanCVE[] = cvesData.map((cveItem: any) => ({
-          cve: cveItem.cve_id || cveItem.cve,
-          summary: cveItem.summary || '',
-          cvss: cveItem.cvss || undefined,
-          cvss3: cveItem.cvss_v3 ? {
-            score: cveItem.cvss_v3,
-            vector: ''
-          } : undefined,
-          kev: cveItem.kev || false,
-          published: cveItem.published_time || new Date().toISOString(),
-          modified: cveItem.modified_time || cveItem.published_time || new Date().toISOString(),
-          references: cveItem.references || [],
-          extractedVendors: extractVendorsFromSummary(cveItem.summary || '')
-        }));
-
-        // Filter by CVSS score
-        const filteredCves = mappedCves.filter(cve => {
-          const score = cve.cvss3?.score || cve.cvss || 0;
-          return score >= minCvssScore;
-        });
-
-        return filteredCves.slice(0, limit);
-
-      } catch (error) {
-        console.warn(`Proxy ${corsProxy} failed:`, error);
-        continue;
-      }
+    try {
+      const response = await api.get(`/cves/shodan/latest?limit=${limit}&minCvssScore=${minCvssScore}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching CVE data from backend:', error);
+      throw new Error('Failed to fetch CVE data from server');
     }
-    
-         // If all proxies fail, throw error
-     throw new Error('All CORS proxies failed. Unable to fetch CVE data.');
-   }
+  }
 };
 
 // Legacy functions for backward compatibility
@@ -468,73 +425,44 @@ export const fetchIncidents = incidentsApi.getAll;
 export const fetchThreatActors = threatActorsApi.getAll;
 export const fetchLatestCVEs = cvesApi.getShodanLatest;
 
-// AI Summary function for real-time analysis
+// AI Summary function with exponential backoff retry for 503 errors
 export const generateAISummary = async (incident: Incident, users: User[], threatActors: ThreatActor[]): Promise<string> => {
-  try {
-    // Check if API key is available
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('Gemini API key not found. Please check your .env file.');
+  const maxRetries = 5;
+  const baseDelay = 1000; // 1 second base delay
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🤖 AI Summary attempt ${attempt + 1}/${maxRetries + 1}`);
+      
+      const response = await aiApi.post('/cves/ai-summary', {
+        incident,
+        users,
+        threatActors
+      });
+      
+      console.log('✅ AI Summary generated successfully');
+      return response.data.summary;
+      
+    } catch (error: any) {
+      console.error(`❌ AI Summary attempt ${attempt + 1} failed:`, error.response?.status, error.message);
+      
+      // If it's a 503 error and we haven't exhausted retries, wait and retry
+      if (error.response?.status === 503 && attempt < maxRetries) {
+        const delay = baseDelay * Math.pow(2, attempt); // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+        console.log(`⏳ Gemini API overloaded (503). Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      // For other errors or final attempt, throw the error
+      if (error.response?.status === 503) {
+        throw new Error('AI service temporarily unavailable. Please try again later.');
+      } else {
+        throw new Error('Failed to generate AI summary. Please try again.');
+      }
     }
-    
-    // Get assigned user name
-    const assignedUser = users.find(u => u.userId === incident.assignedToUserId);
-    const assignedUserName = assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName}` : 'Unassigned';
-    
-    // Get threat actor names
-    const incidentThreatActors = threatActors.filter(ta => incident.threatActorIds?.includes(ta.threatActorId));
-    const threatActorNames = incidentThreatActors.map(ta => ta.name).join(', ') || 'None identified';
-    
-    // Create the prompt for AI analysis
-    const prompt = `Analyze this cybersecurity incident and provide a concise, business-friendly threat intelligence summary for small and medium enterprises (SMEs).
-
-INCIDENT DETAILS:
-- Title: ${incident.title}
-- Description: ${incident.description}
-- Status: ${incident.status}
-- Priority: ${incident.priority}
-- Type: ${incident.type || 'Not specified'}
-- CVEs: ${incident.cveIds?.join(', ') || 'None'}
-- Threat Actors: ${threatActorNames}
-- Assigned To: ${assignedUserName}
-- Date Created: ${new Date(incident.dateCreated).toLocaleDateString()}
-- Resolution Notes: ${incident.resolutionNotes || 'None'}
-
-Please provide a structured analysis in plain text (no markdown formatting) with these sections:
-
-1. THREAT ASSESSMENT: Brief risk evaluation in simple terms
-2. KEY INDICATORS: Important technical details explained simply
-3. WHAT DOES THIS MEAN FOR ME?: Business impact and implications
-4. IMMEDIATE ACTIONS: What to do right now
-5. WHAT CAN I DO TO PROTECT MYSELF FROM VULNERABILITIES LIKE THIS IN THE FUTURE?: Long-term protection strategies
-
-Keep the response concise (max 400 words) and focus on actionable intelligence for business owners and managers. Use simple, non-technical language where possible.`;
-
-    // Call Google Gemini API
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' + apiKey, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }]
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API error response:', errorText);
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-  } catch (error) {
-    console.error('Error generating AI summary:', error);
-    throw new Error('Failed to generate AI summary. Please try again.');
   }
+  
+  // This should never be reached, but just in case
+  throw new Error('Failed to generate AI summary after multiple attempts.');
 };

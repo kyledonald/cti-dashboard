@@ -2,6 +2,7 @@ import express from 'express';
 import { Firestore, FieldValue } from '@google-cloud/firestore';
 import * as functions from 'firebase-functions';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 // Load environment variables
 dotenv.config();
@@ -38,6 +39,15 @@ if (process.env.FUNCTIONS_EMULATOR) {
 export const db = new Firestore(firestoreConfig);
 
 const app = express();
+
+// Enable CORS for all origins
+app.use(cors({
+  origin: true, // Allow all origins in production
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Public health check endpoints (no authentication required)
@@ -61,8 +71,11 @@ app.get('/server-time', (req, res) => {
   res.status(200).json({ currentTime: new Date().toISOString() });
 });
 
+// Public CVE routes (no authentication required)
+// These are utility endpoints that don't expose sensitive data
+app.use('/cves', cveRouter(db));
 
-// Apply authentication middleware to all routes except health checks
+// Apply authentication middleware to all other routes
 app.use(authenticateToken(db));
 
 // Protected routes (authentication required)
@@ -73,7 +86,5 @@ app.use('/users', userRouter(db));
 app.use('/threat-actors', threatActorRouter(db));
 
 app.use('/incidents', incidentRouter(db));
-
-app.use('/cves', cveRouter());
 
 module.exports.api = functions.https.onRequest(app);
