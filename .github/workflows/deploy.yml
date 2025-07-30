@@ -125,9 +125,8 @@ jobs:
 
       - name: Deploy Frontend to Firebase Hosting
         run: |
-          cd web-app
           npm install -g firebase-tools
           echo "Firebase project configuration:"
-          cat ../.firebaserc
+          cat .firebaserc
           echo "Deploying to Firebase..."
           firebase deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}" 
