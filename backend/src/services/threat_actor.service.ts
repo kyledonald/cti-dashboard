@@ -32,9 +32,6 @@ export class ThreatActorService {
       sophistication: actorData.sophistication ?? 'Unknown',
       resourceLevel: actorData.resourceLevel ?? 'Unknown',
       primaryTargets: actorData.primaryTargets ?? [],
-      attackPatterns: actorData.attackPatterns ?? [],
-      tools: actorData.tools ?? [],
-      malwareFamilies: actorData.malwareFamilies ?? [],
       isActive: actorData.isActive ?? true,
       organizationId: actorData.organizationId,
       createdAt: FieldValue.serverTimestamp(),
@@ -93,12 +90,6 @@ export class ThreatActorService {
       dataToUpdate.resourceLevel = updateData.resourceLevel;
     if (updateData.primaryTargets !== undefined)
       dataToUpdate.primaryTargets = updateData.primaryTargets;
-    if (updateData.attackPatterns !== undefined)
-      dataToUpdate.attackPatterns = updateData.attackPatterns;
-    if (updateData.tools !== undefined)
-      dataToUpdate.tools = updateData.tools;
-    if (updateData.malwareFamilies !== undefined)
-      dataToUpdate.malwareFamilies = updateData.malwareFamilies;
     if (updateData.isActive !== undefined)
       dataToUpdate.isActive = updateData.isActive;
 

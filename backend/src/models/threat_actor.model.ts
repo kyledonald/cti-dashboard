@@ -12,9 +12,6 @@ export interface ThreatActor {
   sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
   resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
   primaryTargets?: string[];
-  attackPatterns?: string[];
-  tools?: string[];
-  malwareFamilies?: string[];
   isActive?: boolean;
   organizationId?: string;
   createdAt: FieldValue | FirebaseFirestore.Timestamp;
@@ -32,9 +29,6 @@ export interface CreateThreatActorDTO {
   sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
   resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
   primaryTargets?: string[];
-  attackPatterns?: string[];
-  tools?: string[];
-  malwareFamilies?: string[];
   isActive?: boolean;
   organizationId: string;
 }
@@ -50,8 +44,5 @@ export interface UpdateThreatActorDTO {
   sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
   resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
   primaryTargets?: string[];
-  attackPatterns?: string[];
-  tools?: string[];
-  malwareFamilies?: string[];
   isActive?: boolean;
 }

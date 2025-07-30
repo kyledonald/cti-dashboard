@@ -55,9 +55,6 @@ const ThreatActorsPage: React.FC = () => {
     sophistication: 'Unknown' as 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert',
     resourceLevel: 'Unknown' as 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government',
     primaryTargets: [] as string[],
-    attackPatterns: [] as string[],
-    tools: [] as string[],
-    malwareFamilies: [] as string[],
     isActive: true
   });
 
@@ -212,9 +209,6 @@ const ThreatActorsPage: React.FC = () => {
       sophistication: 'Unknown',
       resourceLevel: 'Unknown',
       primaryTargets: [],
-      attackPatterns: [],
-      tools: [],
-      malwareFamilies: [],
       isActive: true
     });
     setAliasInput('');
@@ -265,9 +259,6 @@ const ThreatActorsPage: React.FC = () => {
         sophistication: formData.sophistication,
         resourceLevel: formData.resourceLevel,
         primaryTargets: formData.primaryTargets,
-        attackPatterns: formData.attackPatterns,
-        tools: formData.tools,
-        malwareFamilies: formData.malwareFamilies,
         isActive: formData.isActive,
         organizationId: user.organizationId
       };
@@ -312,9 +303,6 @@ const ThreatActorsPage: React.FC = () => {
         sophistication: formData.sophistication,
         resourceLevel: formData.resourceLevel,
         primaryTargets: formData.primaryTargets,
-        attackPatterns: formData.attackPatterns,
-        tools: formData.tools,
-        malwareFamilies: formData.malwareFamilies,
         isActive: formData.isActive
       };
 
@@ -374,9 +362,6 @@ const ThreatActorsPage: React.FC = () => {
       sophistication: actor.sophistication || 'Unknown',
       resourceLevel: actor.resourceLevel || 'Unknown',
       primaryTargets: actor.primaryTargets || [],
-      attackPatterns: actor.attackPatterns || [],
-      tools: actor.tools || [],
-      malwareFamilies: actor.malwareFamilies || [],
       isActive: actor.isActive !== false
     });
     setShowEditModal(true);
