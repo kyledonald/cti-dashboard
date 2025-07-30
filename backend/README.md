@@ -4,3 +4,4 @@
 # Test permissions fix
 # test firebase token
 # pointing to right dir this time
+# adding firebaserc

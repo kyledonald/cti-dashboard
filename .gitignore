@@ -26,7 +26,6 @@ build/
 *.tsbuildinfo
 
 .firebase/
-.firebaserc
 
 # Backend
 backend/node_modules/
