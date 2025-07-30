@@ -77,7 +77,7 @@ export const usePermissions = (): PermissionSet => {
       // Data permissions (org-scoped)
       canCreateIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can create
       canEditIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can edit
-      canDeleteIncidents: isOrgAdmin, // Only org admins can delete
+      canDeleteIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can delete
       canViewIncidents: hasOrgAccess, // All assigned can view
       
       canViewThreatActors: hasOrgAccess, // All assigned can view

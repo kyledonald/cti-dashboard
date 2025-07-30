@@ -10,7 +10,7 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
-import { usersApi, type User, type CreateUserDTO } from '../api';
+import { type User } from '../api';
 
 // Convert Firebase error codes to human-readable messages
 const getHumanReadableError = (error: any): string => {
@@ -85,77 +85,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Create or update user in backend
   const createOrUpdateUser = async (firebaseUser: FirebaseUser, overrideNames?: { firstName: string; lastName: string }): Promise<User> => {
     try {
-      // Get existing user by Firebase UID
-      const existingUsers = await usersApi.getAll();
-      // Ensure existingUsers is an array before calling find
-      if (!Array.isArray(existingUsers)) {
-        console.error('usersApi.getAll() did not return an array:', existingUsers);
-        throw new Error('Invalid response format from users API');
+      // Try to register/get user using the new registration endpoint
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch(`${import.meta.env.DEV 
+        ? '/api' 
+        : 'https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api'}/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          firstName: overrideNames?.firstName || pendingUserData?.firstName,
+          lastName: overrideNames?.lastName || pendingUserData?.lastName
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Registration failed: ${response.status}`);
       }
-      const existingUser = existingUsers.find(u => u.googleId === firebaseUser.uid);
-      
-      // If user exists, but we have pendingUserData (from signup), update their name if needed
-      if (existingUser) {
-        // If pendingUserData is present and names differ, update them
-        if (pendingUserData && (
-          (pendingUserData.firstName && existingUser.firstName !== pendingUserData.firstName) ||
-          (pendingUserData.lastName && existingUser.lastName !== pendingUserData.lastName)
-        )) {
-          try {
-            console.log('Updating user names from pendingUserData:', pendingUserData);
-            const updatedUser = await usersApi.update(existingUser.userId, {
-              firstName: pendingUserData.firstName,
-              lastName: pendingUserData.lastName,
-            });
-            return updatedUser;
-          } catch (profileUpdateError) {
-            console.error('Profile update failed, returning existing user:', profileUpdateError);
-            return existingUser;
-          }
-        }
-        // Update profile picture if it changed
-        if (firebaseUser.photoURL && firebaseUser.photoURL !== existingUser.profilePictureUrl) {
-          try {
-            const updatedUser = await usersApi.update(existingUser.userId, {
-              profilePictureUrl: firebaseUser.photoURL
-            });
-            return updatedUser;
-          } catch (profileUpdateError) {
-            console.error('Profile update failed, returning existing user:', profileUpdateError);
-            return existingUser;
-          }
-        }
-        return existingUser;
-      } else {
-        // Create new user
-        let firstName: string;
-        let lastName: string;
-        if (overrideNames) {
-          firstName = overrideNames.firstName;
-          lastName = overrideNames.lastName;
-        } else if (pendingUserData) {
-          firstName = pendingUserData.firstName;
-          lastName = pendingUserData.lastName;
-        } else {
-          // Parse from displayName (for Google sign-in) or fallback to email prefix
-          const displayName = firebaseUser.displayName || '';
-          const nameParts = displayName.trim().split(' ').filter(part => part.length > 0);
-          firstName = nameParts[0] || firebaseUser.email!.split('@')[0] || 'User';
-          lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-        }
-        
-        console.log('Creating new user with names:', { firstName, lastName, pendingUserData, overrideNames });
-        
-        const userData: CreateUserDTO = {
-          googleId: firebaseUser.uid,
-          email: firebaseUser.email!,
-          firstName,
-          lastName,
-          ...(firebaseUser.photoURL && { profilePictureUrl: firebaseUser.photoURL }),
-        };
-        const newUser = await usersApi.create(userData);
-        return newUser;
-      }
+
+      const data = await response.json();
+      return data.user;
     } catch (error) {
       console.error('Error creating/updating user:', error);
       throw error;

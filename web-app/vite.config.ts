@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://cti-dashboard-gateway-688kl12y.nw.gateway.dev',
+        target: 'https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
         secure: true,

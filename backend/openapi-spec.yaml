@@ -9,6 +9,16 @@ schemes:
 produces:
   - application/json
 
+# Define Firebase JWT security scheme
+securityDefinitions:
+  firebase_jwt:
+    type: oauth2
+    authorizationUrl: ""
+    flow: implicit
+    x-google-issuer: https://securetoken.google.com/cti-dashboard-459422
+    x-google-jwks_uri: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+    x-google-audiences: cti-dashboard-459422
+
 x-google-backend:
   address: https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api
   path_translation: APPEND_PATH_TO_ADDRESS
@@ -43,7 +53,7 @@ paths:
         '500':
           description: Internal Server Error.
 
-  # --- Organizations API Paths ---
+  # --- Organizations API Paths (PROTECTED) ---
   /organizations:
     post:
       summary: Create a new organization
@@ -67,6 +77,10 @@ paths:
           description: Organization created successfully
         '400':
           description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
 
     get:
       summary: Get all organizations
@@ -74,6 +88,8 @@ paths:
       responses:
         '200':
           description: A list of organizations
+        '401':
+          description: Unauthorized
 
   /organizations/{organizationId}:
     get:
@@ -88,6 +104,8 @@ paths:
       responses:
         '200':
           description: Organization data
+        '401':
+          description: Unauthorized
         '404':
           description: Organization not found
 
@@ -115,6 +133,10 @@ paths:
       responses:
         '200':
           description: Organization updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
         '404':
           description: Organization not found
         '400':
@@ -132,10 +154,14 @@ paths:
       responses:
         '204':
           description: Organization deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions (admin only)
         '404':
           description: Organization not found
 
-  # --- Users API Paths ---
+  # --- Users API Paths (PROTECTED) ---
   /users:
     post:
       summary: Create a new user
@@ -166,6 +192,10 @@ paths:
           description: User created successfully
         '400':
           description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
 
     get:
       summary: Get all users
@@ -179,6 +209,8 @@ paths:
       responses:
         '200':
           description: A list of users
+        '401':
+          description: Unauthorized
 
   /users/{userId}:
     get:
@@ -193,6 +225,8 @@ paths:
       responses:
         '200':
           description: User data
+        '401':
+          description: Unauthorized
         '404':
           description: User not found
 
@@ -220,6 +254,10 @@ paths:
       responses:
         '200':
           description: User updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
         '404':
           description: User not found
         '400':
@@ -237,6 +275,10 @@ paths:
       responses:
         '204':
           description: User deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
         '404':
           description: User not found
 

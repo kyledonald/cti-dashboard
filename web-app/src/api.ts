@@ -4,7 +4,7 @@ import { getIdToken } from 'firebase/auth';
 
 const API_BASE = import.meta.env.DEV
   ? '/api'
-  : 'https://cti-dashboard-gateway-688kl12y.nw.gateway.dev';
+  : 'https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api';
 
 const api = axios.create({
   baseURL: API_BASE,

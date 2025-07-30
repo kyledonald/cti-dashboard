@@ -85,6 +85,15 @@ export class OrganizationService {
     const usersCollection = this.db.collection('users');
     const usersSnapshot = await usersCollection.where('organizationId', '==', organizationId).get();
     
+    // Clean up incidents in this organization - delete them all
+    const incidentsCollection = this.db.collection('incidents');
+    const incidentsSnapshot = await incidentsCollection.where('organizationId', '==', organizationId).get();
+    
+    console.log(`🗑️ Cascading delete for organization ${organizationId}:`, {
+      usersToUpdate: usersSnapshot.size,
+      incidentsToDelete: incidentsSnapshot.size
+    });
+    
     const batch = this.db.batch();
     
     // Update all users to remove organization assignment and set role to unassigned
@@ -94,6 +103,11 @@ export class OrganizationService {
         role: 'unassigned',
         updatedAt: FieldValue.serverTimestamp()
       });
+    });
+    
+    // Delete all incidents in this organization
+    incidentsSnapshot.forEach((incidentDoc) => {
+      batch.delete(incidentDoc.ref);
     });
     
     // Delete the organization
