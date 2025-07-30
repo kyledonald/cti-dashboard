@@ -122,6 +122,14 @@ jobs:
         run: |
           cd web-app
           npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: cti-dashboard-459422.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: cti-dashboard-459422
+          VITE_FIREBASE_STORAGE_BUCKET: cti-dashboard-459422.appspot.com
+          VITE_FIREBASE_MESSAGING_SENDER_ID: 488117546170
+          VITE_FIREBASE_APP_ID: 1:488117546170:web:e11316c2964819fb20e683
+          VITE_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Deploy Frontend to Firebase Hosting
         run: |

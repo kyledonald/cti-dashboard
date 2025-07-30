@@ -5,3 +5,4 @@
 # test firebase token
 # pointing to right dir this time
 # adding firebaserc
+# prod envs
