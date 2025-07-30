@@ -59,6 +59,12 @@ jobs:
       - name: Deploy to Cloud Functions
         run: |
           cd backend
+          echo "Current directory: $(pwd)"
+          echo "Checking gcloud auth..."
+          gcloud auth list
+          echo "Checking gcloud config..."
+          gcloud config list
+          echo "Deploying function..."
           gcloud functions deploy api \
             --entry-point api \
             --runtime nodejs20 \
