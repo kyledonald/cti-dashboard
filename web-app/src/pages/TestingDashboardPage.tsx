@@ -283,7 +283,7 @@ const TestingDashboardPage: React.FC = () => {
     setIsRunning(false);
   };
 
-  const runCategoryTests = async (category: string) => {
+  const runCategoryTests = async (_category: string) => {
     setIsRunning(true);
     // Simulate category test execution
     await new Promise(resolve => setTimeout(resolve, 2000));

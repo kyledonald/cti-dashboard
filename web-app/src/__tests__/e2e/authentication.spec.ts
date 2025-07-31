@@ -11,7 +11,7 @@ test.describe('Authentication E2E Tests', () => {
       
       // Mock successful Firebase authentication
       await page.addInitScript(() => {
-        window.firebase = {
+        (window as any).firebase = {
           auth: () => ({
             signInWithEmailAndPassword: () => Promise.resolve({
               user: {
@@ -60,7 +60,7 @@ test.describe('Authentication E2E Tests', () => {
       
       // Mock failed authentication
       await page.addInitScript(() => {
-        window.firebase = {
+        (window as any).firebase = {
           auth: () => ({
             signInWithEmailAndPassword: () => Promise.reject(new Error('Invalid password'))
           })
@@ -81,7 +81,7 @@ test.describe('Authentication E2E Tests', () => {
       
       // Mock user not found
       await page.addInitScript(() => {
-        window.firebase = {
+        (window as any).firebase = {
           auth: () => ({
             signInWithEmailAndPassword: () => Promise.reject(new Error('User not found'))
           })
@@ -134,7 +134,7 @@ test.describe('Authentication E2E Tests', () => {
       
       // Mock rate limiting response
       await page.addInitScript(() => {
-        window.firebase = {
+        (window as any).firebase = {
           auth: () => ({
             signInWithEmailAndPassword: () => Promise.reject(new Error('Too many attempts'))
           })
@@ -162,7 +162,7 @@ test.describe('Authentication E2E Tests', () => {
       
       // Mock successful registration
       await page.addInitScript(() => {
-        window.firebase = {
+        (window as any).firebase = {
           auth: () => ({
             createUserWithEmailAndPassword: () => Promise.resolve({
               user: {
@@ -231,7 +231,7 @@ test.describe('Authentication E2E Tests', () => {
     test('13. Role-based access control', async ({ page }) => {
       // Mock viewer user
       await page.addInitScript(() => {
-        window.firebase = {
+        (window as any).firebase = {
           auth: () => ({
             onAuthStateChanged: (callback: any) => callback({
               uid: 'viewer-user-id',
