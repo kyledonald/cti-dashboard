@@ -2,13 +2,47 @@ import express from 'express';
 import { Firestore } from '@google-cloud/firestore';
 import axios from 'axios';
 
+// In-memory rate limiting for AI summary requests
+const aiSummaryRequests = new Map<string, { count: number; resetTime: number }>();
+
+// Rate limiting middleware for AI summary
+const rateLimitAI = (req: any, res: any, next: any) => {
+  const userId = req.user?.userId || req.ip;
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 5; // 5 requests per 15 minutes
+
+  const userRequests = aiSummaryRequests.get(userId);
+  
+  if (!userRequests || now > userRequests.resetTime) {
+    // First request or window expired
+    aiSummaryRequests.set(userId, { count: 1, resetTime: now + windowMs });
+    console.log(`Rate limit: New window for user ${userId}`);
+    return next();
+  }
+
+  if (userRequests.count >= maxRequests) {
+    const retryAfter = Math.ceil((userRequests.resetTime - now) / 1000);
+    console.log(`Rate limit: User ${userId} exceeded limit (${userRequests.count}/${maxRequests})`);
+    return res.status(429).json({
+      error: 'Too many AI summary requests',
+      details: 'Please wait 15 minutes before requesting another AI summary',
+      retryAfter: retryAfter
+    });
+  }
+
+  userRequests.count++;
+  console.log(`Rate limit: User ${userId} request ${userRequests.count}/${maxRequests}`);
+  next();
+};
+
 export const cveRouter = (db: Firestore) => {
   const router = express.Router();
 
   // Generate AI summary for incidents (backend proxy to avoid CORS and API key exposure)
   // This endpoint doesn't require authentication since it's only accessible through the frontend
   // and the frontend already enforces role-based access
-  router.post('/ai-summary', async (req, res) => {
+  router.post('/ai-summary', rateLimitAI, async (req, res) => {
     try {
       console.log('AI Summary Request received:', {
         hasIncident: !!req.body.incident,
