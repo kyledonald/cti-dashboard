@@ -629,7 +629,7 @@ const IncidentsPage: React.FC = () => {
       setShowAiSummary(true);
     } catch (error: any) {
       console.error('Error generating AI summary:', error);
-      setError('Failed to generate AI summary: ' + error.message);
+      setError('Error: ' + error.message);
     } finally {
       setGeneratingSummary(false);
     }
