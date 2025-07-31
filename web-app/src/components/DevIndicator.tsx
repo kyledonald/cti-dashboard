@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 const DevIndicator: React.FC = () => {
   // Only show in development mode
@@ -12,13 +11,6 @@ const DevIndicator: React.FC = () => {
       <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-3 py-2 rounded-lg shadow-lg">
         <div className="flex items-center space-x-2 text-sm">
           <span className="font-semibold">DEV</span>
-          <Link 
-            to="/testing" 
-            className="text-blue-600 hover:text-blue-800 underline"
-            title="Testing Dashboard"
-          >
-            🧪 Tests
-          </Link>
         </div>
       </div>
     </div>

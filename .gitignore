@@ -33,4 +33,10 @@ backend/dist/
 backend/.gcloudignore
 backend/.gitignore
 
+# Testing
+playwright-report/
+test-results/
+coverage/
+*.lcov
+
 dev-helper.sh
