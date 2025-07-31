@@ -45,7 +45,7 @@ export const cveRouter = (db: Firestore) => {
       const threatActorNames = incidentThreatActors.map((ta: any) => ta.name).join(', ') || 'None identified';
       
       // Create the prompt for AI analysis
-      const prompt = `Analyze this cybersecurity incident and provide a concise, business-friendly threat intelligence summary for small and medium enterprises (SMEs).
+      const prompt = `Analyze this cybersecurity incident and provide a structured threat intelligence summary for small and medium enterprises (SMEs).
 
 INCIDENT DETAILS:
 - Title: ${incident.title}
@@ -57,12 +57,24 @@ INCIDENT DETAILS:
 - Threat Actors: ${threatActorNames}
 - Assigned To: ${assignedUserName}
 
-Please provide a 2-3 paragraph summary that includes:
-1. Executive summary of the threat
-2. Potential business impact
-3. Recommended actions for SMEs
+IMPORTANT: You MUST format your response with exactly these 5 sections using the exact headers shown below. Do not use any other format.
 
-Keep it professional, concise, and actionable.`;
+**EXECUTIVE SUMMARY**
+Provide a concise overview of the threat and its significance.
+
+**THREAT ANALYSIS**
+Analyze the nature of the threat, potential attack vectors, and technical details.
+
+**BUSINESS IMPACT**
+Explain the potential impact on business operations, data, and systems.
+
+**DETECTION & RESPONSE**
+Describe how to detect this type of threat and immediate response actions.
+
+**WHAT CAN I DO TO PREVENT THIS IN THE FUTURE?**
+Provide specific, actionable recommendations for prevention and mitigation.
+
+Format your response exactly as shown above with these 5 sections. Use professional language suitable for business stakeholders.`;
 
       console.log('Calling Gemini API with prompt length:', prompt.length);
 
