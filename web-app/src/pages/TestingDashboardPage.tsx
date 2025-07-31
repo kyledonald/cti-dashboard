@@ -22,166 +22,8 @@ const TestingDashboardPage: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-                // Mock test data - in real implementation, this would come from test runners
-              const mockTestResults: TestResult[] = [
-                // Authentication Tests
-                {
-                  id: 'auth-001',
-                  name: 'Valid Login with Correct Credentials',
-                  description: 'User can successfully log in with valid email and password',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.2,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'auth-002',
-                  name: 'Invalid Email Format Rejection',
-                  description: 'System rejects login attempts with invalid email format',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.1,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'auth-003',
-                  name: 'Empty Credentials Handling',
-                  description: 'System properly handles empty email and password fields',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.15,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'auth-004',
-                  name: 'SQL Injection Prevention',
-                  description: 'System prevents SQL injection attacks in login form',
-                  category: 'integration',
-                  status: 'pass',
-                  executionTime: 0.3,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'auth-005',
-                  name: 'XSS Attack Prevention',
-                  description: 'System prevents XSS attacks in user inputs',
-                  category: 'integration',
-                  status: 'pass',
-                  executionTime: 0.25,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'auth-006',
-                  name: 'Complete Login Workflow',
-                  description: 'End-to-end login process from landing page to dashboard',
-                  category: 'e2e',
-                  status: 'pass',
-                  executionTime: 2.5,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'auth-007',
-                  name: 'Rate Limiting on Login',
-                  description: 'System enforces rate limiting on repeated login attempts',
-                  category: 'integration',
-                  status: 'pass',
-                  executionTime: 1.2,
-                  lastRun: new Date().toISOString()
-                },
-                // Authorization Tests
-                {
-                  id: 'authz-001',
-                  name: 'Admin Access to All Endpoints',
-                  description: 'Admin users can access all system endpoints',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.3,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'authz-002',
-                  name: 'Viewer Restrictions',
-                  description: 'Viewer users cannot perform admin actions',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.2,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'authz-003',
-                  name: 'Role-Based UI Elements',
-                  description: 'UI elements are properly hidden/shown based on user role',
-                  category: 'e2e',
-                  status: 'pass',
-                  executionTime: 3.1,
-                  lastRun: new Date().toISOString()
-                },
-                // Incident Management Tests
-                {
-                  id: 'incident-001',
-                  name: 'Create Incident',
-                  description: 'Users can create new security incidents',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.4,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'incident-002',
-                  name: 'Edit Incident',
-                  description: 'Users can edit existing incidents',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.3,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'incident-003',
-                  name: 'Delete Incident',
-                  description: 'Authorized users can delete incidents',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.2,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'incident-004',
-                  name: 'Incident Workflow',
-                  description: 'Complete incident lifecycle from creation to resolution',
-                  category: 'e2e',
-                  status: 'pass',
-                  executionTime: 8.5,
-                  lastRun: new Date().toISOString()
-                },
-                // AI Summary Tests
-                {
-                  id: 'ai-001',
-                  name: 'AI Summary Generation',
-                  description: 'System can generate AI summaries for incidents',
-                  category: 'integration',
-                  status: 'pass',
-                  executionTime: 5.2,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'ai-002',
-                  name: 'Rate Limiting on AI Requests',
-                  description: 'AI summary requests are properly rate limited',
-                  category: 'integration',
-                  status: 'pass',
-                  executionTime: 2.1,
-                  lastRun: new Date().toISOString()
-                },
-                {
-                  id: 'ai-003',
-                  name: 'AI Summary Format',
-                  description: 'AI summaries follow the correct 5-section format',
-                  category: 'unit',
-                  status: 'pass',
-                  executionTime: 0.8,
-                  lastRun: new Date().toISOString()
-                }
-              ];
+              // No tests available yet - will be populated when real tests are created
+              const mockTestResults: TestResult[] = [];
 
   useEffect(() => {
     setTestResults(mockTestResults);
@@ -235,7 +77,6 @@ const TestingDashboardPage: React.FC = () => {
   const totalTests = testResults.length;
   const passedTests = testResults.filter(t => t.status === 'pass').length;
   const failedTests = testResults.filter(t => t.status === 'fail').length;
-  const successRate = totalTests > 0 ? ((passedTests / totalTests) * 100).toFixed(1) : '0';
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -317,42 +158,54 @@ const TestingDashboardPage: React.FC = () => {
 
             <TabsContent value={selectedCategory} className="mt-6">
               <div className="space-y-4">
-                {filteredTests.map((test) => (
-                  <div key={test.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="text-lg">{getStatusIcon(test.status)}</span>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
-                            {test.name}
-                          </h3>
-                          <Badge className={getStatusColor(test.status)}>
-                            {test.status.toUpperCase()}
-                          </Badge>
-                          <Badge variant="outline" className="capitalize">
-                            {test.category}
-                          </Badge>
-                        </div>
-                                                            <p className="text-gray-600 dark:text-gray-400 mb-2">
-                                      {test.description}
-                                    </p>
-                      </div>
-                      <div className="text-right text-sm text-gray-500">
-                        {test.executionTime && (
-                          <div>⏱️ {test.executionTime}s</div>
-                        )}
-                        {test.lastRun && (
-                          <div>🕒 {new Date(test.lastRun).toLocaleString()}</div>
-                        )}
-                      </div>
-                    </div>
-                    {test.errorMessage && (
-                      <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
-                        ❌ {test.errorMessage}
-                      </div>
-                    )}
+                {filteredTests.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🧪</div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      No Tests Available
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Tests will appear here once you create them. Start by giving me a user requirement!
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  filteredTests.map((test) => (
+                    <div key={test.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <span className="text-lg">{getStatusIcon(test.status)}</span>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                              {test.name}
+                            </h3>
+                            <Badge className={getStatusColor(test.status)}>
+                              {test.status.toUpperCase()}
+                            </Badge>
+                            <Badge variant="outline" className="capitalize">
+                              {test.category}
+                            </Badge>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-400 mb-2">
+                            {test.description}
+                          </p>
+                        </div>
+                        <div className="text-right text-sm text-gray-500">
+                          {test.executionTime && (
+                            <div>⏱️ {test.executionTime}s</div>
+                          )}
+                          {test.lastRun && (
+                            <div>🕒 {new Date(test.lastRun).toLocaleString()}</div>
+                          )}
+                        </div>
+                      </div>
+                      {test.errorMessage && (
+                        <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
+                          ❌ {test.errorMessage}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </TabsContent>
           </Tabs>
