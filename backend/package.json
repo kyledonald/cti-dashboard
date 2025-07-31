@@ -9,6 +9,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:e2e": "jest --testPathPattern=e2e",
+    "test:ur": "jest --testNamePattern"
     "lint": "npx tsc --noEmit",
     "format": "prettier --write \"src/**/*.{ts,js,json,yaml}\"",
     "check-format": "prettier --check \"src/**/*.{ts,js,json,yaml}\""

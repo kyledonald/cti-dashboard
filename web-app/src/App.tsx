@@ -18,6 +18,8 @@ import LoginPage from './pages/LoginPage.tsx';
 import LandingPage from './pages/LandingPage.tsx';
 import WelcomePage from './pages/WelcomePage.tsx';
 import UserSettingsPage from './pages/UserSettingsPage.tsx';
+import TestingDashboardPage from './pages/TestingDashboardPage.tsx';
+import DevIndicator from './components/DevIndicator.tsx';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -36,6 +38,9 @@ function App() {
 
   return (
     <Router>
+      {/* Development Indicator - Only shown in dev mode */}
+      <DevIndicator />
+      
       {!user ? (
         // Unauthenticated Routes - No sidebar/header
         <Routes>
@@ -114,6 +119,11 @@ function App() {
                         
                         {/* User Settings */}
                         <Route path="/settings" element={<ProtectedRoute><UserSettingsPage /></ProtectedRoute>} />
+                        
+                        {/* Testing Dashboard - Development Only */}
+                        {import.meta.env.DEV && (
+                          <Route path="/testing" element={<TestingDashboardPage />} />
+                        )}
                         
                         {/* Special Pages */}
                         <Route path="/organization-required" element={<OrganizationRequiredPage />} />
