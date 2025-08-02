@@ -28,12 +28,18 @@ if (process.env.FUNCTIONS_EMULATOR) {
   firestoreConfig.databaseId = '(default)';
 } else {
   // Use Firebase's built-in project detection instead of GCP_PROJECT env var
-  const projectId = process.env.GCLOUD_PROJECT || 'cti-dashboard-459422';
+  const projectId = process.env.GCLOUD_PROJECT;
+  const databaseId = process.env.FIRESTORE_DATABASE_ID;
+  
+  if (!projectId) {
+    throw new Error('GCLOUD_PROJECT environment variable is required in production');
+  }
+  
   console.log(
     `Running in PRODUCTION environment. Connecting to GCP Firestore for project: ${projectId}`,
   );
   firestoreConfig.projectId = projectId;
-  firestoreConfig.databaseId = 'cti-db';
+  firestoreConfig.databaseId = databaseId;
 }
 
 export const db = new Firestore(firestoreConfig);

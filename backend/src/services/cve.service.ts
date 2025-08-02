@@ -1,19 +1,5 @@
-import axios from 'axios'; 
-import { CVEResponse } from '../models/cve.model';
+import axios from 'axios';
 
-interface CustomAxiosError extends Error {
-  response?: {
-    status: number;
-    data: any;
-  };
-  isAxiosError: boolean;
-}
-
-function isCustomAxiosError(error: any): error is CustomAxiosError {
-  return (error as CustomAxiosError).isAxiosError === true;
-}
-
-// New interface to match frontend ShodanCVE
 export interface ShodanCVE {
   cve: string;
   summary: string;
@@ -22,21 +8,95 @@ export interface ShodanCVE {
     score: number;
     vector: string;
   };
-  epss?: number;
   kev?: boolean;
   published: string;
   modified: string;
   references: string[];
-  cpe?: string[];
-  cwe?: string[];
-  vendors?: string[];
-  products?: string[];
+  extractedVendors?: string[];
 }
 
 export class CVEService {
   private SHODAN_CVE_API_BASE_URL = 'https://cvedb.shodan.io';
 
-  async getCVEById(cveId: string): Promise<CVEResponse | null> {
+  // Helper function to extract vendors from summary
+  private extractVendorsFromSummary(summary: string): string[] {
+    const commonVendors = [
+      'Microsoft', 'Adobe', 'Oracle', 'Cisco', 'Apple', 'Google', 'VMware',
+      'Apache', 'Linux', 'Ubuntu', 'Red Hat', 'Debian', 'Dell', 'HP', 'IBM', 
+      'Intel', 'AMD', 'NVIDIA', 'Qualcomm', 'Samsung', 'Huawei', 'Juniper', 
+      'Fortinet', 'Palo Alto'
+    ];
+
+    const foundVendors: string[] = [];
+    const lowerSummary = summary.toLowerCase();
+
+    commonVendors.forEach(vendor => {
+      if (lowerSummary.includes(vendor.toLowerCase())) {
+        foundVendors.push(vendor);
+      }
+    });
+
+    return foundVendors;
+  }
+
+  // Get latest CVEs from Shodan API
+  async getLatestCVEs(limit: number = 50, minCvssScore: number = 0): Promise<ShodanCVE[]> {
+    try {
+      // Fetch from Shodan API directly (no CORS issues from backend)
+      const response = await axios.get(`https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 200)}`, {
+        headers: {
+          'Accept': 'application/json',
+        },
+        timeout: 10000
+      });
+
+      if (!response.data) {
+        throw new Error('No data received from Shodan API');
+      }
+
+      let cvesData: any[];
+
+      // Handle Shodan API response format
+      if ((response.data as any).cves && Array.isArray((response.data as any).cves)) {
+        cvesData = (response.data as any).cves;
+      } else if (Array.isArray(response.data)) {
+        cvesData = response.data;
+      } else {
+        throw new Error('Unexpected response format from Shodan API');
+      }
+
+      // Map to our interface
+      const mappedCves = cvesData.map((cveItem: any) => ({
+        cve: cveItem.cve_id || cveItem.cve,
+        summary: cveItem.summary || '',
+        cvss: cveItem.cvss || undefined,
+        cvss3: cveItem.cvss_v3 ? {
+          score: cveItem.cvss_v3,
+          vector: ''
+        } : undefined,
+        kev: cveItem.kev || false,
+        published: cveItem.published_time || new Date().toISOString(),
+        modified: cveItem.modified_time || cveItem.published_time || new Date().toISOString(),
+        references: cveItem.references || [],
+        extractedVendors: this.extractVendorsFromSummary(cveItem.summary || '')
+      }));
+
+      // Filter by CVSS score
+      const filteredCves = mappedCves.filter((cve: any) => {
+        const score = cve.cvss3?.score || cve.cvss || 0;
+        return score >= minCvssScore;
+      });
+
+      return filteredCves.slice(0, limit);
+
+    } catch (error: any) {
+      console.error('Error fetching CVE data:', error.message);
+      throw new Error(`Failed to fetch CVE data: ${error.message}`);
+    }
+  }
+
+  // Get CVE by ID
+  async getCVEById(cveId: string): Promise<any> {
     try {
       const response = await axios.get(`${this.SHODAN_CVE_API_BASE_URL}/cve/${cveId}`);
       const cveData: any = response.data;
@@ -58,7 +118,7 @@ export class CVEService {
       }
       return null;
     } catch (error: any) {
-      if (isCustomAxiosError(error) && error.response && error.response.status === 404) {
+      if (error.response && error.response.status === 404) {
         console.warn(`CVE not found on Shodan: ${cveId}`);
         return null;
       }
@@ -67,82 +127,10 @@ export class CVEService {
     }
   }
 
-  async getLatestCVEs(limit: number = 10): Promise<CVEResponse[]> {
-    try {
-      const response = await axios.get(`${this.SHODAN_CVE_API_BASE_URL}/cves`);
-      const cvesData = (response.data as { cves: any[] }).cves;
-
-      if (cvesData && Array.isArray(cvesData) && cvesData.length > 0) {
-        const mappedCves = cvesData.map((cveItem: any) => ({
-          cveId: cveItem.cve_id,
-          summary: cveItem.summary,
-          cvss: cveItem.cvss ?? null,
-          cvss_version: cveItem.cvss_version ?? null,
-          cvss_v2: cveItem.cvss_v2 ?? null,
-          cvss_v3: cveItem.cvss_v3 ?? null,
-          publishedTime: cveItem.published_time,
-          references: cveItem.references ?? [],
-          kev: cveItem.kev ?? false,
-          proposeAction: cveItem.propose_action ?? null,
-          ransomwareCampaign: cveItem.ransomware_campaign ?? null,
-        }));
-        return mappedCves.slice(0, limit);
-      }
-      return [];
-    } catch (error: any) {
-      console.error('Error fetching latest CVEs from Shodan:', error.message);
-      throw new Error(`Failed to fetch latest CVE data from Shodan: ${error.message}`);
-    }
-  }
-
-  // New method to get latest CVEs with CVSS filtering
+  // Legacy method for backward compatibility
   async getLatestCVEsWithFilter(minCvssScore: number = 7.5, limit: number = 10): Promise<ShodanCVE[]> {
-    try {
-      // Fetch more CVEs than needed to account for filtering
-      const response = await axios.get(`${this.SHODAN_CVE_API_BASE_URL}/cves?latest&limit=${limit * 3}`);
-      
-      const responseData = response.data as any;
-      let cvesData: any[];
-      
-      // Handle the actual Shodan API response format
-      if (responseData.cves && Array.isArray(responseData.cves)) {
-        cvesData = responseData.cves;
-      } else if (Array.isArray(responseData)) {
-        cvesData = responseData;
-      } else {
-        console.warn('Unexpected response format from Shodan CVE API');
-        return [];
-      }
-
-      const mappedCves: ShodanCVE[] = cvesData.map((cveItem: any) => ({
-        cve: cveItem.cve_id || cveItem.cve,
-        summary: cveItem.summary || '',
-        cvss: cveItem.cvss || undefined,
-        cvss3: cveItem.cvss_v3 ? {
-          score: cveItem.cvss_v3,
-          vector: '' // Shodan doesn't provide vector string in this endpoint
-        } : undefined,
-        epss: cveItem.epss || undefined,
-        kev: cveItem.kev || false,
-        published: cveItem.published_time || new Date().toISOString(),
-        modified: cveItem.modified_time || cveItem.published_time || new Date().toISOString(),
-        references: cveItem.references || [],
-        cpe: cveItem.cpe || undefined,
-        cwe: cveItem.cwe || undefined,
-        vendors: cveItem.vendors || undefined,
-        products: cveItem.products || undefined
-      }));
-
-      // Filter by CVSS score - use cvss_v3 or cvss field
-      const filteredCves = mappedCves.filter(cve => {
-        const score = cve.cvss3?.score || cve.cvss || 0;
-        return score >= minCvssScore;
-      });
-
-      return filteredCves.slice(0, limit);
-    } catch (error: any) {
-      console.error('Error fetching latest CVEs with filter from Shodan:', error.message);
-      throw new Error(`Failed to fetch filtered CVE data from Shodan: ${error.message}`);
-    }
+    return this.getLatestCVEs(limit, minCvssScore);
   }
 }
+
+export const cveService = new CVEService();

@@ -4,7 +4,7 @@ import { getIdToken } from 'firebase/auth';
 
 const API_BASE = import.meta.env.DEV
   ? '/api'
-  : 'https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api';
+  : import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -457,6 +457,8 @@ export const generateAISummary = async (incident: Incident, users: User[], threa
       // For other errors or final attempt, throw the error
       if (error.response?.status === 503) {
         throw new Error('AI service temporarily unavailable. Please try again later.');
+      } else if (error.response?.status === 429) {
+        throw new Error('You\'re going too fast.. save some tokens for the rest of us! You can generate a summary again in 15 minutes.');
       } else {
         throw new Error('Failed to generate AI summary. Please try again.');
       }
