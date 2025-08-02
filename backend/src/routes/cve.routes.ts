@@ -91,24 +91,18 @@ INCIDENT DETAILS:
 - Threat Actors: ${threatActorNames}
 - Assigned To: ${assignedUserName}
 
-IMPORTANT: You MUST format your response with exactly these 5 sections using the exact headers shown below. Do not use any other format.
+IMPORTANT: You MUST format your response with exactly these 3 sections using the exact headers shown below. Do not use any other format.
 
-**EXECUTIVE SUMMARY**
+EXECUTIVE SUMMARY
 Provide a concise overview of the threat and its significance.
 
-**THREAT ANALYSIS**
-Analyze the nature of the threat, potential attack vectors, and technical details.
-
-**BUSINESS IMPACT**
+BUSINESS IMPACT
 Explain the potential impact on business operations, data, and systems.
 
-**DETECTION & RESPONSE**
-Describe how to detect this type of threat and immediate response actions.
+DETECTION & RESPONSE
+Describe how to detect this type of threat and immediate response actions. Provide specific, actionable recommendations for prevention and mitigation.
 
-**WHAT CAN I DO TO PREVENT THIS IN THE FUTURE?**
-Provide specific, actionable recommendations for prevention and mitigation.
-
-Format your response exactly as shown above with these 5 sections. Use professional language suitable for business stakeholders.`;
+Format your response exactly as shown above with these 3 sections. Use professional language suitable for business stakeholders.`;
 
       console.log('Calling Gemini API with prompt length:', prompt.length);
 
