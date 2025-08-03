@@ -15,34 +15,25 @@ import { authenticateToken } from './middleware/auth.middleware';
 
 let firestoreConfig: any = {};
 
-if (process.env.FUNCTIONS_EMULATOR) {
-  console.log(
-    'Running in FUNCTIONS_EMULATOR environment. Connecting to local Firestore emulator.',
-  );
-  firestoreConfig.host = 'localhost:8080';
-  firestoreConfig.ssl = false;
-  firestoreConfig.credentials = {
-    client_email: 'firebase-emulator',
-    private_key: 'firebase-emulator',
-  };
-  firestoreConfig.databaseId = '(default)';
-} else {
-  // Use Firebase's built-in project detection instead of GCP_PROJECT env var
-  const projectId = process.env.GCLOUD_PROJECT;
-  const databaseId = process.env.FIRESTORE_DATABASE_ID || 'cti-db';
-  
-  if (!projectId) {
-    throw new Error('GCLOUD_PROJECT environment variable is required in production');
-  }
-  
-  console.log(
-    `Running in PRODUCTION environment. Connecting to GCP Firestore for project: ${projectId}, database: ${databaseId}`,
-  );
-  firestoreConfig.projectId = projectId;
-  firestoreConfig.databaseId = databaseId;
-}
+// Production configuration only
+const projectId = process.env.GCLOUD_PROJECT || 'cti-dashboard-459422';
+const databaseId = process.env.FIRESTORE_DATABASE_ID || 'cti-db';
 
+console.log('Environment variables check:', {
+  GCLOUD_PROJECT: projectId,
+  FIRESTORE_DATABASE_ID: databaseId
+});
+
+console.log(
+  `Connecting to GCP Firestore for project: ${projectId}, database: ${databaseId}`,
+);
+
+firestoreConfig.projectId = projectId;
+firestoreConfig.databaseId = databaseId;
+
+console.log('Firestore config:', JSON.stringify(firestoreConfig, null, 2));
 export const db = new Firestore(firestoreConfig);
+console.log('Firestore connection established successfully');
 
 const app = express();
 
