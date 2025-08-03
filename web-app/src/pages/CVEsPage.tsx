@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cvesApi, incidentsApi, type ShodanCVE, type Incident } from '../api';
-import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
 import { CVEPageHeader } from '../components/cves/CVEPageHeader';
 import { CVESearchBar } from '../components/cves/CVESearchBar';
 import { CVETabNavigation } from '../components/cves/CVETabNavigation';
 import { CVEErrorState } from '../components/cves/CVEErrorState';
+import { CVELoadingState } from '../components/cves/CVELoadingState';
+import { CVECard } from '../components/cves/CVECard';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -352,21 +352,7 @@ const CVEsPage: React.FC = () => {
   };
 
   if (loading && cves.length === 0) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">CVEs</h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Monitor Common Vulnerabilities and Exposures</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <h3 className="mt-4 text-sm font-medium text-gray-900 dark:text-white">Loading CVEs...</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Fetching latest vulnerabilities from Shodan</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <CVELoadingState />;
   }
 
   return (
@@ -417,113 +403,22 @@ const CVEsPage: React.FC = () => {
           <div className="space-y-4">
             {filteredCVEs
               .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-              .map((cve) => {
-                const cvssScore = cve.cvss3?.score || cve.cvss || 0;
-                const severityLabel = getSeverityLabel(cvssScore);
-
-                return (
-                  <Card key={cve.cve} className={`p-6 hover:shadow-md transition-shadow border-l-4 ${getSeverityBorderColor(cvssScore)}`}>
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {cve.cve}
-                        </h3>
-                        <Badge variant={getSeverityVariant(cvssScore)}>
-                          {severityLabel} ({cvssScore.toFixed(1)})
-                        </Badge>
-                        {cve.kev && (
-                          <Badge variant="critical">
-                            ACTIVELY EXPLOITED
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-right text-sm text-gray-500 dark:text-gray-400">
-                        <div>Published: {formatDate(cve.published)}</div>
-                        {cve.modified !== cve.published && (
-                          <div>Modified: {formatDate(cve.modified)}</div>
-                        )}
-                      </div>
-                    </div>
-
-                    <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-                      {cve.summary}
-                    </p>
-
-                    {/* References */}
-                    {cve.references && cve.references.length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Official References</h4>
-                        <div className="space-y-1">
-                          {cve.references.slice(0, 3).map((ref, index) => (
-                            <a
-                              key={index}
-                              href={ref}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block text-sm text-blue-600 dark:text-blue-400 hover:underline truncate"
-                            >
-                              {ref}
-                            </a>
-                          ))}
-                          {cve.references.length > 3 && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              +{cve.references.length - 3} more references
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Quick Actions - Bottom Right - Only show for users with CVE management permissions */}
-                    {permissions.canManageCVEs && (
-                      <div className="flex justify-end">
-                        <div className="flex gap-2">
-                          {activeTab === 'active' ? (
-                            <>
-                              {hasExistingIncident(cve.cve) ? (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  disabled
-                                  className="bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
-                                >
-                                  Existing Incident for this CVE
-                                </Button>
-                              ) : (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => createIncidentFromCVE(cve)}
-                                  className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 dark:bg-green-900/20 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/30 dark:hover:border-green-600"
-                                >
-                                  Create Incident
-                                </Button>
-                              )}
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => dismissCVE(cve.cve)}
-                                className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 dark:bg-red-900/20 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/30 dark:hover:border-red-600"
-                              >
-                                No Action Required
-                              </Button>
-                            </>
-                          ) : (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => restoreCVE(cve.cve)}
-                              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:border-blue-600"
-                            >
-                              Restore
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </Card>
-                );
-              })}
+              .map((cve) => (
+                <CVECard
+                  key={cve.cve}
+                  cve={cve}
+                  activeTab={activeTab}
+                  permissions={permissions}
+                  hasExistingIncident={hasExistingIncident}
+                  onDismissCVE={dismissCVE}
+                  onRestoreCVE={restoreCVE}
+                  onCreateIncident={createIncidentFromCVE}
+                  getSeverityLabel={getSeverityLabel}
+                  getSeverityVariant={getSeverityVariant}
+                  getSeverityBorderColor={getSeverityBorderColor}
+                  formatDate={formatDate}
+                />
+              ))}
           </div>
 
           {/* Pagination Info - Always show */}
