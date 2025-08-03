@@ -3,11 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { threatActorsApi, organizationsApi, type ThreatActor, type CreateThreatActorDTO, type UpdateThreatActorDTO, type Organization } from '../api';
 
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
-import { Badge } from '../components/ui/badge';
 
 import { ThreatActorPageHeader } from '../components/threat-actors/ThreatActorPageHeader';
 import { ThreatActorStatistics } from '../components/threat-actors/ThreatActorStatistics';
@@ -17,6 +13,7 @@ import { ThreatActorEmptyState } from '../components/threat-actors/ThreatActorEm
 import { ThreatActorPagination } from '../components/threat-actors/ThreatActorPagination';
 import { ThreatActorLoadingState } from '../components/threat-actors/ThreatActorLoadingState';
 import { ThreatActorAccessDeniedState } from '../components/threat-actors/ThreatActorAccessDeniedState';
+import { ThreatActorForm } from '../components/threat-actors/ThreatActorForm';
 
 // Country flag mapping
 const getCountryFlag = (country: string): string => {
@@ -224,26 +221,7 @@ const ThreatActorsPage: React.FC = () => {
     setError('');
   };
 
-  // Array input helpers
-  const addToArray = (value: string, field: keyof typeof formData, setValue: (value: string) => void) => {
-    if (!value.trim()) return;
-    const currentArray = formData[field] as string[];
-    if (!currentArray.includes(value.trim())) {
-      setFormData({
-        ...formData,
-        [field]: [...currentArray, value.trim()]
-      });
-    }
-    setValue('');
-  };
 
-  const removeFromArray = (value: string, field: keyof typeof formData) => {
-    const currentArray = formData[field] as string[];
-    setFormData({
-      ...formData,
-      [field]: currentArray.filter(item => item !== value)
-    });
-  };
 
   // CRUD operations
   const handleCreateThreatActor = async () => {
@@ -467,460 +445,47 @@ const ThreatActorsPage: React.FC = () => {
       )}
 
       {/* Create Modal */}
-      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Threat Actor</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Name *
-                </label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="APT28, Lazarus Group, etc."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Country
-                </label>
-                <Input
-                  value={formData.country}
-                  onChange={(e) => setFormData({...formData, country: e.target.value})}
-                  placeholder="Country of origin"
-                />
-              </div>
-            </div>
+      <ThreatActorForm
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        mode="create"
+        formData={formData}
+        onFormDataChange={setFormData}
+        aliasInput={aliasInput}
+        onAliasInputChange={setAliasInput}
+        targetInput={targetInput}
+        onTargetInputChange={setTargetInput}
+        onSubmit={handleCreateThreatActor}
+        onCancel={() => {
+          setShowCreateModal(false);
+          resetForm();
+        }}
+        submitting={submitting}
+        error={error}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Detailed description of the threat actor..."
-                rows={3}
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Sophistication Level
-                </label>
-                <select
-                  value={formData.sophistication}
-                  onChange={(e) => setFormData({...formData, sophistication: e.target.value as any})}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="Unknown">Unknown</option>
-                  <option value="Minimal">Minimal</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                  <option value="Expert">Expert</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Resource Level
-                </label>
-                <select
-                  value={formData.resourceLevel}
-                  onChange={(e) => setFormData({...formData, resourceLevel: e.target.value as any})}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="Unknown">Unknown</option>
-                  <option value="Individual">Individual</option>
-                  <option value="Club">Club</option>
-                  <option value="Contest">Contest</option>
-                  <option value="Team">Team</option>
-                  <option value="Organization">Organization</option>
-                  <option value="Government">Government</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  First Seen
-                </label>
-                <Input
-                  type="date"
-                  value={formData.firstSeen}
-                  onChange={(e) => setFormData({...formData, firstSeen: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Last Seen
-                </label>
-                <Input
-                  type="date"
-                  value={formData.lastSeen}
-                  onChange={(e) => setFormData({...formData, lastSeen: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Motivation
-              </label>
-              <Input
-                value={formData.motivation}
-                onChange={(e) => setFormData({...formData, motivation: e.target.value})}
-                placeholder="Financial, Espionage, Hacktivism, etc."
-              />
-            </div>
-
-            {/* Array inputs */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Aliases
-              </label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={aliasInput}
-                  onChange={(e) => setAliasInput(e.target.value)}
-                  placeholder="Add alias..."
-                  onKeyPress={(e) => e.key === 'Enter' && addToArray(aliasInput, 'aliases', setAliasInput)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addToArray(aliasInput, 'aliases', setAliasInput)}
-                >
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {formData.aliases.map((alias, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {alias}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray(alias, 'aliases')}
-                      className="ml-1 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Primary Targets
-              </label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={targetInput}
-                  onChange={(e) => setTargetInput(e.target.value)}
-                  placeholder="Add target sector..."
-                  onKeyPress={(e) => e.key === 'Enter' && addToArray(targetInput, 'primaryTargets', setTargetInput)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addToArray(targetInput, 'primaryTargets', setTargetInput)}
-                >
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {formData.primaryTargets.map((target, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {target}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray(target, 'primaryTargets')}
-                      className="ml-1 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isActive" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Currently Active
-              </label>
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
-              </div>
-            )}
-
-            <div className="flex gap-3 justify-end pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowCreateModal(false);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreateThreatActor}
-                disabled={submitting || !formData.name.trim()}
-              >
-                {submitting ? 'Creating...' : 'Create Threat Actor'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      />
 
       {/* Edit Modal */}
-      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Threat Actor</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {/* Same form fields as create modal */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Name *
-                </label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="APT28, Lazarus Group, etc."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Country
-                </label>
-                <Input
-                  value={formData.country}
-                  onChange={(e) => setFormData({...formData, country: e.target.value})}
-                  placeholder="Country of origin"
-                />
-              </div>
-            </div>
+      <ThreatActorForm
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        mode="edit"
+        formData={formData}
+        onFormDataChange={setFormData}
+        aliasInput={aliasInput}
+        onAliasInputChange={setAliasInput}
+        targetInput={targetInput}
+        onTargetInputChange={setTargetInput}
+        onSubmit={handleEditThreatActor}
+        onCancel={() => {
+          setShowEditModal(false);
+          setEditingActor(null);
+          resetForm();
+        }}
+        submitting={submitting}
+        error={error}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Detailed description of the threat actor..."
-                rows={3}
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Sophistication Level
-                </label>
-                <select
-                  value={formData.sophistication}
-                  onChange={(e) => setFormData({...formData, sophistication: e.target.value as any})}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="Unknown">Unknown</option>
-                  <option value="Minimal">Minimal</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                  <option value="Expert">Expert</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Resource Level
-                </label>
-                <select
-                  value={formData.resourceLevel}
-                  onChange={(e) => setFormData({...formData, resourceLevel: e.target.value as any})}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="Unknown">Unknown</option>
-                  <option value="Individual">Individual</option>
-                  <option value="Club">Club</option>
-                  <option value="Contest">Contest</option>
-                  <option value="Team">Team</option>
-                  <option value="Organization">Organization</option>
-                  <option value="Government">Government</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  First Seen
-                </label>
-                <Input
-                  type="date"
-                  value={formData.firstSeen}
-                  onChange={(e) => setFormData({...formData, firstSeen: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Last Seen
-                </label>
-                <Input
-                  type="date"
-                  value={formData.lastSeen}
-                  onChange={(e) => setFormData({...formData, lastSeen: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Motivation
-              </label>
-              <Input
-                value={formData.motivation}
-                onChange={(e) => setFormData({...formData, motivation: e.target.value})}
-                placeholder="Financial, Espionage, Hacktivism, etc."
-              />
-            </div>
-
-            {/* Array inputs */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Aliases
-              </label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={aliasInput}
-                  onChange={(e) => setAliasInput(e.target.value)}
-                  placeholder="Add alias..."
-                  onKeyPress={(e) => e.key === 'Enter' && addToArray(aliasInput, 'aliases', setAliasInput)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addToArray(aliasInput, 'aliases', setAliasInput)}
-                >
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {formData.aliases.map((alias, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {alias}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray(alias, 'aliases')}
-                      className="ml-1 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Primary Targets
-              </label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={targetInput}
-                  onChange={(e) => setTargetInput(e.target.value)}
-                  placeholder="Add target sector..."
-                  onKeyPress={(e) => e.key === 'Enter' && addToArray(targetInput, 'primaryTargets', setTargetInput)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addToArray(targetInput, 'primaryTargets', setTargetInput)}
-                >
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {formData.primaryTargets.map((target, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {target}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray(target, 'primaryTargets')}
-                      className="ml-1 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isActiveEdit"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isActiveEdit" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Currently Active
-              </label>
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
-              </div>
-            )}
-
-            <div className="flex gap-3 justify-end pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingActor(null);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleEditThreatActor}
-                disabled={submitting || !formData.name.trim()}
-              >
-                {submitting ? 'Updating...' : 'Update Threat Actor'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      />
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
