@@ -47,8 +47,6 @@ const IncidentsPage: React.FC = () => {
   const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<{ incidentId: string; commentId: string } | null>(null);
   
-
-  
   // Form states
   const [formData, setFormData] = useState({
     title: '',
@@ -201,8 +199,6 @@ const IncidentsPage: React.FC = () => {
     // Only run when incidents or location.search changes
   }, [incidents, location.search]);
 
-
-
   const resetForm = () => {
     setFormData({
       title: '',
@@ -219,10 +215,6 @@ const IncidentsPage: React.FC = () => {
     setCveError('');
     setError('');
   };
-
-
-
-
 
   // Comment management hook
   const {
@@ -338,7 +330,7 @@ const IncidentsPage: React.FC = () => {
         }, isNewAssignment);
       }
 
-             // Reload incidents
+       // Reload incidents
        const incidentsData = await incidentsApi.getAll();
        const orgIncidents = incidentsData.filter((inc: Incident) => inc.organizationId === user?.organizationId);
        setIncidents(orgIncidents);
@@ -370,8 +362,6 @@ const IncidentsPage: React.FC = () => {
       setError('Failed to delete incident');
     }
   };
-
-
 
   // Handle "Assign to Me" in modals
   const handleAssignToMeInModal = () => {
@@ -432,10 +422,6 @@ const IncidentsPage: React.FC = () => {
       setCommentToDelete(null);
     }
   };
-
-
-
-
 
   // Permission check
   if (!permissions.canViewIncidents) {
