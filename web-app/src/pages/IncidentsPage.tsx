@@ -119,7 +119,7 @@ const IncidentsPage: React.FC = () => {
           threatActorsApi.getAll()
         ]);
 
-                       // Filter incidents by organization
+        // Filter incidents by organization
         const orgIncidents = incidentsData.filter((inc: Incident) => inc.organizationId === user?.organizationId);
         setIncidents(orgIncidents);
 
@@ -277,7 +277,7 @@ const IncidentsPage: React.FC = () => {
         }, true);
       }
 
-             // Reload incidents
+       // Reload incidents
        const incidentsData = await incidentsApi.getAll();
        const orgIncidents = incidentsData.filter((inc: Incident) => inc.organizationId === user?.organizationId);
        setIncidents(orgIncidents);

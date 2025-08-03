@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { threatActorsApi, organizationsApi, type ThreatActor, type CreateThreatActorDTO, type UpdateThreatActorDTO, type Organization } from '../api';
+import { type ThreatActor } from '../api';
 
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
@@ -16,6 +16,8 @@ import { ThreatActorAccessDeniedState } from '../components/threat-actors/Threat
 import { ThreatActorForm } from '../components/threat-actors/ThreatActorForm';
 import { useThreatActorForm } from '../components/threat-actors/hooks/useThreatActorForm';
 import { useThreatActorModals } from '../components/threat-actors/hooks/useThreatActorModals';
+import { useThreatActorActions } from '../components/threat-actors/hooks/useThreatActorActions';
+import { useThreatActorData } from '../components/threat-actors/hooks/useThreatActorData';
 
 // Country flag mapping
 const getCountryFlag = (country: string): string => {
@@ -34,14 +36,22 @@ const ThreatActorsPage: React.FC = () => {
   const { user } = useAuth();
   const permissions = usePermissions();
   
-  // State management
-  const [threatActors, setThreatActors] = useState<ThreatActor[]>([]);
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // Show 6 threat actors per page
+  // Data management
+  const {
+    threatActors,
+    organization,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    filteredActors,
+    paginatedActors,
+    totalPages,
+    statistics,
+    setThreatActors
+  } = useThreatActorData(user);
 
   // Modal states
   const {
@@ -70,44 +80,23 @@ const ThreatActorsPage: React.FC = () => {
     setError: setFormError,
     resetForm,
     populateFormForEdit,
-
-
   } = useThreatActorForm();
 
-  const [submitting, setSubmitting] = useState(false);
-
-  // Load threat actors and organization data
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user?.organizationId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Load threat actors and organization data in parallel
-        const [threatActorsData, organizationData] = await Promise.all([
-          threatActorsApi.getAll(),
-          organizationsApi.getById(user.organizationId)
-        ]);
-
-        // Filter threat actors by organization
-        const orgThreatActors = threatActorsData.filter((ta: ThreatActor) => 
-          ta.organizationId === user?.organizationId
-        );
-        
-        setThreatActors(orgThreatActors);
-        setOrganization(organizationData);
-      } catch (error) {
-        console.error('Error loading data:', error);
-        setFormError('Failed to load threat actors. Please refresh the page.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [user?.organizationId]);
+  // CRUD operations
+  const {
+    submitting,
+    handleCreateThreatActor,
+    handleEditThreatActor,
+    handleDeleteThreatActor
+  } = useThreatActorActions(
+    user,
+    setThreatActors,
+    setFormError,
+    resetForm,
+    closeCreateModal,
+    closeEditModal,
+    closeDeleteConfirm
+  );
 
   // Helper functions
   const getSophisticationColor = (sophistication: string) => {
@@ -198,142 +187,6 @@ const ThreatActorsPage: React.FC = () => {
     return 'Low';
   };
 
-  // Statistics calculations using useMemo to handle dependencies properly
-  const statistics = useMemo(() => {
-    const total = threatActors.length;
-    const active = threatActors.filter(ta => ta.isActive).length;
-    
-
-    
-    const highRisk = threatActors.filter(ta => calculateRiskScore(ta) >= 6).length;
-
-    return { total, active, highRisk };
-  }, [threatActors, organization]);
-
-
-
-
-
-  // CRUD operations
-  const handleCreateThreatActor = async () => {
-    if (!formData.name.trim() || !user?.organizationId) {
-      setError('Name is required');
-      return;
-    }
-
-    setSubmitting(true);
-    setError('');
-
-    try {
-      const newActorData: CreateThreatActorDTO = {
-        name: formData.name.trim(),
-        description: formData.description.trim() || undefined,
-        aliases: formData.aliases,
-        country: formData.country.trim() || undefined,
-        firstSeen: formData.firstSeen || undefined,
-        lastSeen: formData.lastSeen || undefined,
-        motivation: formData.motivation.trim() || undefined,
-        sophistication: formData.sophistication,
-        resourceLevel: formData.resourceLevel,
-        primaryTargets: formData.primaryTargets,
-        isActive: formData.isActive,
-        organizationId: user.organizationId
-      };
-
-      await threatActorsApi.create(newActorData);
-      
-      // Reload threat actors
-      const data = await threatActorsApi.getAll();
-      const orgThreatActors = data.filter((ta: ThreatActor) => 
-        ta.organizationId === user?.organizationId
-      );
-      setThreatActors(orgThreatActors);
-
-      closeCreateModal();
-      resetForm();
-    } catch (error) {
-      console.error('Error creating threat actor:', error);
-      setError('Failed to create threat actor');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleEditThreatActor = async () => {
-    if (!editingActor || !formData.name.trim()) {
-      setError('Name is required');
-      return;
-    }
-
-    setSubmitting(true);
-    setError('');
-
-    try {
-      const updateData: UpdateThreatActorDTO = {
-        name: formData.name.trim(),
-        description: formData.description.trim() || undefined,
-        aliases: formData.aliases,
-        country: formData.country.trim() || undefined,
-        firstSeen: formData.firstSeen || undefined,
-        lastSeen: formData.lastSeen || undefined,
-        motivation: formData.motivation.trim() || undefined,
-        sophistication: formData.sophistication,
-        resourceLevel: formData.resourceLevel,
-        primaryTargets: formData.primaryTargets,
-        isActive: formData.isActive
-      };
-
-      await threatActorsApi.update(editingActor.threatActorId, updateData);
-      
-      // Reload threat actors
-      const data = await threatActorsApi.getAll();
-      const orgThreatActors = data.filter((ta: ThreatActor) => 
-        ta.organizationId === user?.organizationId
-      );
-      setThreatActors(orgThreatActors);
-
-      closeEditModal();
-      resetForm();
-    } catch (error) {
-      console.error('Error updating threat actor:', error);
-      setError('Failed to update threat actor');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDeleteThreatActor = async () => {
-    if (!actorToDelete) return;
-
-    try {
-      await threatActorsApi.delete(actorToDelete.threatActorId);
-      
-      // Remove from local state
-      setThreatActors(threatActors.filter(ta => ta.threatActorId !== actorToDelete.threatActorId));
-      
-      closeDeleteConfirm();
-    } catch (error) {
-      console.error('Error deleting threat actor:', error);
-      setError('Failed to delete threat actor');
-    }
-  };
-
-
-
-  // Filter and paginate
-  const filteredActors = threatActors.filter(actor =>
-    actor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (actor.description && actor.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (actor.aliases && actor.aliases.some(alias => alias.toLowerCase().includes(searchTerm.toLowerCase()))) ||
-    (actor.country && actor.country.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const totalPages = Math.ceil(filteredActors.length / itemsPerPage);
-  const paginatedActors = filteredActors.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
   // Permission check
   if (!permissions.canViewThreatActors) {
     return <ThreatActorAccessDeniedState />;
@@ -342,8 +195,6 @@ const ThreatActorsPage: React.FC = () => {
   if (loading) {
     return <ThreatActorLoadingState />;
   }
-
-
 
   return (
     <div className="space-y-6">
@@ -400,9 +251,9 @@ const ThreatActorsPage: React.FC = () => {
         />
       )}
 
-      {error && (
+      {formError && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-red-800 dark:text-red-200">{error}</p>
+          <p className="text-red-800 dark:text-red-200">{formError}</p>
         </div>
       )}
 
@@ -417,14 +268,13 @@ const ThreatActorsPage: React.FC = () => {
         onAliasInputChange={setAliasInput}
         targetInput={targetInput}
         onTargetInputChange={setTargetInput}
-        onSubmit={handleCreateThreatActor}
+        onSubmit={() => handleCreateThreatActor(formData)}
         onCancel={() => {
           closeCreateModal();
           resetForm();
         }}
         submitting={submitting}
         error={formError}
-
       />
 
       {/* Edit Modal */}
@@ -438,14 +288,13 @@ const ThreatActorsPage: React.FC = () => {
         onAliasInputChange={setAliasInput}
         targetInput={targetInput}
         onTargetInputChange={setTargetInput}
-        onSubmit={handleEditThreatActor}
+        onSubmit={() => handleEditThreatActor(formData, editingActor)}
         onCancel={() => {
           closeEditModal();
           resetForm();
         }}
         submitting={submitting}
         error={formError}
-
       />
 
       {/* Delete Confirmation Dialog */}
@@ -461,7 +310,7 @@ const ThreatActorsPage: React.FC = () => {
         confirmText="Delete"
         variant="destructive"
         icon="delete"
-        onConfirm={handleDeleteThreatActor}
+        onConfirm={() => handleDeleteThreatActor(actorToDelete, threatActors)}
       />
     </div>
   );
