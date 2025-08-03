@@ -2,13 +2,21 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { threatActorsApi, organizationsApi, type ThreatActor, type CreateThreatActorDTO, type UpdateThreatActorDTO, type Organization } from '../api';
-import { Card, CardContent } from '../components/ui/card';
+
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Badge } from '../components/ui/badge';
-import { Search, Plus, Edit, Trash2, Shield, AlertTriangle, Activity } from 'lucide-react';
+
+import { ThreatActorPageHeader } from '../components/threat-actors/ThreatActorPageHeader';
+import { ThreatActorStatistics } from '../components/threat-actors/ThreatActorStatistics';
+import { ThreatActorSearch } from '../components/threat-actors/ThreatActorSearch';
+import { ThreatActorCard } from '../components/threat-actors/ThreatActorCard';
+import { ThreatActorEmptyState } from '../components/threat-actors/ThreatActorEmptyState';
+import { ThreatActorPagination } from '../components/threat-actors/ThreatActorPagination';
+import { ThreatActorLoadingState } from '../components/threat-actors/ThreatActorLoadingState';
+import { ThreatActorAccessDeniedState } from '../components/threat-actors/ThreatActorAccessDeniedState';
 
 // Country flag mapping
 const getCountryFlag = (country: string): string => {
@@ -34,7 +42,7 @@ const ThreatActorsPage: React.FC = () => {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // Better for card grid layout
+  const itemsPerPage = 6; // Show 6 threat actors per page
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -388,34 +396,11 @@ const ThreatActorsPage: React.FC = () => {
 
   // Permission check
   if (!permissions.canViewThreatActors) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="text-6xl mb-4">🚫</div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Access Denied
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                You don't have permission to view threat actors.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <ThreatActorAccessDeniedState />;
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-2xl mb-4">⏳</div>
-          <p className="text-gray-600 dark:text-gray-400">Loading threat actors...</p>
-        </div>
-      </div>
-    );
+    return <ThreatActorLoadingState />;
   }
 
 
@@ -423,254 +408,56 @@ const ThreatActorsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Threat Intelligence
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Monitor threat actors targeting your organization
-          </p>
-        </div>
-        {permissions.canManageThreatActors && (
-          <Button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Threat Actor
-          </Button>
-        )}
-      </div>
+      <ThreatActorPageHeader
+        permissions={permissions}
+        onAddThreatActor={openCreateModal}
+      />
 
       {/* Statistics Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-              <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Actors</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.total}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-              <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.active}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
-              <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">High Risk</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.highRisk}</p>
-            </div>
-          </div>
-        </Card>
-
-
-      </div>
+      <ThreatActorStatistics statistics={statistics} />
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search threat actors..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
+      <ThreatActorSearch
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
 
       {/* Threat Actor Cards Grid */}
       {filteredActors.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {paginatedActors.map((actor) => {
-              const riskScore = calculateRiskScore(actor);
-              
-              // Case-insensitive targeting check
-              const orgIndustry = organization?.industry?.toLowerCase();
-              const orgCountry = organization?.nationality?.toLowerCase();
-              const actorTargets = actor.primaryTargets?.map(target => target.toLowerCase()) || [];
-              const isTargetingOrg = (orgIndustry && actorTargets.includes(orgIndustry)) || 
-                                   (orgCountry && actorTargets.includes(orgCountry));
-              
-              return (
-                <Card key={actor.threatActorId} className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200 border-2 hover:border-blue-300 dark:hover:border-blue-600 flex flex-col h-full">
-                  {/* Country Flag Corner */}
-                  <div className="absolute top-2 right-2 text-2xl opacity-80">
-                    {getCountryFlag(actor.country || 'Unknown')}
-                  </div>
-                  {/* Targeting Organization Alert */}
-                  {isTargetingOrg && (
-                    <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                      ⚠️ Targeting Our Industry
-                    </div>
-                  )}
-                  <CardContent className="p-6 flex flex-col flex-1">
-                    {/* Header */}
-                    <div className="mb-4">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 pr-8">
-                        {actor.name}
-                      </h3>
-                      {/* Risk Score */}
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Risk:</span>
-                        <Badge className={`${getRiskColor(riskScore)} bg-transparent border`}>
-                          {getRiskLevel(riskScore)} ({riskScore}/10)
-                        </Badge>
-                      </div>
-                      {/* Status */}
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className={`w-2 h-2 rounded-full ${actor.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {actor.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                    </div>
-                    {/* Sophistication & Resource Level */}
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Sophistication</span>
-                        <Badge className={`text-xs ${getSophisticationColor(actor.sophistication || 'Unknown')}`}>{actor.sophistication || 'Unknown'}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Resources</span>
-                        <Badge className={`text-xs ${getResourceLevelColor(actor.resourceLevel || 'Unknown')}`}>{actor.resourceLevel || 'Unknown'}</Badge>
-                      </div>
-                    </div>
-                    {/* Description */}
-                    {actor.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">{actor.description}</p>
-                    )}
-                    {/* Aliases */}
-                    {actor.aliases && actor.aliases.length > 0 && (
-                      <div className="mb-4">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Aliases:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {actor.aliases.slice(0, 3).map((alias, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">{alias}</Badge>
-                          ))}
-                          {actor.aliases.length > 3 && (
-                            <Badge variant="outline" className="text-xs">+{actor.aliases.length - 3} more</Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {/* Primary Targets */}
-                    {actor.primaryTargets && actor.primaryTargets.length > 0 && (
-                      <div className="mb-4">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Targets:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {actor.primaryTargets.slice(0, 2).map((target, index) => {
-                            const isOurIndustry = target.toLowerCase() === organization?.industry?.toLowerCase();
-                            const isOurCountry = target.toLowerCase() === organization?.nationality?.toLowerCase();
-                            const isTargetingUs = isOurIndustry || isOurCountry;
-                            return (
-                              <Badge key={index} variant="outline" className={`text-xs ${isTargetingUs ? 'border-red-300 text-red-700 dark:border-red-600 dark:text-red-400' : ''}`}>{target}</Badge>
-                            );
-                          })}
-                          {actor.primaryTargets.length > 2 && (
-                            <Badge variant="outline" className="text-xs">+{actor.primaryTargets.length - 2} more</Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {/* Last Seen */}
-                    {actor.lastSeen && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Last seen: {new Date(actor.lastSeen).toLocaleDateString()}</p>
-                    )}
-                    {/* Action Buttons - always at bottom */}
-                    <div className="flex gap-2 mt-auto pt-4">
-                      {permissions.canManageThreatActors && (
-                        <>
-                          <Button variant="outline" size="sm" onClick={() => openEditModal(actor)} className="flex-1"><Edit className="w-3 h-3 mr-1" />Edit</Button>
-                          <Button variant="destructive" size="sm" onClick={() => openDeleteConfirm(actor)} className="px-2"><Trash2 className="w-3 h-3" /></Button>
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {paginatedActors.map((actor) => (
+              <ThreatActorCard
+                key={actor.threatActorId}
+                actor={actor}
+                permissions={permissions}
+                getSophisticationColor={getSophisticationColor}
+                getResourceLevelColor={getResourceLevelColor}
+                getRiskColor={getRiskColor}
+                getRiskLevel={getRiskLevel}
+                calculateRiskScore={calculateRiskScore}
+                getCountryFlag={getCountryFlag}
+                onEdit={openEditModal}
+                onDelete={openDeleteConfirm}
+              />
+            ))}
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700 dark:text-gray-300">
-                Showing <span className="font-medium">{((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredActors.length)}</span> of <span className="font-medium">{filteredActors.length}</span> threat actors
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const page = i + 1;
-                  return (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      className={currentPage === page ? "font-bold" : ""}
-                    >
-                      {page}
-                    </Button>
-                  );
-                })}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
+          <ThreatActorPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredActors.length}
+            onPageChange={setCurrentPage}
+          />
         </>
       ) : (
-        <Card className="p-12">
-          <div className="text-center">
-            <div className="text-6xl mb-4">🕵️</div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {searchTerm ? 'No threat actors found' : 'No threat actors yet'}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {searchTerm 
-                ? `No threat actors match "${searchTerm}". Try a different search term.`
-                : 'Start building your threat intelligence by adding known threat actors.'
-              }
-            </p>
-            {permissions.canManageThreatActors && !searchTerm && (
-              <Button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Add First Threat Actor
-              </Button>
-            )}
-          </div>
-        </Card>
+        <ThreatActorEmptyState
+          searchTerm={searchTerm}
+          permissions={permissions}
+          onAddThreatActor={openCreateModal}
+        />
       )}
 
       {error && (
