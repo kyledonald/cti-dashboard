@@ -4,7 +4,7 @@ import { getIdToken } from 'firebase/auth';
 
 const API_BASE = import.meta.env.DEV
   ? '/api'
-  : import.meta.env.VITE_API_BASE_URL;
+  : import.meta.env.VITE_API_BASE_URL || 'https://europe-west2-cti-dashboard-459422.cloudfunctions.net/api';
 
 const api = axios.create({
   baseURL: API_BASE,
