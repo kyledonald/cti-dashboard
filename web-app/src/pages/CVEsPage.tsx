@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 
-
 import { CVEPageHeader } from '../components/cves/CVEPageHeader';
 import { CVESearchBar } from '../components/cves/CVESearchBar';
 import { CVETabNavigation } from '../components/cves/CVETabNavigation';
@@ -81,7 +80,6 @@ const CVEsPage: React.FC = () => {
 
   const {
     dismissCVE,
-
     restoreCVE,
     handleCloseIncidentConfirm,
     handleDismissWithoutClosing,

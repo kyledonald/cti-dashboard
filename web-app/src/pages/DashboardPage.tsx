@@ -15,8 +15,14 @@ import {
   BarElement,
   Title,
 } from 'chart.js';
-import { Card } from '../components/ui/card';
+
 import { Link } from 'react-router-dom';
+import { DashboardHeader } from '../components/dashboard/DashboardHeader';
+import { DashboardMetricCard } from '../components/dashboard/DashboardMetricCard';
+import { DashboardChartCard } from '../components/dashboard/DashboardChartCard';
+import { DashboardQuickLinkCard } from '../components/dashboard/DashboardQuickLinkCard';
+import { DashboardEmptyState } from '../components/dashboard/DashboardEmptyState';
+import { DashboardLoadingState } from '../components/dashboard/DashboardLoadingState';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title);
 
@@ -202,109 +208,111 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto p-4">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">Your organization's security at a glance</p>
-      </div>
+      <DashboardHeader />
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{isLoading ? '...' : orgIncidents.length}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">Total Incidents</div>
-        </Card>
-        <Card className="p-6 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{isLoading ? '...' : orgIncidents.filter(i => i.status === 'Closed' || i.status === 'Resolved').length}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">Closed Incidents</div>
-        </Card>
-        <Card className="p-6 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-red-600 dark:text-red-400">{isLoading ? '...' : orgIncidents.filter(i => i.status === 'Open' || i.status === 'Triaged' || i.status === 'In Progress').length}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">Open Incidents</div>
-        </Card>
-        <Card className="p-6 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{isLoading ? '...' : cveCount}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">CVEs (High Severity)</div>
-        </Card>
-        <Card className="p-6 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">{isLoading ? '...' : kevCount}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">Known Exploited CVEs</div>
-        </Card>
-        <Card className="p-6 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{isLoading ? '...' : highRiskThreatActors.length}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">High-Risk Threat Actors</div>
-        </Card>
-        <Card className="p-6 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{isLoading ? '...' : softwareList.length}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">My Software</div>
-        </Card>
-        <Card className="p-6 flex flex-col items-center justify-center">
-          <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">{isLoading ? '...' : atRiskSoftwareCount}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 text-center">Potential Software Vulnerabilities</div>
-        </Card>
+        <DashboardMetricCard
+          value={orgIncidents.length}
+          label="Total Incidents"
+          color="purple"
+          isLoading={isLoading}
+        />
+        <DashboardMetricCard
+          value={orgIncidents.filter(i => i.status === 'Closed' || i.status === 'Resolved').length}
+          label="Closed Incidents"
+          color="green"
+          isLoading={isLoading}
+        />
+        <DashboardMetricCard
+          value={orgIncidents.filter(i => i.status === 'Open' || i.status === 'Triaged' || i.status === 'In Progress').length}
+          label="Open Incidents"
+          color="red"
+          isLoading={isLoading}
+        />
+        <DashboardMetricCard
+          value={cveCount}
+          label="CVEs (High Severity)"
+          color="yellow"
+          isLoading={isLoading}
+        />
+        <DashboardMetricCard
+          value={kevCount}
+          label="Known Exploited CVEs"
+          color="pink"
+          isLoading={isLoading}
+        />
+        <DashboardMetricCard
+          value={highRiskThreatActors.length}
+          label="High-Risk Threat Actors"
+          color="orange"
+          isLoading={isLoading}
+        />
+        <DashboardMetricCard
+          value={softwareList.length}
+          label="My Software"
+          color="indigo"
+          isLoading={isLoading}
+        />
+        <DashboardMetricCard
+          value={atRiskSoftwareCount}
+          label="Potential Software Vulnerabilities"
+          color="rose"
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Charts Grid - Each chart gets its own row */}
       <div className="space-y-8">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Incident Status Breakdown</h3>
-          <div className="flex justify-center">
-            <div className="w-full max-w-2xl h-72 mx-auto">
-              <Pie data={pieData} options={chartOptions} />
-            </div>
-          </div>
-        </Card>
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Incidents Created (Last 6 Months)</h3>
-          <div className="w-full max-w-2xl h-72 mx-auto">
-            <Line data={lineData} options={chartOptions} />
-          </div>
-        </Card>
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Incidents by Priority</h3>
-          <div className="w-full max-w-2xl h-72 mx-auto">
-            <Bar data={barData} options={chartOptions} />
-          </div>
-        </Card>
+        <DashboardChartCard title="Incident Status Breakdown" centerChart>
+          <Pie data={pieData} options={chartOptions} />
+        </DashboardChartCard>
+        <DashboardChartCard title="Incidents Created (Last 6 Months)">
+          <Line data={lineData} options={chartOptions} />
+        </DashboardChartCard>
+        <DashboardChartCard title="Incidents by Priority">
+          <Bar data={barData} options={chartOptions} />
+        </DashboardChartCard>
       </div>
 
       {/* Quick Links - Following sidebar order */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8">
-        <Link to="/incidents">
-          <Card className="p-6 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer flex flex-col items-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">Incidents</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">View and manage security incidents</div>
-          </Card>
-        </Link>
-        <Link to="/threat-actors">
-          <Card className="p-6 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors cursor-pointer flex flex-col items-center">
-            <div className="text-2xl font-bold text-pink-600 dark:text-pink-400 mb-2">Threat Actors</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">See known threat actors</div>
-          </Card>
-        </Link>
-        <Link to="/cves">
-          <Card className="p-6 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors cursor-pointer flex flex-col items-center">
-            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">CVEs</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Explore vulnerabilities</div>
-          </Card>
-        </Link>
-        <Link to="/my-software">
-          <Card className="p-6 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors cursor-pointer flex flex-col items-center">
-            <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">My Software</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Manage your software inventory</div>
-          </Card>
-        </Link>
-        <Link to="/users">
-          <Card className="p-6 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors cursor-pointer flex flex-col items-center">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">Users</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Organization directory</div>
-          </Card>
-        </Link>
-        <Link to="/organization">
-          <Card className="p-6 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer flex flex-col items-center">
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">Organization</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Manage organization settings</div>
-          </Card>
-        </Link>
+        <DashboardQuickLinkCard
+          to="/incidents"
+          title="Incidents"
+          description="View and manage security incidents"
+          color="blue"
+        />
+        <DashboardQuickLinkCard
+          to="/threat-actors"
+          title="Threat Actors"
+          description="See known threat actors"
+          color="pink"
+        />
+        <DashboardQuickLinkCard
+          to="/cves"
+          title="CVEs"
+          description="Explore vulnerabilities"
+          color="yellow"
+        />
+        <DashboardQuickLinkCard
+          to="/my-software"
+          title="My Software"
+          description="Manage your software inventory"
+          color="indigo"
+        />
+        <DashboardQuickLinkCard
+          to="/users"
+          title="Users"
+          description="Organization directory"
+          color="green"
+        />
+        <DashboardQuickLinkCard
+          to="/organization"
+          title="Organization"
+          description="Manage organization settings"
+          color="orange"
+        />
       </div>
 
       {/* High Priority Incidents */}
@@ -314,25 +322,9 @@ const DashboardPage: React.FC = () => {
         </div>
         <div className="p-6">
           {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <DashboardLoadingState />
           ) : highPriorityIncidents.length === 0 ? (
-            <div className="text-center py-8">
-              <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No high priority incidents</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Great! No critical or high priority incidents are currently active.</p>
-            </div>
+            <DashboardEmptyState />
           ) : (
             <div className="space-y-4">
               {highPriorityIncidents.map((incident, idx) => (
