@@ -6,13 +6,15 @@ interface UseAISummaryProps {
   users: User[];
   threatActors: ThreatActor[];
   setError: (error: string) => void;
+  onError?: () => void; // Optional callback for when an error occurs
 }
 
 export const useAISummary = ({
   viewingIncident,
   users,
   threatActors,
-  setError
+  setError,
+  onError
 }: UseAISummaryProps) => {
   const [aiSummary, setAiSummary] = useState<string>('');
   const [generatingSummary, setGeneratingSummary] = useState(false);
@@ -31,6 +33,10 @@ export const useAISummary = ({
     } catch (error: any) {
       console.error('Error generating AI summary:', error);
       setError('Error: ' + error.message);
+      // Call the error callback if provided (e.g., to close the modal)
+      if (onError) {
+        onError();
+      }
     } finally {
       setGeneratingSummary(false);
     }

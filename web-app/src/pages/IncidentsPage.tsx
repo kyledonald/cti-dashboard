@@ -90,7 +90,8 @@ const IncidentsPage: React.FC = () => {
     viewingIncident,
     users,
     threatActors,
-    setError
+    setError,
+    onError: () => setShowViewModal(false) // Close the modal when there's an error
   });
 
   // PDF Export hook
