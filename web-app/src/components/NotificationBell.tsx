@@ -21,8 +21,6 @@ const NotificationBell: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -83,7 +81,7 @@ const NotificationBell: React.FC = () => {
                    Mark all read
                  </Button>
                )}
-                             {notifications.length > 0 && (
+                {notifications.length > 0 && (
                  <Button
                    variant="ghost"
                    size="sm"

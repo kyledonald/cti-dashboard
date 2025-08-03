@@ -17,10 +17,10 @@ export const ThreatActorPageHeader: React.FC<ThreatActorPageHeaderProps> = ({
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Threat Intelligence
+          Threat Actors
         </h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Monitor threat actors targeting your organization
+          Create and track cyber threat actors
         </p>
       </div>
       {permissions.canManageThreatActors && (

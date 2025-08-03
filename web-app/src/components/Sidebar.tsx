@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
-// No additional imports needed - using inline SVGs
-// import { IfSuperAdmin, IfPermission } from './PermissionGuards';
 
 interface SidebarProps {
   isOpen: boolean;
