@@ -14,6 +14,8 @@ import { ThreatActorPagination } from '../components/threat-actors/ThreatActorPa
 import { ThreatActorLoadingState } from '../components/threat-actors/ThreatActorLoadingState';
 import { ThreatActorAccessDeniedState } from '../components/threat-actors/ThreatActorAccessDeniedState';
 import { ThreatActorForm } from '../components/threat-actors/ThreatActorForm';
+import { useThreatActorForm } from '../components/threat-actors/hooks/useThreatActorForm';
+import { useThreatActorModals } from '../components/threat-actors/hooks/useThreatActorModals';
 
 // Country flag mapping
 const getCountryFlag = (country: string): string => {
@@ -42,31 +44,37 @@ const ThreatActorsPage: React.FC = () => {
   const itemsPerPage = 6; // Show 6 threat actors per page
 
   // Modal states
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [editingActor, setEditingActor] = useState<ThreatActor | null>(null);
-  const [actorToDelete, setActorToDelete] = useState<ThreatActor | null>(null);
+  const {
+    showCreateModal,
+    showEditModal,
+    showDeleteConfirm,
+    editingActor,
+    actorToDelete,
+    openCreateModal,
+    closeCreateModal,
+    openEditModal,
+    closeEditModal,
+    openDeleteConfirm,
+    closeDeleteConfirm
+  } = useThreatActorModals();
 
   // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    aliases: [] as string[],
-    country: '',
-    firstSeen: '',
-    lastSeen: '',
-    motivation: '',
-    sophistication: 'Unknown' as 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert',
-    resourceLevel: 'Unknown' as 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government',
-    primaryTargets: [] as string[],
-    isActive: true
-  });
+  const {
+    formData,
+    setFormData,
+    aliasInput,
+    setAliasInput,
+    targetInput,
+    setTargetInput,
+    error: formError,
+    setError: setFormError,
+    resetForm,
+    populateFormForEdit,
+
+
+  } = useThreatActorForm();
 
   const [submitting, setSubmitting] = useState(false);
-  const [aliasInput, setAliasInput] = useState('');
-  const [targetInput, setTargetInput] = useState('');
-  // Removed unused state variables
 
   // Load threat actors and organization data
   useEffect(() => {
@@ -92,7 +100,7 @@ const ThreatActorsPage: React.FC = () => {
         setOrganization(organizationData);
       } catch (error) {
         console.error('Error loading data:', error);
-        setError('Failed to load threat actors. Please refresh the page.');
+        setFormError('Failed to load threat actors. Please refresh the page.');
       } finally {
         setLoading(false);
       }
@@ -202,24 +210,7 @@ const ThreatActorsPage: React.FC = () => {
     return { total, active, highRisk };
   }, [threatActors, organization]);
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      aliases: [],
-      country: '',
-      firstSeen: '',
-      lastSeen: '',
-      motivation: '',
-      sophistication: 'Unknown',
-      resourceLevel: 'Unknown',
-      primaryTargets: [],
-      isActive: true
-    });
-    setAliasInput('');
-    setTargetInput('');
-    setError('');
-  };
+
 
 
 
@@ -258,7 +249,7 @@ const ThreatActorsPage: React.FC = () => {
       );
       setThreatActors(orgThreatActors);
 
-      setShowCreateModal(false);
+      closeCreateModal();
       resetForm();
     } catch (error) {
       console.error('Error creating threat actor:', error);
@@ -301,8 +292,7 @@ const ThreatActorsPage: React.FC = () => {
       );
       setThreatActors(orgThreatActors);
 
-      setShowEditModal(false);
-      setEditingActor(null);
+      closeEditModal();
       resetForm();
     } catch (error) {
       console.error('Error updating threat actor:', error);
@@ -321,42 +311,14 @@ const ThreatActorsPage: React.FC = () => {
       // Remove from local state
       setThreatActors(threatActors.filter(ta => ta.threatActorId !== actorToDelete.threatActorId));
       
-      setShowDeleteConfirm(false);
-      setActorToDelete(null);
+      closeDeleteConfirm();
     } catch (error) {
       console.error('Error deleting threat actor:', error);
       setError('Failed to delete threat actor');
     }
   };
 
-  // Modal handlers
-  const openCreateModal = () => {
-    resetForm();
-    setShowCreateModal(true);
-  };
 
-  const openEditModal = (actor: ThreatActor) => {
-    setEditingActor(actor);
-    setFormData({
-      name: actor.name,
-      description: actor.description || '',
-      aliases: actor.aliases || [],
-      country: actor.country || '',
-      firstSeen: actor.firstSeen || '',
-      lastSeen: actor.lastSeen || '',
-      motivation: actor.motivation || '',
-      sophistication: actor.sophistication || 'Unknown',
-      resourceLevel: actor.resourceLevel || 'Unknown',
-      primaryTargets: actor.primaryTargets || [],
-      isActive: actor.isActive !== false
-    });
-    setShowEditModal(true);
-  };
-
-  const openDeleteConfirm = (actor: ThreatActor) => {
-    setActorToDelete(actor);
-    setShowDeleteConfirm(true);
-  };
 
   // Filter and paginate
   const filteredActors = threatActors.filter(actor =>
@@ -388,7 +350,7 @@ const ThreatActorsPage: React.FC = () => {
       {/* Header */}
       <ThreatActorPageHeader
         permissions={permissions}
-        onAddThreatActor={openCreateModal}
+        onAddThreatActor={() => openCreateModal(resetForm)}
       />
 
       {/* Statistics Dashboard */}
@@ -415,7 +377,7 @@ const ThreatActorsPage: React.FC = () => {
                 getRiskLevel={getRiskLevel}
                 calculateRiskScore={calculateRiskScore}
                 getCountryFlag={getCountryFlag}
-                onEdit={openEditModal}
+                onEdit={(actor) => openEditModal(actor, populateFormForEdit)}
                 onDelete={openDeleteConfirm}
               />
             ))}
@@ -434,7 +396,7 @@ const ThreatActorsPage: React.FC = () => {
         <ThreatActorEmptyState
           searchTerm={searchTerm}
           permissions={permissions}
-          onAddThreatActor={openCreateModal}
+          onAddThreatActor={() => openCreateModal(resetForm)}
         />
       )}
 
@@ -447,7 +409,7 @@ const ThreatActorsPage: React.FC = () => {
       {/* Create Modal */}
       <ThreatActorForm
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={closeCreateModal}
         mode="create"
         formData={formData}
         onFormDataChange={setFormData}
@@ -457,18 +419,18 @@ const ThreatActorsPage: React.FC = () => {
         onTargetInputChange={setTargetInput}
         onSubmit={handleCreateThreatActor}
         onCancel={() => {
-          setShowCreateModal(false);
+          closeCreateModal();
           resetForm();
         }}
         submitting={submitting}
-        error={error}
+        error={formError}
 
       />
 
       {/* Edit Modal */}
       <ThreatActorForm
         isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
+        onClose={closeEditModal}
         mode="edit"
         formData={formData}
         onFormDataChange={setFormData}
@@ -478,12 +440,11 @@ const ThreatActorsPage: React.FC = () => {
         onTargetInputChange={setTargetInput}
         onSubmit={handleEditThreatActor}
         onCancel={() => {
-          setShowEditModal(false);
-          setEditingActor(null);
+          closeEditModal();
           resetForm();
         }}
         submitting={submitting}
-        error={error}
+        error={formError}
 
       />
 
@@ -491,9 +452,8 @@ const ThreatActorsPage: React.FC = () => {
       <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={(open) => {
-          setShowDeleteConfirm(open);
           if (!open) {
-            setActorToDelete(null);
+            closeDeleteConfirm();
           }
         }}
         title="Delete Threat Actor"
