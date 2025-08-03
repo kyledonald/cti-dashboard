@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cvesApi, incidentsApi, type ShodanCVE, type Incident } from '../api';
-import { Button } from '../components/ui/button';
+
 import { CVEPageHeader } from '../components/cves/CVEPageHeader';
 import { CVESearchBar } from '../components/cves/CVESearchBar';
 import { CVETabNavigation } from '../components/cves/CVETabNavigation';
 import { CVEErrorState } from '../components/cves/CVEErrorState';
 import { CVELoadingState } from '../components/cves/CVELoadingState';
 import { CVECard } from '../components/cves/CVECard';
+import { CVEPagination } from '../components/cves/CVEPagination';
+import { CVEEmptyState } from '../components/cves/CVEEmptyState';
+import { CVEConfirmationDialog } from '../components/cves/CVEConfirmationDialog';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -422,104 +425,28 @@ const CVEsPage: React.FC = () => {
           </div>
 
           {/* Pagination Info - Always show */}
-          <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-                             Showing <b>{Math.min((currentPage - 1) * itemsPerPage + 1, filteredCVEs.length)}-{Math.min(currentPage * itemsPerPage, filteredCVEs.length)}</b> of <b>{filteredCVEs.length}</b> {activeTab === 'active' ? 'critical vulnerabilities' : 'dismissed vulnerabilities'}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setCurrentPage(prev => Math.max(1, prev - 1));
-                  setTimeout(() => {
-                    cveContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }, 100);
-                }}
-                disabled={currentPage === 1}
-                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </Button>
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Page {currentPage} of {Math.max(1, Math.ceil(filteredCVEs.length / itemsPerPage))}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setCurrentPage(prev => Math.min(Math.ceil(filteredCVEs.length / itemsPerPage), prev + 1));
-                  setTimeout(() => {
-                    cveContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }, 100);
-                }}
-                disabled={currentPage >= Math.ceil(filteredCVEs.length / itemsPerPage)}
-                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+          <CVEPagination
+            currentPage={currentPage}
+            totalItems={filteredCVEs.length}
+            itemsPerPage={itemsPerPage}
+            activeTab={activeTab}
+            onPageChange={setCurrentPage}
+            onScrollToTop={() => cveContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          />
         </div>
       ) : !loading && !error ? (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="text-center py-8">
-            <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h3 className="mt-4 text-sm font-medium text-gray-900 dark:text-white">
-              {activeTab === 'active' ? 'No vulnerabilities found' : 'No dismissed vulnerabilities'}
-            </h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {activeTab === 'active' 
-                ? 'No vulnerabilities found matching this criteria.' 
-                : 'No vulnerabilities have been marked as "No Action Required" yet.'
-              }
-            </p>
-          </div>
-        </div>
+        <CVEEmptyState activeTab={activeTab} />
       ) : null}
 
       {/* CVE Dismissal with Incident Closure Confirmation Dialog */}
-      {showCloseIncidentConfirm && incidentToClose && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Close Associated Incident?
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              This CVE (<strong>{cveToClose}</strong>) has an existing incident:
-            </p>
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
-              <p className="font-medium text-blue-900 dark:text-blue-100">
-                {incidentToClose.title}
-              </p>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                Status: {incidentToClose.status} | Priority: {incidentToClose.priority}
-              </p>
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Would you like to move this incident to the "Closed" column since you're marking the CVE as No Action Required?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleCloseIncidentConfirm}
-                disabled={closingIncident}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                {closingIncident ? 'Closing...' : 'Yes, Close Incident'}
-              </button>
-              <button
-                onClick={handleDismissWithoutClosing}
-                disabled={closingIncident}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors dark:bg-gray-700 dark:hover:bg-gray-600 dark:disabled:bg-gray-800 dark:text-gray-200"
-              >
-                No, Keep Incident Open
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CVEConfirmationDialog
+        showCloseIncidentConfirm={showCloseIncidentConfirm}
+        incidentToClose={incidentToClose}
+        cveToClose={cveToClose}
+        closingIncident={closingIncident}
+        onCloseIncidentConfirm={handleCloseIncidentConfirm}
+        onDismissWithoutClosing={handleDismissWithoutClosing}
+      />
     </div>
   );
 };
