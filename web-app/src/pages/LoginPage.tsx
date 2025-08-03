@@ -292,7 +292,6 @@ const LoginPage: React.FC = () => {
             </>
           )}
           
-
         </CardContent>
       </Card>
     </div>

@@ -100,7 +100,7 @@ const LandingPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Threat Intelligence</h3>
             <p className="text-gray-600 dark:text-gray-300">
-              Track threat actors and understand attack patterns.
+              Track cyber threat actors and their attributes.
             </p>
           </div>
         </div>
