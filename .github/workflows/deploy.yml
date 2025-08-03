@@ -102,7 +102,7 @@ jobs:
             --allow-unauthenticated \
             --source . \
             --region europe-west2 \
-            --set-env-vars "GCP_PROJECT=cti-dashboard-459422,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
+            --set-env-vars "GCP_PROJECT=cti-dashboard-459422,FIRESTORE_DATABASE_ID=cti-db,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
             --memory 256Mi \
             --timeout 60s
 
