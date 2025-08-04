@@ -362,6 +362,11 @@ export const usersApi = {
   delete: async (userId: string): Promise<void> => {
     await api.delete(`/users/${userId}`);
   },
+
+  leaveOrganization: async (userId: string): Promise<User> => {
+    const response = await api.post(`/users/${userId}/leave-organization`);
+    return response.data.user;
+  },
 };
 
 // Define UpdateIncidentDTO interface

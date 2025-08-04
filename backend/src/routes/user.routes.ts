@@ -38,6 +38,11 @@ export const userRouter = (db: Firestore) => {
   router.delete('/:userId', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     userController.deleteUser(req, res),
   );
+  
+  // Leave organization - Users can leave their own organization
+  router.post('/:userId/leave-organization', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
+    userController.leaveOrganization(req, res),
+  );
 
   return router;
 };

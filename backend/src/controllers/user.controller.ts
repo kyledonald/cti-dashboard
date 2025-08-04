@@ -238,4 +238,38 @@ export class UserController {
         .json({ error: 'Failed to delete user', details: error.message });
     }
   }
+
+  async leaveOrganization(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { userId } = req.params;
+      
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // Authorization logic: Users can only leave their own organization
+      const isLeavingSelf = req.user.userId === userId;
+      if (!isLeavingSelf) {
+        return res.status(403).json({ 
+          error: 'Insufficient permissions', 
+          message: 'You can only leave your own organization' 
+        });
+      }
+
+      const updatedUser = await this.service.leaveOrganization(userId);
+      if (!updatedUser) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+      
+      res.status(200).json({ 
+        message: 'Successfully left organization', 
+        user: updatedUser 
+      });
+    } catch (error: any) {
+      console.error('Error in leaveOrganization controller:', error);
+      res
+        .status(500)
+        .json({ error: 'Failed to leave organization', details: error.message });
+    }
+  }
 }

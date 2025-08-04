@@ -162,5 +162,37 @@ export class UserService {
     return snapshot.size;
   }
 
+  // Method to allow users to leave their organization
+  async leaveOrganization(userId: string): Promise<User | null> {
+    console.log('User leaving organization:', userId);
+    const userRef = this.collection.doc(userId);
+    const doc = await userRef.get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    const user = doc.data() as User;
+    
+    // Only allow non-admin users to leave organization
+    if (user.role === 'admin') {
+      throw new Error('Admin users cannot leave their organization. Please transfer admin role first.');
+    }
+
+    const dataToUpdate = {
+      organizationId: '',
+      role: 'unassigned',
+      updatedAt: FieldValue.serverTimestamp()
+    };
+
+    console.log('Updating user to leave organization:', dataToUpdate);
+    await userRef.update(dataToUpdate);
+    
+    // Fetch and return the updated user
+    const updatedDoc = await userRef.get();
+    const updatedUser = updatedDoc.data() as User;
+    console.log('User left organization result:', updatedUser);
+    return updatedUser;
+  }
 
 }
