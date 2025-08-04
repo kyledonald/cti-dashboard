@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { LandingPageHeader } from '../components/landing/LandingPageHeader';
-import { LandingPageHero } from '../components/landing/LandingPageHero';
-import { LandingPageFeatures } from '../components/landing/LandingPageFeatures';
+import { LandingPageHeader } from '../components/landing-page/LandingPageHeader';
+import { LandingPageHero } from '../components/landing-page/LandingPageHero';
+import { LandingPageFeatures } from '../components/landing-page/LandingPageFeatures';
 
 const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();

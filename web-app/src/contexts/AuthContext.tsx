@@ -101,6 +101,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
       });
 
+      console.log('Sending registration request with data:', {
+        firstName: overrideNames?.firstName || pendingUserData?.firstName,
+        lastName: overrideNames?.lastName || pendingUserData?.lastName,
+        overrideNames,
+        pendingUserData
+      });
+      });
+
       if (!response.ok) {
         throw new Error(`Registration failed: ${response.status}`);
       }

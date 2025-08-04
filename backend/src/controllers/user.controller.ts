@@ -79,6 +79,15 @@ export class UserController {
         organizationId: ''
       };
 
+      // Log the user data being created for debugging
+      console.log('Creating user with data:', {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        requestBody: req.body,
+        decodedTokenName: decodedToken.name
+      });
+
       const newUser = await this.service.createUser(userData);
       res.status(201).json({ 
         message: 'User registered successfully', 
