@@ -1,7 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { incidentsApi, cvesApi, threatActorsApi } from '../api';
-import { useQuery } from '@tanstack/react-query';
+import React from 'react';
 import { Pie, Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -23,188 +20,29 @@ import { DashboardChartCard } from '../components/dashboard/DashboardChartCard';
 import { DashboardQuickLinkCard } from '../components/dashboard/DashboardQuickLinkCard';
 import { DashboardEmptyState } from '../components/dashboard/DashboardEmptyState';
 import { DashboardLoadingState } from '../components/dashboard/DashboardLoadingState';
+import { useDashboardData } from '../components/dashboard/hooks/useDashboardData';
+import { useDashboardMetrics } from '../components/dashboard/hooks/useDashboardMetrics';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title);
 
 const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
+  const {
+    orgIncidents,
+    kevCount,
+    cveCount,
+    atRiskSoftwareCount,
+    highRiskThreatActors,
+    softwareList,
+    isLoading,
+  } = useDashboardData();
 
-  // Data fetching
-  const { data: incidents = [], isLoading: incidentsLoading } = useQuery({
-    queryKey: ['incidents'],
-    queryFn: incidentsApi.getAll,
-  });
-  const { data: threatActors = [], isLoading: threatActorsLoading } = useQuery({
-    queryKey: ['threatActors'],
-    queryFn: threatActorsApi.getAll,
-  });
-  const [cves, setCves] = useState<any[]>([]);
-  const [cvesLoading, setCvesLoading] = useState(true);
-  const [softwareList, setSoftwareList] = useState<string[]>([]);
-  const [atRiskSoftwareCount, setAtRiskSoftwareCount] = useState(0);
-
-  // Fetch CVEs (top 200, high severity)
-  useEffect(() => {
-    let mounted = true;
-    setCvesLoading(true);
-    cvesApi.getShodanLatest(8.0, 200).then((data) => {
-      if (mounted) setCves(data);
-    }).finally(() => setCvesLoading(false));
-    return () => { mounted = false; };
-  }, []);
-
-  // Load org-specific software from localStorage
-  useEffect(() => {
-    if (!user?.organizationId) return;
-    const saved = localStorage.getItem(`organization-software-${user.organizationId}`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          if (parsed.length > 0 && typeof parsed[0] === 'string') {
-            setSoftwareList(parsed);
-          } else {
-            setSoftwareList(parsed.map((item: any) => `${item.vendor} ${item.name}`.trim()));
-          }
-        }
-      } catch {}
-    }
-  }, [user?.organizationId]);
-
-  // Calculate at-risk software
-  useEffect(() => {
-    if (!softwareList.length || !cves.length) {
-      setAtRiskSoftwareCount(0);
-      return;
-    }
-    const atRisk = cves.filter(cve =>
-      softwareList.some(software => cve.summary.toLowerCase().includes(software.toLowerCase()))
-    );
-    setAtRiskSoftwareCount(atRisk.length);
-  }, [softwareList, cves]);
-
-  // Org-specific filtering
-  const orgId = user?.organizationId;
-  const orgIncidents = useMemo(() => incidents.filter(i => i.organizationId === orgId), [incidents, orgId]);
-  const orgThreatActors = useMemo(() => threatActors.filter(ta => !ta.organizationId || ta.organizationId === orgId), [threatActors, orgId]);
-
-  // Incident status counts
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { Open: 0, Triaged: 0, 'In Progress': 0, Resolved: 0, Closed: 0 };
-    orgIncidents.forEach(i => { counts[i.status] = (counts[i.status] || 0) + 1; });
-    return counts;
-  }, [orgIncidents]);
-
-  // Incident trend (last 6 months)
-  const incidentTrend = useMemo(() => {
-    const months: string[] = [];
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push(`${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`);
-    }
-    const counts = months.map(label => {
-      const [month, year] = label.split(' ');
-      return orgIncidents.filter(i => {
-        const date = new Date(i.dateCreated?._seconds ? i.dateCreated._seconds * 1000 : i.dateCreated);
-        return date.getMonth() === new Date(`${month} 1, ${year}`).getMonth() && date.getFullYear() === +year;
-      }).length;
-    });
-    return { labels: months, data: counts };
-  }, [orgIncidents]);
-
-  // CVE metrics
-  const kevCount = useMemo(() => cves.filter(cve => cve.kev).length, [cves]);
-  const cveCount = cves.length;
-
-  // High-risk threat actors
-  const highRiskThreatActors = useMemo(() => orgThreatActors.filter(ta => ta.sophistication === 'Advanced' || ta.sophistication === 'Expert' || ta.isActive), [orgThreatActors]);
-
-  // High priority incidents (High/Critical, Open/Triaged/In Progress)
-  const highPriorityIncidents = useMemo(() => {
-    return orgIncidents
-      .filter(i => 
-        (i.priority === 'High' || i.priority === 'Critical') && 
-        (i.status === 'Open' || i.status === 'Triaged' || i.status === 'In Progress')
-      )
-      .sort((a, b) => {
-        const aTime = a.dateCreated?._seconds ? a.dateCreated._seconds * 1000 : new Date(a.dateCreated).getTime();
-        const bTime = b.dateCreated?._seconds ? b.dateCreated._seconds * 1000 : new Date(b.dateCreated).getTime();
-        return bTime - aTime;
-      })
-      .slice(0, 5);
-  }, [orgIncidents]);
-
-  const isLoading = incidentsLoading || threatActorsLoading || cvesLoading;
-
-  // Chart data
-  const pieData = {
-    labels: Object.keys(statusCounts),
-    datasets: [{
-      data: Object.values(statusCounts),
-      backgroundColor: [
-        '#3b82f6', // blue
-        '#a78bfa', // purple
-        '#fbbf24', // yellow
-        '#10b981', // green
-        '#f87171', // red
-      ],
-      borderWidth: 1,
-    }],
-  };
-
-  const lineData = {
-    labels: incidentTrend.labels,
-    datasets: [
-      {
-        label: 'Incidents Created',
-        data: incidentTrend.data,
-        fill: false,
-        borderColor: '#6366f1',
-        backgroundColor: '#6366f1',
-        tension: 0.3,
-      },
-    ],
-  };
-
-  const barData = {
-    labels: ['Critical', 'High', 'Medium', 'Low'],
-    datasets: [
-      {
-        label: 'Incidents by Priority',
-        data: [
-          orgIncidents.filter(i => i.priority === 'Critical').length,
-          orgIncidents.filter(i => i.priority === 'High').length,
-          orgIncidents.filter(i => i.priority === 'Medium').length,
-          orgIncidents.filter(i => i.priority === 'Low').length,
-        ],
-        backgroundColor: [
-          '#ef4444', // red
-          '#f59e42', // orange
-          '#fbbf24', // yellow
-          '#10b981', // green
-        ],
-      },
-    ],
-  };
-
-  // Chart options for padding
-  const chartOptions = {
-    plugins: {
-      legend: {
-        labels: {
-          padding: 24, // More space below legend
-        },
-      },
-    },
-    layout: {
-      padding: {
-        top: 24, // More space above chart area
-      },
-    },
-    maintainAspectRatio: false,
-    responsive: true,
-  };
+  const {
+    highPriorityIncidents,
+    pieData,
+    lineData,
+    barData,
+    chartOptions,
+  } = useDashboardMetrics(orgIncidents);
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto p-4">
