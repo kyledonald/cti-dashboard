@@ -1,175 +1,76 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { updateProfile, updatePassword, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { usersApi } from '../api';
+
+import { UserSettingsHeader } from '../components/user-settings/UserSettingsHeader';
+import { UserSettingsMessage } from '../components/user-settings/UserSettingsMessage';
+import { UserProfileSection } from '../components/user-settings/UserProfileSection';
+import { UserPasswordSection } from '../components/user-settings/UserPasswordSection';
+import { UserDeleteSection } from '../components/user-settings/UserDeleteSection';
+import { useUserSettingsState } from '../components/user-settings/hooks/useUserSettingsState';
+import { usePasswordValidation } from '../components/user-settings/hooks/usePasswordValidation';
+import { useUserSettingsActions } from '../components/user-settings/hooks/useUserSettingsActions';
 
 const UserSettingsPage: React.FC = () => {
   const { user, firebaseUser, signOut, refreshUser } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   
-  // Form states
-  const [firstName, setFirstName] = useState(user?.firstName || '');
-  const [lastName, setLastName] = useState(user?.lastName || '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [deleteConfirmPassword, setDeleteConfirmPassword] = useState('');
-  
-  // UI states
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const {
+    isEditing,
+    setIsEditing,
+    isChangingPassword,
+    setIsChangingPassword,
+    isDeletingAccount,
+    setIsDeletingAccount,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    deleteConfirmPassword,
+    setDeleteConfirmPassword,
+    loading,
+    setLoading,
+    message,
+    showMessage,
+  } = useUserSettingsState(user);
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 5000);
-  };
+  const { validatePasswordComplexity } = usePasswordValidation();
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !firebaseUser) return;
+  const { handleUpdateProfile, handleChangePassword, handleDeleteAccount } = useUserSettingsActions({
+    user,
+    firebaseUser,
+    signOut,
+    refreshUser,
+    setLoading,
+    showMessage,
+    validatePasswordComplexity,
+  });
 
-    setLoading(true);
-    try {
-      // Update Firebase profile
-      await updateProfile(firebaseUser, {
-        displayName: `${firstName} ${lastName}`.trim()
-      });
-
-      // Update backend user
-      await usersApi.update(user.userId, {
-        firstName,
-        lastName
-      });
-
-      // Refresh user context
-      await refreshUser();
-      
+  // Wrapper functions to handle state management
+  const handleUpdateProfileWrapper = async (e: React.FormEvent) => {
+    const success = await handleUpdateProfile(e, firstName, lastName);
+    if (success) {
       setIsEditing(false);
-      showMessage('success', 'Profile updated successfully!');
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      showMessage('error', error.message || 'Failed to update profile');
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Password complexity validation
-  const validatePasswordComplexity = (password: string): { isValid: boolean; message: string } => {
-    if (password.length < 8) {
-      return { isValid: false, message: 'Password must be at least 8 characters long.' };
-    }
-    
-    if (!/[A-Z]/.test(password)) {
-      return { isValid: false, message: 'Password must contain at least one uppercase letter.' };
-    }
-    
-    if (!/[a-z]/.test(password)) {
-      return { isValid: false, message: 'Password must contain at least one lowercase letter.' };
-    }
-    
-    if (!/[0-9]/.test(password)) {
-      return { isValid: false, message: 'Password must contain at least one number.' };
-    }
-    
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      return { isValid: false, message: 'Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?).' };
-    }
-    
-    return { isValid: true, message: '' };
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!firebaseUser || !firebaseUser.email) return;
-
-    if (newPassword !== confirmPassword) {
-      showMessage('error', 'New passwords do not match');
-      return;
-    }
-
-    // Password complexity validation
-    const passwordValidation = validatePasswordComplexity(newPassword);
-    if (!passwordValidation.isValid) {
-      showMessage('error', passwordValidation.message);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Re-authenticate user
-      const credential = EmailAuthProvider.credential(firebaseUser.email, currentPassword);
-      await reauthenticateWithCredential(firebaseUser, credential);
-
-      // Update password
-      await updatePassword(firebaseUser, newPassword);
-
+  const handleChangePasswordWrapper = async (e: React.FormEvent) => {
+    const success = await handleChangePassword(e, currentPassword, newPassword, confirmPassword);
+    if (success) {
       setIsChangingPassword(false);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      showMessage('success', 'Password changed successfully!');
-    } catch (error: any) {
-      console.error('Error changing password:', error);
-      if (error.code === 'auth/wrong-password') {
-        showMessage('error', 'Current password is incorrect');
-      } else {
-        showMessage('error', error.message || 'Failed to change password');
-      }
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleDeleteAccount = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !firebaseUser || !firebaseUser.email) return;
-
-    setLoading(true);
-    try {
-      // Check if user is an admin and if there are other users in the organization
-      if (user.role === 'admin' && user.organizationId) {
-        const allUsers = await usersApi.getAll();
-        const orgUsers = allUsers.filter((u: any) => u.organizationId === user.organizationId);
-        const otherAdmins = orgUsers.filter((u: any) => u.role === 'admin' && u.userId !== user.userId);
-        const otherUsers = orgUsers.filter((u: any) => u.userId !== user.userId);
-
-        if (otherUsers.length > 0 && otherAdmins.length === 0) {
-          showMessage('error', 'You cannot delete your account as you are the only admin. Please promote another user to admin first, or remove all other users from the organization.');
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Re-authenticate user
-      const credential = EmailAuthProvider.credential(firebaseUser.email, deleteConfirmPassword);
-      await reauthenticateWithCredential(firebaseUser, credential);
-
-      // Delete from backend first
-      await usersApi.delete(user.userId);
-
-      // Delete Firebase user
-      await deleteUser(firebaseUser);
-
-      // Sign out
-      await signOut();
-      
-      showMessage('success', 'Account deleted successfully');
-    } catch (error: any) {
-      console.error('Error deleting account:', error);
-      if (error.code === 'auth/wrong-password') {
-        showMessage('error', 'Password is incorrect');
-      } else {
-        showMessage('error', error.message || 'Failed to delete account');
-      }
-    } finally {
-      setLoading(false);
-    }
+  const handleDeleteAccountWrapper = async (e: React.FormEvent) => {
+    await handleDeleteAccount(e, deleteConfirmPassword);
   };
-
-
 
   if (!user) {
     return <div>Loading...</div>;
@@ -177,314 +78,59 @@ const UserSettingsPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Account Settings
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Manage your profile information, security settings, and account preferences.
-        </p>
-      </div>
+      <UserSettingsHeader />
 
-      {/* Message */}
-      {message && (
-        <div className={`p-4 rounded-lg ${
-          message.type === 'success' 
-            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
-            : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-        }`}>
-          {message.text}
-        </div>
-      )}
+      <UserSettingsMessage message={message} />
 
-      {/* Profile Information */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Profile Information
-          </h2>
-          {!isEditing && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Edit Profile
-            </button>
-          )}
-        </div>
+      <UserProfileSection
+        user={user}
+        isEditing={isEditing}
+        firstName={firstName}
+        lastName={lastName}
+        loading={loading}
+        onEdit={() => setIsEditing(true)}
+        onCancel={() => {
+          setIsEditing(false);
+          setFirstName(user.firstName);
+          setLastName(user.lastName);
+        }}
+        onSave={handleUpdateProfileWrapper}
+        onFirstNameChange={setFirstName}
+        onLastNameChange={setLastName}
+      />
 
-        {isEditing ? (
-          <form onSubmit={handleUpdateProfile} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                  required
-                />
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditing(false);
-                  setFirstName(user.firstName);
-                  setLastName(user.lastName);
-                }}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  First Name
-                </label>
-                <p className="text-gray-900 dark:text-white">{user.firstName}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Last Name
-                </label>
-                <p className="text-gray-900 dark:text-white">{user.lastName}</p>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email Address
-              </label>
-              <p className="text-gray-900 dark:text-white">{user.email}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Role
-              </label>
-              <p className="text-gray-900 dark:text-white capitalize">{user.role}</p>
-            </div>
-          </div>
-        )}
-      </div>
+      <UserPasswordSection
+        isChangingPassword={isChangingPassword}
+        currentPassword={currentPassword}
+        newPassword={newPassword}
+        confirmPassword={confirmPassword}
+        loading={loading}
+        onEdit={() => setIsChangingPassword(true)}
+        onCancel={() => {
+          setIsChangingPassword(false);
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmPassword('');
+        }}
+        onSave={handleChangePasswordWrapper}
+        onCurrentPasswordChange={setCurrentPassword}
+        onNewPasswordChange={setNewPassword}
+        onConfirmPasswordChange={setConfirmPassword}
+      />
 
-      {/* Change Password */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Change Password
-          </h2>
-          {!isChangingPassword && (
-            <button
-              onClick={() => setIsChangingPassword(true)}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-            >
-              Change Password
-            </button>
-          )}
-        </div>
-
-        {isChangingPassword ? (
-          <form onSubmit={handleChangePassword} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Current Password
-              </label>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                New Password
-              </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                required
-                minLength={6}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Confirm New Password
-              </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                required
-                minLength={8}
-              />
-            </div>
-            
-            <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <p className="font-medium">Password requirements:</p>
-              <ul className="space-y-1 ml-4">
-                <li className={`${newPassword.length >= 8 ? 'text-green-600 dark:text-green-400' : ''}`}>
-                  • At least 8 characters
-                </li>
-                <li className={`${/[A-Z]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}`}>
-                  • One uppercase letter
-                </li>
-                <li className={`${/[a-z]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}`}>
-                  • One lowercase letter
-                </li>
-                <li className={`${/[0-9]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}`}>
-                  • One number
-                </li>
-                <li className={`${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}`}>
-                  • One special character
-                </li>
-              </ul>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 transition-colors"
-              >
-                {loading ? 'Changing...' : 'Change Password'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsChangingPassword(false);
-                  setCurrentPassword('');
-                  setNewPassword('');
-                  setConfirmPassword('');
-                }}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : (
-          <p className="text-gray-600 dark:text-gray-300">
-            Keep your account secure by using a strong, unique password.
-          </p>
-        )}
-      </div>
-
-
-
-      {/* Delete Account */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-l-4 border-red-500">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Delete Account
-            </h2>
-            <p className="text-red-600 dark:text-red-400 text-sm mt-1">
-              This action cannot be undone
-            </p>
-          </div>
-          {!isDeletingAccount && (
-            <button
-              onClick={() => setIsDeletingAccount(true)}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Delete Account
-            </button>
-          )}
-        </div>
-
-        {isDeletingAccount ? (
-          <form onSubmit={handleDeleteAccount} className="space-y-4">
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <svg className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <div className="text-sm">
-                  <p className="text-red-800 dark:text-red-200 font-medium mb-1">
-                    Warning: This will permanently delete your account
-                  </p>
-                  <ul className="text-red-700 dark:text-red-300 space-y-1">
-                    <li>• All your data will be permanently removed</li>
-                    <li>• You will lose access to all organizations</li>
-                    {user.role === 'admin' && user.organizationId && (
-                      <li>• If you are the only admin in your organization, you must promote another user, or delete the organization before deleting your account</li>
-                    )}
-                    <li>• This action cannot be undone</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Enter your password to confirm deletion
-              </label>
-              <input
-                type="password"
-                value={deleteConfirmPassword}
-                onChange={(e) => setDeleteConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                required
-                placeholder="Enter your password"
-              />
-            </div>
-            <div className="flex space-x-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-              >
-                {loading ? 'Deleting...' : 'Delete My Account'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsDeletingAccount(false);
-                  setDeleteConfirmPassword('');
-                }}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : (
-          <p className="text-gray-600 dark:text-gray-300">
-            Permanently delete your account and all associated data.
-          </p>
-        )}
-      </div>
+      <UserDeleteSection
+        user={user}
+        isDeletingAccount={isDeletingAccount}
+        deleteConfirmPassword={deleteConfirmPassword}
+        loading={loading}
+        onEdit={() => setIsDeletingAccount(true)}
+        onCancel={() => {
+          setIsDeletingAccount(false);
+          setDeleteConfirmPassword('');
+        }}
+        onSave={handleDeleteAccountWrapper}
+        onDeleteConfirmPasswordChange={setDeleteConfirmPassword}
+      />
     </div>
   );
 };
