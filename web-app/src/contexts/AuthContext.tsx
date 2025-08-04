@@ -96,8 +96,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          firstName: overrideNames?.firstName || pendingUserData?.firstName,
-          lastName: overrideNames?.lastName || pendingUserData?.lastName
+          firstName: pendingUserData?.firstName || overrideNames?.firstName,
+          lastName: pendingUserData?.lastName || overrideNames?.lastName
         })
       });
 
@@ -106,7 +106,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         lastName: overrideNames?.lastName || pendingUserData?.lastName,
         overrideNames,
         pendingUserData
-      });
       });
 
       if (!response.ok) {
