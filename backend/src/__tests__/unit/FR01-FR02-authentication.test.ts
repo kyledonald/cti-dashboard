@@ -34,8 +34,8 @@ app.use(express.json({ limit: '10mb' }));
 
 // Mock authentication middleware
 const mockAuthMiddleware = (req: any, res: any, next: any) => {
-  // Skip auth for registration endpoint
-  if (req.path === '/users/register') {
+  // Skip auth for registration and logout endpoints
+  if (req.path === '/users/register' || req.path === '/users/logout') {
     return next();
   }
   
@@ -110,6 +110,41 @@ app.post('/users/register', (req, res) => {
       lastName: sanitizedLastName,
       role: 'unassigned'
     }
+  });
+});
+
+// Mock logout endpoint
+app.post('/users/logout', (req, res) => {
+  // Test 1: No auth token provided
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: 'No valid authorization header found'
+    });
+  }
+
+  // Test 2: Invalid token format
+  const token = authHeader.replace('Bearer ', '');
+  if (token === 'invalid-token') {
+    return res.status(401).json({
+      error: 'Invalid token',
+      message: 'Token is invalid or expired'
+    });
+  }
+
+  // Test 3: Successful logout
+  if (token === 'valid-token') {
+    return res.status(200).json({
+      message: 'User logged out successfully',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Default case
+  return res.status(200).json({
+    message: 'User logged out successfully',
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -215,6 +250,49 @@ describe('FR01: User Authentication & Dashboard Access', () => {
       expect(response.body.user).toHaveProperty('userId');
       expect(response.body.user).toHaveProperty('email');
       expect(response.body.user).toHaveProperty('role');
+    });
+  });
+});
+
+describe('FR02: User Logout', () => {
+  describe('Logout Tests', () => {
+    it('should reject logout without authentication', async () => {
+      const response = await request(app)
+        .post('/users/logout')
+        .expect(401);
+
+      expect(response.body.error).toBe('Authentication required');
+      expect(response.body.message).toBe('No valid authorization header found');
+    });
+
+    it('should reject logout with invalid token', async () => {
+      const response = await request(app)
+        .post('/users/logout')
+        .set('Authorization', 'Bearer invalid-token')
+        .expect(401);
+
+      expect(response.body.error).toBe('Invalid token');
+      expect(response.body.message).toBe('Token is invalid or expired');
+    });
+
+    it('should allow logout with valid token', async () => {
+      const response = await request(app)
+        .post('/users/logout')
+        .set('Authorization', 'Bearer valid-token')
+        .expect(200);
+
+      expect(response.body.message).toBe('User logged out successfully');
+      expect(response.body).toHaveProperty('timestamp');
+    });
+
+    it('should handle logout with any valid token format', async () => {
+      const response = await request(app)
+        .post('/users/logout')
+        .set('Authorization', 'Bearer any-other-token')
+        .expect(200);
+
+      expect(response.body.message).toBe('User logged out successfully');
+      expect(response.body).toHaveProperty('timestamp');
     });
   });
 }); 

@@ -7,8 +7,8 @@
       "description": "should reject registration with no username/password",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.023,
-      "lastRun": "2025-08-05T15:19:44.770Z"
+      "executionTime": 0.025,
+      "lastRun": "2025-08-05T15:36:15.721Z"
     },
     {
       "id": "FR01-2",
@@ -18,7 +18,7 @@
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:19:44.771Z"
+      "lastRun": "2025-08-05T15:36:15.721Z"
     },
     {
       "id": "FR01-3",
@@ -27,8 +27,8 @@
       "description": "should reject registration with insufficiently complex password",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:19:44.771Z"
+      "executionTime": 0.001,
+      "lastRun": "2025-08-05T15:36:15.721Z"
     },
     {
       "id": "FR01-4",
@@ -38,7 +38,7 @@
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:19:44.771Z"
+      "lastRun": "2025-08-05T15:36:15.721Z"
     },
     {
       "id": "FR01-5",
@@ -47,8 +47,8 @@
       "description": "should reject registration with XSS attempt",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-05T15:19:44.771Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T15:36:15.721Z"
     },
     {
       "id": "FR01-6",
@@ -57,8 +57,8 @@
       "description": "should reject dashboard access without authentication",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:19:44.771Z"
+      "executionTime": 0.001,
+      "lastRun": "2025-08-05T15:36:15.721Z"
     },
     {
       "id": "FR01-7",
@@ -68,21 +68,68 @@
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:19:44.771Z"
+      "lastRun": "2025-08-05T15:36:15.721Z"
+    },
+    {
+      "id": "FR02-8",
+      "requirementId": "FR02",
+      "name": "should reject logout without authentication",
+      "description": "should reject logout without authentication",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-05T15:36:15.721Z"
+    },
+    {
+      "id": "FR02-9",
+      "requirementId": "FR02",
+      "name": "should reject logout with invalid token",
+      "description": "should reject logout with invalid token",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T15:36:15.722Z"
+    },
+    {
+      "id": "FR02-10",
+      "requirementId": "FR02",
+      "name": "should allow logout with valid token",
+      "description": "should allow logout with valid token",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-05T15:36:15.722Z"
+    },
+    {
+      "id": "FR02-11",
+      "requirementId": "FR02",
+      "name": "should handle logout with any valid token format",
+      "description": "should handle logout with any valid token format",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-05T15:36:15.722Z"
     }
   ],
   "summary": {
-    "totalTests": 7,
-    "passedTests": 7,
+    "totalTests": 11,
+    "passedTests": 11,
     "failedTests": 0,
     "successRate": 100,
-    "lastUpdated": "2025-08-05T15:19:44.771Z"
+    "lastUpdated": "2025-08-05T15:36:15.722Z"
   },
   "requirements": {
     "FR01": {
       "id": "FR01",
       "testCount": 7,
       "passedCount": 7,
+      "failedCount": 0,
+      "successRate": 100
+    },
+    "FR02": {
+      "id": "FR02",
+      "testCount": 4,
+      "passedCount": 4,
       "failedCount": 0,
       "successRate": 100
     }
