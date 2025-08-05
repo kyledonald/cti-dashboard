@@ -4,6 +4,7 @@ import {
   CreateThreatActorDTO,
   UpdateThreatActorDTO,
 } from '../models/threat_actor.model';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export class ThreatActorController {
   private service: ThreatActorService;
@@ -36,10 +37,20 @@ export class ThreatActorController {
     }
   }
 
-  async getAllThreatActors(req: Request, res: Response) {
+  async getAllThreatActors(req: AuthenticatedRequest, res: Response) {
     try {
-      const actors = await this.service.getAllThreatActors();
-      res.status(200).json({ threatActors: actors });
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // Enforce organization isolation - users can only see threat actors from their organization
+      const userOrganizationId = req.user.organizationId;
+      
+      // Get all threat actors and filter by organization
+      const allActors = await this.service.getAllThreatActors();
+      const filteredActors = allActors.filter(actor => actor.organizationId === userOrganizationId);
+      
+      res.status(200).json({ threatActors: filteredActors });
     } catch (error: any) {
       console.error('Error in getAllThreatActors controller:', error);
       res.status(500).json({
@@ -49,14 +60,27 @@ export class ThreatActorController {
     }
   }
 
-  async getThreatActorById(req: Request, res: Response) {
+  async getThreatActorById(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const { threatActorId } = req.params;
       const actor = await this.service.getThreatActorById(threatActorId);
 
       if (!actor) {
         return res.status(404).json({ error: 'Threat actor not found.' });
       }
+
+      // Enforce organization isolation - users can only see threat actors from their organization
+      if (actor.organizationId !== req.user.organizationId) {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You can only view threat actors from your own organization' 
+        });
+      }
+
       res.status(200).json({ threatActor: actor });
     } catch (error: any) {
       console.error('Error in getThreatActorById controller:', error);

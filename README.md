@@ -1,21 +1,15 @@
 # CTI Dashboard
 
-A comprehensive Cyber Threat Intelligence dashboard for organizations to manage security incidents, track threat actors, monitor CVEs, and generate AI-powered threat reports.
+A comprehensive Cyber Threat Intelligence dashboard for SMEs to manage security incidents, track threat actors, monitor CVEs, and generate AI-powered threat summaries.
 
 ## Features
 
 ### Core Functionality
 - **Security Incidents Management**: Create, track, and manage security incidents with Kanban-style workflow
-- **Threat Actor Intelligence**: Comprehensive threat actor profiles with country flags, risk assessments, and targeting analysis
-- **CVE Monitoring**: Real-time CVE data from Shodan with CVSS scoring and known exploited vulnerabilities
+- **Threat Actor Intelligence**: Build up threat actor profiles
+- **CVE Monitoring**: Real-time CVE data from Shodan with CVSS scoring and known exploited vulnerabilities (KEV)
 - **User Management**: Role-based access control (Admin, Editor, Viewer) with organization-specific data
-- **AI Threat Reports**: AI-generated comprehensive threat reports for security incidents using Google Gemini
-
-### AI Threat Reports Feature
-- **Automatic Report Generation**: Generate detailed threat reports for any security incident
-- **Structured Analysis**: Executive summary, threat analysis, risk assessment, recommendations, and IOCs
-- **Organization-Scoped**: Reports are organization-specific and respect user permissions
-- **Real-time Generation**: Uses Google Gemini AI for professional, actionable threat intelligence
+- **AI Summary Generation**: Generate downloadable threat summaries for any security incident
 
 
 ## Technology Stack
@@ -23,7 +17,7 @@ A comprehensive Cyber Threat Intelligence dashboard for organizations to manage 
 - **Frontend**: React, TypeScript, Tailwind CSS, Vite
 - **Backend**: Node.js, Express, TypeScript, Firebase Functions
 - **Database**: Firestore
-- **AI**: Google Gemini API
+- **AI**: Google Gemini API (1.5 Flash)
 - **Authentication**: Firebase Auth
 - **CVE Data**: Shodan API
 

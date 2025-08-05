@@ -4,6 +4,7 @@ import {
   CreateOrganizationDTO,
   UpdateOrganizationDTO,
 } from '../models/organization.model';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export class OrganizationController {
   private service: OrganizationService;
@@ -36,10 +37,24 @@ export class OrganizationController {
     }
   }
 
-  async getAllOrganizations(req: Request, res: Response) {
+  async getAllOrganizations(req: AuthenticatedRequest, res: Response) {
     try {
-      const organizations = await this.service.getAllOrganizations();
-      res.status(200).json({ organizations: organizations });
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // Enforce organization isolation - users can only see their own organization
+      const userOrganizationId = req.user.organizationId;
+      
+      // Get all organizations and filter to only return the user's organization
+      const allOrganizations = await this.service.getAllOrganizations();
+      const userOrganization = allOrganizations.find(org => org.organizationId === userOrganizationId);
+      
+      if (!userOrganization) {
+        return res.status(404).json({ error: 'Your organization not found.' });
+      }
+      
+      res.status(200).json({ organizations: [userOrganization] });
     } catch (error: any) {
       console.error('Error in getAllOrganizations controller:', error);
       res.status(500).json({
@@ -49,8 +64,12 @@ export class OrganizationController {
     }
   }
 
-  async getOrganizationById(req: Request, res: Response) {
+  async getOrganizationById(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const { organizationId } = req.params;
       const organization =
         await this.service.getOrganizationById(organizationId);
@@ -58,6 +77,15 @@ export class OrganizationController {
       if (!organization) {
         return res.status(404).json({ error: 'Organization not found.' });
       }
+
+      // Enforce organization isolation - users can only see their own organization
+      if (organization.organizationId !== req.user.organizationId) {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You can only view your own organization' 
+        });
+      }
+
       res.status(200).json({ organization: organization });
     } catch (error: any) {
       console.error('Error in getOrganizationById controller:', error);
@@ -68,10 +96,22 @@ export class OrganizationController {
     }
   }
 
-  async updateOrganization(req: Request, res: Response) {
+  async updateOrganization(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const { organizationId } = req.params;
       const updateData: UpdateOrganizationDTO = req.body;
+
+      // Enforce organization isolation - users can only update their own organization
+      if (organizationId !== req.user.organizationId) {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You can only update your own organization' 
+        });
+      }
 
       const updated = await this.service.updateOrganization(
         organizationId,
@@ -91,9 +131,22 @@ export class OrganizationController {
     }
   }
 
-  async deleteOrganization(req: Request, res: Response) {
+  async deleteOrganization(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const { organizationId } = req.params;
+
+      // Enforce organization isolation - users can only delete their own organization
+      if (organizationId !== req.user.organizationId) {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You can only delete your own organization' 
+        });
+      }
+
       const deleted = await this.service.deleteOrganization(organizationId);
 
       if (!deleted) {

@@ -100,9 +100,15 @@ export class UserController {
 
   async getAllUsers(req: AuthenticatedRequest, res: Response) {
     try {
-      const { organizationId } = req.query; // filter by organization
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
 
-      const users = await this.service.getAllUsers(organizationId as string);
+      // Enforce organization isolation - users can only see users from their organization
+      const userOrganizationId = req.user.organizationId;
+      
+      // Only allow filtering by the user's own organization
+      const users = await this.service.getAllUsers(userOrganizationId);
       res.status(200).json({ users: users });
     } catch (error: any) {
       console.error('Error in getAllUsers controller:', error);
@@ -114,13 +120,25 @@ export class UserController {
 
   async getUserById(req: AuthenticatedRequest, res: Response) {
     try {
-      const { userId } = req.params;
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
 
+      const { userId } = req.params;
       const user = await this.service.getUserById(userId);
 
       if (!user) {
         return res.status(404).json({ error: 'User not found.' });
       }
+
+      // Enforce organization isolation - users can only see users from their organization
+      if (user.organizationId !== req.user.organizationId) {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You can only view users from your own organization' 
+        });
+      }
+
       res.status(200).json({ user: user });
     } catch (error: any) {
       console.error('Error in getUserById controller:', error);

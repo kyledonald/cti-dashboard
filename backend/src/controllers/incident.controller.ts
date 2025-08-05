@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import { IncidentService } from '../services/incident.service';
 import { CreateIncidentDTO, UpdateIncidentDTO, AddCommentDTO } from '../models/incident.model';
 import { CVEService } from '../services/cve.service'; 
-import { CVEResponse } from '../models/cve.model'; 
+import { CVEResponse } from '../models/cve.model';
+import { AuthenticatedRequest } from '../middleware/auth.middleware'; 
 
 export class IncidentController {
   private service: IncidentService;
@@ -44,13 +45,16 @@ export class IncidentController {
     }
   }
 
-  async getAllIncidents(req: Request, res: Response) {
+  async getAllIncidents(req: AuthenticatedRequest, res: Response) {
     try {
-      const { organizationId } = req.query; // filter by organization
-  
-      const incidents = await this.service.getAllIncidents(
-        organizationId as string,
-      );
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // Enforce organization isolation - users can only see incidents from their organization
+      const userOrganizationId = req.user.organizationId;
+      
+      const incidents = await this.service.getAllIncidents(userOrganizationId);
       res.status(200).json({ incidents: incidents });
     } catch (error: any) {
       console.error('Error in getAllIncidents controller:', error);
@@ -60,13 +64,25 @@ export class IncidentController {
     }
   }
 
-  async getIncidentById(req: Request, res: Response) {
+  async getIncidentById(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const { incidentId } = req.params;
       const incident = await this.service.getIncidentById(incidentId);
 
       if (!incident) {
         return res.status(404).json({ error: 'Incident not found.' });
+      }
+
+      // Enforce organization isolation - users can only see incidents from their organization
+      if (incident.organizationId !== req.user.organizationId) {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You can only view incidents from your own organization' 
+        });
       }
 
       let cveDetails: CVEResponse[] = [];
@@ -83,10 +99,28 @@ export class IncidentController {
     }
   }
 
-  async updateIncident(req: Request, res: Response) {
+  async updateIncident(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const { incidentId } = req.params;
       const updateData: UpdateIncidentDTO = req.body;
+      
+      // First get the incident to check organization access
+      const incident = await this.service.getIncidentById(incidentId);
+      if (!incident) {
+        return res.status(404).json({ error: 'Incident not found.' });
+      }
+
+      // Enforce organization isolation - users can only update incidents from their organization
+      if (incident.organizationId !== req.user.organizationId) {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You can only update incidents from your own organization' 
+        });
+      }
   
       const updated = await this.service.updateIncident(incidentId, updateData);
 
@@ -102,9 +136,27 @@ export class IncidentController {
     }
   }
 
-  async deleteIncident(req: Request, res: Response) {
+  async deleteIncident(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const { incidentId } = req.params;
+      
+      // First get the incident to check organization access
+      const incident = await this.service.getIncidentById(incidentId);
+      if (!incident) {
+        return res.status(404).json({ error: 'Incident not found.' });
+      }
+
+      // Enforce organization isolation - users can only delete incidents from their organization
+      if (incident.organizationId !== req.user.organizationId) {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You can only delete incidents from your own organization' 
+        });
+      }
   
       const deleted = await this.service.deleteIncident(incidentId);
 
