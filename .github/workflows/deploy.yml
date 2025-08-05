@@ -112,6 +112,8 @@ jobs:
           
           # Run the tests
           echo "🚀 Running E2E tests..."
+          echo "🔍 Debug: TEST_USER_EMAIL is set: $([ -n "$TEST_USER_EMAIL" ] && echo "YES" || echo "NO")"
+          echo "🔍 Debug: TEST_USER_PASSWORD is set: $([ -n "$TEST_USER_PASSWORD" ] && echo "YES" || echo "NO")"
           npm run test:e2e
           TEST_EXIT_CODE=$?
           

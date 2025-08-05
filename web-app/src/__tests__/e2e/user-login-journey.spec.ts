@@ -19,7 +19,10 @@ test.describe('Recorded E2E Test - Login Flow', () => {
     }
     
     console.log('📋 Step 1: Navigate to application');
-    await page.goto(process.env.CI ? 'http://localhost:4173/' : 'http://localhost:5173/');
+    const url = process.env.CI ? 'http://localhost:4173/' : 'http://localhost:5173/';
+    console.log(`🔗 Navigating to: ${url}`);
+    await page.goto(url);
+    console.log('✅ Navigation completed');
     
     console.log('📋 Step 2: Start login process');
     await page.getByRole('button', { name: 'Sign In' }).click();
