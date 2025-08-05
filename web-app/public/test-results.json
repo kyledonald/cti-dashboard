@@ -1,0 +1,90 @@
+{
+  "testResults": [
+    {
+      "id": "FR01-1",
+      "requirementId": "FR01",
+      "name": "should reject registration with no username/password",
+      "description": "should reject registration with no username/password",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.031,
+      "lastRun": "2025-08-05T15:16:02.138Z"
+    },
+    {
+      "id": "FR01-2",
+      "requirementId": "FR01",
+      "name": "should reject registration with missing fields",
+      "description": "should reject registration with missing fields",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T15:16:02.139Z"
+    },
+    {
+      "id": "FR01-3",
+      "requirementId": "FR01",
+      "name": "should reject registration with insufficiently complex password",
+      "description": "should reject registration with insufficiently complex password",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T15:16:02.139Z"
+    },
+    {
+      "id": "FR01-4",
+      "requirementId": "FR01",
+      "name": "should accept registration with valid credentials",
+      "description": "should accept registration with valid credentials",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T15:16:02.139Z"
+    },
+    {
+      "id": "FR01-5",
+      "requirementId": "FR01",
+      "name": "should reject registration with XSS attempt",
+      "description": "should reject registration with XSS attempt",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T15:16:02.139Z"
+    },
+    {
+      "id": "FR01-6",
+      "requirementId": "FR01",
+      "name": "should reject dashboard access without authentication",
+      "description": "should reject dashboard access without authentication",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T15:16:02.139Z"
+    },
+    {
+      "id": "FR01-7",
+      "requirementId": "FR01",
+      "name": "should allow dashboard access with valid authentication",
+      "description": "should allow dashboard access with valid authentication",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T15:16:02.139Z"
+    }
+  ],
+  "summary": {
+    "totalTests": 7,
+    "passedTests": 7,
+    "failedTests": 0,
+    "successRate": 100,
+    "lastUpdated": "2025-08-05T15:16:02.139Z"
+  },
+  "requirements": {
+    "FR01": {
+      "id": "FR01",
+      "testCount": 7,
+      "passedCount": 7,
+      "failedCount": 0,
+      "successRate": 100
+    }
+  }
+}
