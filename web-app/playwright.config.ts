@@ -36,17 +36,15 @@ export default defineConfig({
     ]),
   ],
 
-  webServer: process.env.CI ? {
-    command: 'npm run preview',
-    url: 'http://localhost:4173',
-    reuseExistingServer: false,
-    timeout: 120 * 1000,
-  } : {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
-    timeout: 120 * 1000,
-  },
+  // Only use webServer for local development
+  ...(process.env.CI ? {} : {
+    webServer: {
+      command: 'npm run dev',
+      url: 'http://localhost:5173',
+      reuseExistingServer: true,
+      timeout: 120 * 1000,
+    },
+  }),
 
   // Global test timeout
   timeout: 30000,

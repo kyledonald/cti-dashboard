@@ -78,8 +78,49 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Run E2E tests
-        run: npm run test:e2e
+      - name: Start preview server and run E2E tests
+        timeout-minutes: 10
+        run: |
+          # Start the preview server in the background
+          echo "Starting preview server..."
+          npm run preview &
+          PREVIEW_PID=$!
+          
+          # Wait for server to be ready by checking if it responds
+          echo "Waiting for preview server to be ready..."
+          SERVER_READY=false
+          for i in {1..30}; do
+            if curl -s http://localhost:4173 > /dev/null 2>&1; then
+              echo "✅ Server is ready after $i attempts!"
+              SERVER_READY=true
+              break
+            fi
+            echo "⏳ Attempt $i/30: Server not ready yet, waiting 2s..."
+            sleep 2
+          done
+          
+          if [ "$SERVER_READY" = false ]; then
+            echo "❌ Server failed to start after 60 seconds"
+            echo "Preview server logs:"
+            ps aux | grep preview
+            kill $PREVIEW_PID 2>/dev/null || true
+            exit 1
+          fi
+          
+          # Give server a moment to fully stabilize
+          sleep 3
+          
+          # Run the tests
+          echo "🚀 Running E2E tests..."
+          npm run test:e2e
+          TEST_EXIT_CODE=$?
+          
+          # Clean up
+          echo "🧹 Cleaning up preview server..."
+          kill $PREVIEW_PID 2>/dev/null || true
+          
+          # Exit with test result
+          exit $TEST_EXIT_CODE
         env:
           CI: true
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
