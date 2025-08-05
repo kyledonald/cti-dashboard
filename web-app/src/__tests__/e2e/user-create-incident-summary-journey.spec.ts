@@ -18,10 +18,7 @@ test.describe('Comprehensive Incident Management Journey', () => {
     }
     
     console.log('📋 Step 1: Login to application');
-    const url = process.env.CI ? 'http://localhost:4173/' : 'http://localhost:5173/';
-    console.log(`🔗 Navigating to: ${url}`);
-    await page.goto(url);
-    console.log('✅ Navigation completed');
+    await page.goto('http://localhost:5173/');
     await page.getByRole('button', { name: 'Sign In' }).click();
     await page.getByRole('button', { name: 'Continue with Email' }).click();
     await page.getByRole('textbox', { name: 'Email' }).click();

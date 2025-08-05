@@ -23,28 +23,14 @@ export default defineConfig({
         headless: process.env.HEADLESS !== 'false',
       },
     },
-    // Only include other browsers for local development
-    ...(process.env.CI ? [] : [
-      {
-        name: 'firefox',
-        use: { ...devices['Desktop Firefox'] },
-      },
-      {
-        name: 'webkit',
-        use: { ...devices['Desktop Safari'] },
-      },
-    ]),
   ],
 
-  // Only use webServer for local development
-  ...(process.env.CI ? {} : {
-    webServer: {
-      command: 'npm run dev',
-      url: 'http://localhost:5173',
-      reuseExistingServer: true,
-      timeout: 120 * 1000,
-    },
-  }),
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: true,
+    timeout: 120 * 1000,
+  },
 
   // Global test timeout
   timeout: 60000, // Increased to 60 seconds
