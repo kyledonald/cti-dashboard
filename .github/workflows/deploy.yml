@@ -73,7 +73,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install chromium
 
       - name: Build application
         run: npm run build
@@ -82,6 +82,8 @@ jobs:
         run: npm run test:e2e
         env:
           CI: true
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
 
   deploy:
     needs: [test-backend, test-frontend]
