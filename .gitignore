@@ -31,7 +31,6 @@ build/
 backend/node_modules/
 backend/dist/
 backend/.gcloudignore
-backend/.gitignore
 
 # Testing
 playwright-report/
