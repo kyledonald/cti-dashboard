@@ -26,6 +26,14 @@ let mockUsers = [
     organizationId: 'org-1'
   },
   {
+    userId: 'second-admin-user-id',
+    email: 'second-admin@example.com',
+    firstName: 'Second',
+    lastName: 'Admin',
+    role: 'admin',
+    organizationId: 'org-1'
+  },
+  {
     userId: 'editor-user-id',
     email: 'editor@example.com',
     firstName: 'Editor',
@@ -82,10 +90,12 @@ const mockAuthMiddleware = (req: any, res: any, next: any) => {
   // Mock different users based on token
   if (token === 'admin-token') {
     req.user = mockUsers[0]; // admin user
+  } else if (token === 'second-admin-token') {
+    req.user = mockUsers[1]; // second admin user
   } else if (token === 'editor-token') {
-    req.user = mockUsers[1]; // editor user
+    req.user = mockUsers[2]; // editor user
   } else if (token === 'viewer-token') {
-    req.user = mockUsers[2]; // viewer user
+    req.user = mockUsers[3]; // viewer user
   } else {
     return res.status(401).json({
       error: 'Invalid token',
@@ -179,12 +189,18 @@ app.put('/users/:userId/role', (req: any, res) => {
     });
   }
   
-  // Test 5: Cannot change your own role
+  // Test 5: Cannot change your own role if you're the only admin
   if (userId === req.user.userId) {
-    return res.status(400).json({
-      error: 'Cannot change own role',
-      message: 'You cannot change your own role'
-    });
+    // Check if this user is the only admin in the organization
+    const orgUsers = mockUsers.filter(u => u.organizationId === req.user.organizationId);
+    const adminUsers = orgUsers.filter(u => u.role === 'admin');
+    
+    if (adminUsers.length === 1 && adminUsers[0].userId === req.user.userId) {
+      return res.status(400).json({
+        error: 'Cannot change own role',
+        message: 'You cannot change your own role as you are the only admin in the organization'
+      });
+    }
   }
   
   // Test 6: Successful role update
@@ -210,6 +226,14 @@ describe('User Role Management & Viewing', () => {
         email: 'admin@example.com',
         firstName: 'Admin',
         lastName: 'User',
+        role: 'admin',
+        organizationId: 'org-1'
+      },
+      {
+        userId: 'second-admin-user-id',
+        email: 'second-admin@example.com',
+        firstName: 'Second',
+        lastName: 'Admin',
         role: 'admin',
         organizationId: 'org-1'
       },
@@ -287,7 +311,11 @@ describe('User Role Management & Viewing', () => {
       expect(response.body.message).toBe('You can only modify users in your organization');
     });
 
-    it('should reject admin trying to change their own role', async () => {
+    it('should reject admin trying to change their own role when they are the only admin', async () => {
+      // Temporarily remove the second admin to create a single admin scenario
+      const originalMockUsers = [...mockUsers];
+      mockUsers = mockUsers.filter(u => u.userId !== 'second-admin-user-id');
+      
       const response = await request(app)
         .put('/users/admin-user-id/role')
         .set('Authorization', 'Bearer admin-token')
@@ -295,7 +323,22 @@ describe('User Role Management & Viewing', () => {
         .expect(400);
 
       expect(response.body.error).toBe('Cannot change own role');
-      expect(response.body.message).toBe('You cannot change your own role');
+      expect(response.body.message).toBe('You cannot change your own role as you are the only admin in the organization');
+      
+      // Restore the original mock data
+      mockUsers = originalMockUsers;
+    });
+
+    it('should allow admin to change their own role when there are other admins', async () => {
+      const response = await request(app)
+        .put('/users/second-admin-user-id/role')
+        .set('Authorization', 'Bearer second-admin-token')
+        .send({ role: 'editor' })
+        .expect(200);
+
+      expect(response.body.message).toBe('User role updated successfully');
+      expect(response.body.user.role).toBe('editor');
+      expect(response.body.user.userId).toBe('second-admin-user-id');
     });
 
     it('should allow admin to assign valid role to user in same organization', async () => {
@@ -318,9 +361,9 @@ describe('User Role Management & Viewing', () => {
         .set('Authorization', 'Bearer admin-token')
         .expect(200);
 
-      expect(response.body.users).toHaveLength(3); // admin, editor, viewer from org-1
+      expect(response.body.users).toHaveLength(4); // 2 admins, editor, viewer from org-1
       expect(response.body.users.every((user: any) => user.organizationId === 'org-1')).toBe(true);
-      expect(response.body.users.some((user: any) => user.role === 'admin')).toBe(true);
+      expect(response.body.users.filter((user: any) => user.role === 'admin')).toHaveLength(2);
       expect(response.body.users.some((user: any) => user.role === 'editor')).toBe(true);
       expect(response.body.users.some((user: any) => user.role === 'viewer')).toBe(true);
     });
