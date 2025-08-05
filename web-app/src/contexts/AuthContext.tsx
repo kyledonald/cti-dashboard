@@ -101,12 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
       });
 
-      console.log('Sending registration request with data:', {
-        firstName: overrideNames?.firstName || pendingUserData?.firstName,
-        lastName: overrideNames?.lastName || pendingUserData?.lastName,
-        overrideNames,
-        pendingUserData
-      });
+  
 
       if (!response.ok) {
         throw new Error(`Registration failed: ${response.status}`);
@@ -153,9 +148,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (firebaseUser) {
         try {
-          console.log('Auth state changed - Firebase user:', firebaseUser.email, 'Pending data:', pendingUserData);
+
           const user = await createOrUpdateUser(firebaseUser, pendingUserData || undefined);
-          console.log('User created/updated:', user);
+          
           setUser(user);
           // Clear pending data after successful creation
           setPendingUserData(null);
@@ -188,7 +183,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             updatedAt: { _seconds: Date.now() / 1000, _nanoseconds: 0 },
           };
           setUser(tempUser);
-          console.log('Using temporary unassigned user due to backend error:', tempUser);
+
         }
       } else {
         setUser(null);
@@ -224,7 +219,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
-      console.log('Signing up with email - Setting pending data:', { firstName, lastName });
+      
       // Store the names for use in onAuthStateChanged
       setPendingUserData({ firstName, lastName });
       
@@ -235,7 +230,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         displayName: `${firstName} ${lastName}`
       });
       
-      console.log('Firebase user created, display name updated');
+      
       // User creation in backend will be handled by onAuthStateChanged
     } catch (error) {
       console.error('Error signing up with email:', error);

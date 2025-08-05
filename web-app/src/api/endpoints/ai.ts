@@ -8,7 +8,7 @@ export const generateAISummary = async (incident: Incident, users: User[], threa
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🤖 AI Summary attempt ${attempt + 1}/${maxRetries + 1}`);
+
       
       const response = await aiApi.post('/cves/ai-summary', {
         incident,
@@ -16,7 +16,7 @@ export const generateAISummary = async (incident: Incident, users: User[], threa
         threatActors
       });
       
-      console.log('✅ AI Summary generated successfully');
+      
       return response.data.summary;
       
     } catch (error: any) {
@@ -25,7 +25,7 @@ export const generateAISummary = async (incident: Incident, users: User[], threa
       // If it's a 503 error and we haven't exhausted retries, wait and retry
       if (error.response?.status === 503 && attempt < maxRetries) {
         const delay = baseDelay * Math.pow(2, attempt); // Exponential backoff: 1s, 2s, 4s, 8s, 16s
-        console.log(`⏳ Gemini API overloaded (503). Retrying in ${delay}ms...`);
+
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }

@@ -32,11 +32,11 @@ export const useUserProfileActions = ({
     setLeavingOrg(true);
     
     try {
-      console.log('Attempting to leave organization for user:', user.userId);
+  
       
       await usersApi.leaveOrganization(user.userId);
       
-      console.log('Successfully left organization');
+      
       // Redirect to refresh the app state
       window.location.reload();
     } catch (error: any) {

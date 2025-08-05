@@ -6,7 +6,7 @@ export const organizationsApi = {
   getAll: async (): Promise<Organization[]> => {
     try {
       const response = await api.get('/organizations');
-      console.log('Organizations API response:', response.data);
+
       
       // Ensure response is an array
       if (Array.isArray(response.data)) {

@@ -34,29 +34,23 @@ export class AIService {
     if (!userRequests || now > userRequests.resetTime) {
       // First request or window expired
       aiSummaryRequests.set(userId, { count: 1, resetTime: now + windowMs });
-      console.log(`Rate limit: New window for user ${userId}`);
+  
       return { allowed: true };
     }
 
     if (userRequests.count >= maxRequests) {
       const retryAfter = Math.ceil((userRequests.resetTime - now) / 1000);
-      console.log(`Rate limit: User ${userId} exceeded limit (${userRequests.count}/${maxRequests})`);
+  
       return { allowed: false, retryAfter };
     }
 
     userRequests.count++;
-    console.log(`Rate limit: User ${userId} request ${userRequests.count}/${maxRequests}`);
+
     return { allowed: true };
   }
 
   // Generate AI summary for incidents
   async generateIncidentSummary(request: AISummaryRequest): Promise<string> {
-    console.log('AI Summary Request received:', {
-      hasIncident: !!request.incident,
-      hasUsers: !!request.users,
-      hasThreatActors: !!request.threatActors,
-      incidentTitle: request.incident?.title
-    });
 
     // Validate required data
     if (!request.incident) {
@@ -104,7 +98,7 @@ Describe how to detect this type of threat and immediate response actions. Provi
 
 Format your response exactly as shown above with these 3 sections. Keep it short and concise. Use professional language suitable for business stakeholders who may not have deep technical knowledge.`;
 
-    console.log('Calling Gemini API with prompt length:', prompt.length);
+
 
     // Call Gemini API with exponential backoff retry for 503 errors
     const maxRetries = 3;
@@ -113,7 +107,7 @@ Format your response exactly as shown above with these 3 sections. Keep it short
     
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`🤖 Gemini API attempt ${attempt + 1}/${maxRetries + 1}`);
+
         
         geminiResponse = await axios.post(
           `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`,
@@ -132,7 +126,7 @@ Format your response exactly as shown above with these 3 sections. Keep it short
           }
         );
         
-        console.log('✅ Gemini API call successful');
+
         break; // Success, exit retry loop
         
       } catch (error: any) {
@@ -141,7 +135,7 @@ Format your response exactly as shown above with these 3 sections. Keep it short
         // If it's a 503 error and we haven't exhausted retries, wait and retry
         if (error.response?.status === 503 && attempt < maxRetries) {
           const delay = baseDelay * Math.pow(2, attempt); // Exponential backoff: 1s, 2s, 4s
-          console.log(`⏳ Gemini API overloaded (503). Retrying in ${delay}ms...`);
+
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -151,8 +145,7 @@ Format your response exactly as shown above with these 3 sections. Keep it short
       }
     }
 
-    console.log('Gemini API response status:', geminiResponse.status);
-    console.log('Gemini API response data keys:', Object.keys(geminiResponse.data || {}));
+
 
     if (!(geminiResponse.data as any)?.candidates?.[0]?.content?.parts?.[0]?.text) {
       console.error('Invalid Gemini API response structure:', geminiResponse.data);
@@ -160,7 +153,7 @@ Format your response exactly as shown above with these 3 sections. Keep it short
     }
 
     const summary = (geminiResponse.data as any).candidates[0].content.parts[0].text;
-    console.log('AI Summary generated successfully, length:', summary.length);
+
     
     return summary;
   }

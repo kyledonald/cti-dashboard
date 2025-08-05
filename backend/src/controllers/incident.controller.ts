@@ -30,7 +30,7 @@ export class IncidentController {
           .status(400)
           .json({ error: 'Missing required incident fields.' });
       }
-      // TODO: Add authorization: Users can only create incidents for their own organization
+  
       const newIncident = await this.service.createIncident(incidentData);
       res.status(201).json({
         message: 'Incident created successfully',
@@ -47,7 +47,7 @@ export class IncidentController {
   async getAllIncidents(req: Request, res: Response) {
     try {
       const { organizationId } = req.query; // filter by organization
-      // TODO: Add authorization: Users can only see incidents from their own organization or admins can see all.
+  
       const incidents = await this.service.getAllIncidents(
         organizationId as string,
       );
@@ -87,7 +87,7 @@ export class IncidentController {
     try {
       const { incidentId } = req.params;
       const updateData: UpdateIncidentDTO = req.body;
-      // TODO: Add authorization: Users can only update incidents in their org/assigned to them/if admin
+  
       const updated = await this.service.updateIncident(incidentId, updateData);
 
       if (!updated) {
@@ -105,7 +105,7 @@ export class IncidentController {
   async deleteIncident(req: Request, res: Response) {
     try {
       const { incidentId } = req.params;
-      // TODO: Add authorization: Only admins can delete incidents
+  
       const deleted = await this.service.deleteIncident(incidentId);
 
       if (!deleted) {
@@ -129,7 +129,7 @@ export class IncidentController {
         return res.status(400).json({ error: 'Missing required comment fields.' });
       }
 
-      // TODO: Add authorization: Users can only add comments to incidents in their organization
+  
       const updatedIncident = await this.service.addComment(incidentId, commentData);
 
       if (!updatedIncident) {
@@ -155,7 +155,7 @@ export class IncidentController {
         return res.status(400).json({ error: 'User ID is required.' });
       }
 
-      // TODO: Add proper authorization middleware
+  
       // For now, we'll pass the user info in the request body
       const updatedIncident = await this.service.deleteComment(incidentId, commentId, userId, userRole);
 

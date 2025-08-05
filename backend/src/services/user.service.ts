@@ -14,7 +14,6 @@ export class UserService {
   }
 
   async createUser(userData: CreateUserDTO): Promise<User> {
-    console.log('Creating user with data:', userData);
     const userRef = this.collection.doc();
     const userId = userRef.id;
 
@@ -40,7 +39,6 @@ export class UserService {
       updatedAt: FieldValue.serverTimestamp(),
     };
 
-    console.log('Created user:', newUser);
     await userRef.set(newUser);
     return newUser;
   }
@@ -95,7 +93,6 @@ export class UserService {
     userId: string,
     updateData: UpdateUserDTO,
   ): Promise<User | null> {
-    console.log('Updating user:', userId, 'with data:', updateData);
     const userRef = this.collection.doc(userId);
     const doc = await userRef.get();
 
@@ -116,13 +113,11 @@ export class UserService {
     if (updateData.status !== undefined)
       dataToUpdate.status = updateData.status;
 
-    console.log('Updating user with dataToUpdate:', dataToUpdate);
     await userRef.update(dataToUpdate);
     
     // Fetch and return the updated user
     const updatedDoc = await userRef.get();
     const updatedUser = updatedDoc.data() as User;
-    console.log('Updated user result:', updatedUser);
     return updatedUser;
   }
 
@@ -151,7 +146,7 @@ export class UserService {
     if (!doc.exists) {
       return false;
     }
-    // TODO: Add a check if user has active incidents or is an org admin before deleting
+
     await userRef.delete();
     return true;
   }
@@ -164,7 +159,6 @@ export class UserService {
 
   // Method to allow users to leave their organization
   async leaveOrganization(userId: string): Promise<User | null> {
-    console.log('User leaving organization:', userId);
     const userRef = this.collection.doc(userId);
     const doc = await userRef.get();
 
@@ -185,13 +179,11 @@ export class UserService {
       updatedAt: FieldValue.serverTimestamp()
     };
 
-    console.log('Updating user to leave organization:', dataToUpdate);
     await userRef.update(dataToUpdate);
     
     // Fetch and return the updated user
     const updatedDoc = await userRef.get();
     const updatedUser = updatedDoc.data() as User;
-    console.log('User left organization result:', updatedUser);
     return updatedUser;
   }
 

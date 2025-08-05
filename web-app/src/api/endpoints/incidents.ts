@@ -6,7 +6,7 @@ export const incidentsApi = {
   getAll: async (): Promise<Incident[]> => {
     try {
       const response = await api.get('/incidents');
-      console.log('Incidents API response:', response.data);
+  
       
       // Ensure response is an array
       if (Array.isArray(response.data)) {

@@ -22,8 +22,7 @@ export class UserController {
         return res.status(400).json({ error: 'Missing required user fields: email, googleId.' });
       }
 
-      // TODO: Add more validation for email format, valid role, existing organizationId
-      // TODO: Add authentication/authorization: Only admin can create users
+      
 
       const newUser = await this.service.createUser(userData);
       res
@@ -79,14 +78,7 @@ export class UserController {
         organizationId: ''
       };
 
-      // Log the user data being created for debugging
-      console.log('Creating user with data:', {
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        requestBody: req.body,
-        decodedTokenName: decodedToken.name
-      });
+
 
       const newUser = await this.service.createUser(userData);
       res.status(201).json({ 
@@ -105,7 +97,7 @@ export class UserController {
   async getAllUsers(req: AuthenticatedRequest, res: Response) {
     try {
       const { organizationId } = req.query; // filter by organization
-      // TODO: Add authorization: Users can only see users from their own organization.
+
       const users = await this.service.getAllUsers(organizationId as string);
       res.status(200).json({ users: users });
     } catch (error: any) {
@@ -119,7 +111,7 @@ export class UserController {
   async getUserById(req: AuthenticatedRequest, res: Response) {
     try {
       const { userId } = req.params;
-      // TODO: Add authorization: Users can only view their own profile, or admins can view any.
+
       const user = await this.service.getUserById(userId);
 
       if (!user) {

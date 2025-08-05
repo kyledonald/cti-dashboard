@@ -19,21 +19,16 @@ let firestoreConfig: any = {};
 const projectId = process.env.GCLOUD_PROJECT || 'cti-dashboard-459422';
 const databaseId = process.env.FIRESTORE_DATABASE_ID || 'cti-db';
 
-console.log('Environment variables check:', {
-  GCLOUD_PROJECT: projectId,
-  FIRESTORE_DATABASE_ID: databaseId
-});
 
-console.log(
-  `Connecting to GCP Firestore for project: ${projectId}, database: ${databaseId}`,
-);
+
+
 
 firestoreConfig.projectId = projectId;
 firestoreConfig.databaseId = databaseId;
 
-console.log('Firestore config:', JSON.stringify(firestoreConfig, null, 2));
+
 export const db = new Firestore(firestoreConfig);
-console.log('Firestore connection established successfully');
+
 
 const app = express();
 

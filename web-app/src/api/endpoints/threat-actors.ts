@@ -6,7 +6,7 @@ export const threatActorsApi = {
   getAll: async (): Promise<ThreatActor[]> => {
     try {
       const response = await api.get('/threat-actors');
-      console.log('Threat Actors API response:', response.data);
+  
       
       // Ensure response is an array
       if (Array.isArray(response.data)) {

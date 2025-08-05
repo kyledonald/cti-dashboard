@@ -21,7 +21,7 @@ export class ThreatActorController {
           .status(400)
           .json({ error: 'Threat actor name is required.' });
       }
-      // TODO: Add authorization: Only admins/editors can create threat actors
+  
       const newActor = await this.service.createThreatActor(actorData);
       res.status(201).json({
         message: 'Threat actor created successfully',
@@ -71,7 +71,7 @@ export class ThreatActorController {
     try {
       const { threatActorId } = req.params;
       const updateData: UpdateThreatActorDTO = req.body;
-      // TODO: Add authorization: Only admins/editors can update threat actors
+  
       const updated = await this.service.updateThreatActor(
         threatActorId,
         updateData,
@@ -93,7 +93,7 @@ export class ThreatActorController {
   async deleteThreatActor(req: Request, res: Response) {
     try {
       const { threatActorId } = req.params;
-      // TODO: Add authorization: Only admins/editors can delete threat actors
+  
       const deleted = await this.service.deleteThreatActor(threatActorId);
 
       if (!deleted) {
