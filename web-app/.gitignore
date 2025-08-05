@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 test-results.json
+web-app/public/test-results.json
+public/test-results.json
