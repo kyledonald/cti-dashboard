@@ -34,6 +34,40 @@ export class OrganizationService {
     return newOrganization;
   }
 
+  async createOrganizationAndAssignUser(orgData: CreateOrganizationDTO, userId: string): Promise<Organization> {
+    const organizationRef = this.collection.doc();
+    const organizationId = organizationRef.id;
+
+    const newOrganization: Organization = {
+      organizationId: organizationId,
+      name: orgData.name,
+      description: orgData.description || null,
+      status: 'active',
+      nationality: orgData.nationality ?? null,
+      industry: orgData.industry ?? null,
+      usedSoftware: orgData.usedSoftware ?? [],
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    // Use a batch write to ensure both operations succeed or fail together
+    const batch = this.db.batch();
+    
+    // Create the organization
+    batch.set(organizationRef, newOrganization);
+    
+    // Update the user to be part of this organization as admin
+    const userRef = this.db.collection('users').doc(userId);
+    batch.update(userRef, {
+      organizationId: organizationId,
+      role: 'admin',
+      updatedAt: FieldValue.serverTimestamp()
+    });
+
+    await batch.commit();
+    return newOrganization;
+  }
+
   async getAllOrganizations(): Promise<Organization[]> {
     try {
       const snapshot = await this.collection.orderBy('name').get();

@@ -22,8 +22,6 @@ export class UserController {
         return res.status(400).json({ error: 'Missing required user fields: email, googleId.' });
       }
 
-      
-
       const newUser = await this.service.createUser(userData);
       res
         .status(201)
@@ -82,8 +80,6 @@ export class UserController {
         organizationId: ''
       };
 
-
-
       const newUser = await this.service.createUser(userData);
       res.status(201).json({ 
         message: 'User registered successfully', 
@@ -104,7 +100,16 @@ export class UserController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // Enforce organization isolation - users can only see users from their organization
+      // Handle unassigned users - they should only see themselves
+      if (req.user.role === 'unassigned') {
+        const currentUser = await this.service.getUserById(req.user.userId);
+        if (!currentUser) {
+          return res.status(404).json({ error: 'User not found.' });
+        }
+        return res.status(200).json({ users: [currentUser] });
+      }
+
+      // For assigned users, enforce organization isolation
       const userOrganizationId = req.user.organizationId;
       
       // Only allow filtering by the user's own organization
@@ -131,7 +136,18 @@ export class UserController {
         return res.status(404).json({ error: 'User not found.' });
       }
 
-      // Enforce organization isolation - users can only see users from their organization
+      // Handle unassigned users - they can only see themselves
+      if (req.user.role === 'unassigned') {
+        if (user.userId !== req.user.userId) {
+          return res.status(403).json({ 
+            error: 'Access denied', 
+            message: 'Unassigned users can only view their own profile' 
+          });
+        }
+        return res.status(200).json({ user: user });
+      }
+
+      // For assigned users, enforce organization isolation
       if (user.organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 

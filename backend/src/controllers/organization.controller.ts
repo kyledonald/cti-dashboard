@@ -13,8 +13,24 @@ export class OrganizationController {
     this.service = service;
   }
 
-  async createOrganization(req: Request, res: Response) {
+  async createOrganization(req: AuthenticatedRequest, res: Response) {
     try {
+      // Check if user is authenticated
+      if (!req.user) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'You must be logged in to create an organization' 
+        });
+      }
+
+      // Only unassigned users can create organizations
+      if (req.user.role !== 'unassigned') {
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: 'You are already part of an organization and therefore cannot create a new one' 
+        });
+      }
+
       const orgData: CreateOrganizationDTO = req.body;
 
       if (!orgData.name) {
@@ -23,9 +39,11 @@ export class OrganizationController {
           .json({ error: 'Organization name is required.' });
       }
 
-      const newOrganization = await this.service.createOrganization(orgData);
+      // Create the organization and automatically assign the user as admin
+      const newOrganization = await this.service.createOrganizationAndAssignUser(orgData, req.user.userId);
+      
       res.status(201).json({
-        message: 'Organization created successfully',
+        message: 'Organization created successfully and you have been assigned as admin',
         organization: newOrganization,
       });
     } catch (error: any) {
