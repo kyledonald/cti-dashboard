@@ -12,6 +12,8 @@ import { threatActorRouter } from './routes/threat_actor.routes';
 import { incidentRouter } from './routes/incident.routes';
 import { cveRouter } from './routes/cve.routes';
 import { authenticateToken } from './middleware/auth.middleware';
+import { sanitizeInput } from './middleware/sanitization.middleware';
+import { securityHeaders, generalRateLimit } from './middleware/security.middleware';
 
 let firestoreConfig: any = {};
 
@@ -40,7 +42,12 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Limit request body size
+
+// Apply security middleware
+app.use(securityHeaders);
+app.use(generalRateLimit);
+app.use(sanitizeInput);
 
 // Public health check endpoints (no authentication required)
 app.get('/health', (req, res) => {

@@ -157,9 +157,11 @@ export const CreateIncidentModal: React.FC<CreateIncidentModalProps> = ({
                 
                 cveInputs.forEach(cve => {
                   // Validate CVE format: CVE-YYYY-NNNN or CVE-YYYY-NNNNN
+                  // Allow case-insensitive and handle extra spaces
+                  const normalizedCve = cve.replace(/\s+/g, ''); // Remove all whitespace
                   const cvePattern = /^CVE-\d{4}-\d{4,5}$/i;
-                  if (cvePattern.test(cve)) {
-                    validCves.push(cve.toUpperCase());
+                  if (cvePattern.test(normalizedCve)) {
+                    validCves.push(normalizedCve.toUpperCase());
                   } else {
                     invalidCves.push(cve);
                   }

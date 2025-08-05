@@ -39,14 +39,14 @@ export const authenticateToken = (db: Firestore) => {
         });
       }
 
-      const idToken = authHeader.split('Bearer ')[1];
-      
-      if (!idToken) {
+      const tokenParts = authHeader.split('Bearer ');
+      if (tokenParts.length !== 2 || !tokenParts[1]) {
         return res.status(401).json({ 
           error: 'Authentication required',
-          message: 'No token provided'
+          message: 'Invalid authorization header format'
         });
       }
+      const idToken = tokenParts[1];
 
       // Verify the Firebase ID token
       console.error('🔍 VERIFYING TOKEN, first 50 chars:', idToken.substring(0, 50));

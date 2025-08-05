@@ -47,13 +47,14 @@ export class UserController {
         });
       }
 
-      const idToken = authHeader.split('Bearer ')[1];
-      if (!idToken) {
+      const tokenParts = authHeader.split('Bearer ');
+      if (tokenParts.length !== 2 || !tokenParts[1]) {
         return res.status(401).json({ 
           error: 'Authentication required',
-          message: 'No token provided'
+          message: 'Invalid authorization header format'
         });
       }
+      const idToken = tokenParts[1];
 
       // Verify Firebase token
       const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -71,8 +72,11 @@ export class UserController {
       const userData: CreateUserDTO = {
         googleId: decodedToken.uid,
         email: decodedToken.email!,
-        firstName: req.body.firstName || decodedToken.name?.split(' ')[0] || decodedToken.email!.split('@')[0],
-        lastName: req.body.lastName || decodedToken.name?.split(' ').slice(1).join(' ') || '',
+        firstName: req.body.firstName || 
+          (decodedToken.name ? decodedToken.name.split(' ')[0] : '') || 
+          (decodedToken.email ? decodedToken.email.split('@')[0] : 'User'),
+        lastName: req.body.lastName || 
+          (decodedToken.name ? decodedToken.name.split(' ').slice(1).join(' ') : ''),
         profilePictureUrl: decodedToken.picture || '',
         role: 'unassigned',
         organizationId: ''

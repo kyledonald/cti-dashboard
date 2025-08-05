@@ -62,10 +62,24 @@ export const useThreatActorForm = () => {
   };
 
   const validateForm = (): boolean => {
+    // Handle null/undefined input
+    if (!formData.name || typeof formData.name !== 'string') {
+      setError('Name is required');
+      return false;
+    }
+    
+    // Check for empty or whitespace-only name
     if (!formData.name.trim()) {
       setError('Name is required');
       return false;
     }
+    
+    // Check maximum length
+    if (formData.name.length > 100) {
+      setError('Name must be no more than 100 characters long');
+      return false;
+    }
+    
     setError('');
     return true;
   };

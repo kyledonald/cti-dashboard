@@ -166,7 +166,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           } else {
             const displayName = firebaseUser.displayName || '';
             const nameParts = displayName.trim().split(' ').filter(part => part.length > 0);
-            firstName = nameParts[0] || firebaseUser.email!.split('@')[0] || 'User';
+            firstName = nameParts[0] || 
+              (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'User');
             lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
           }
           

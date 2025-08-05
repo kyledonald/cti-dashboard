@@ -205,29 +205,31 @@ export const EditIncidentModal: React.FC<EditIncidentModalProps> = ({
                   setCveInput(e.target.value);
                   setCveError(''); // Clear error when typing
                 }}
-                onBlur={() => {
-                  // Parse and validate CVEs when user finishes typing
-                  setCveError('');
-                  const cveInputs = cveInput.split(',').map(cve => cve.trim()).filter(cve => cve.length > 0);
-                  const validCves: string[] = [];
-                  const invalidCves: string[] = [];
-                  
-                  cveInputs.forEach(cve => {
-                    // Validate CVE format: CVE-YYYY-NNNN or CVE-YYYY-NNNNN
-                    const cvePattern = /^CVE-\d{4}-\d{4,5}$/i;
-                    if (cvePattern.test(cve)) {
-                      validCves.push(cve.toUpperCase());
-                    } else {
-                      invalidCves.push(cve);
-                    }
-                  });
-                  
-                  if (invalidCves.length > 0) {
-                    setCveError(`Invalid CVE format: ${invalidCves.join(', ')}. Please use format CVE-YYYY-NNNN or CVE-YYYY-NNNNN`);
+                              onBlur={() => {
+                // Parse and validate CVEs when user finishes typing
+                setCveError('');
+                const cveInputs = cveInput.split(',').map(cve => cve.trim()).filter(cve => cve.length > 0);
+                const validCves: string[] = [];
+                const invalidCves: string[] = [];
+                
+                cveInputs.forEach(cve => {
+                  // Validate CVE format: CVE-YYYY-NNNN or CVE-YYYY-NNNNN
+                  // Allow case-insensitive and handle extra spaces
+                  const normalizedCve = cve.replace(/\s+/g, ''); // Remove all whitespace
+                  const cvePattern = /^CVE-\d{4}-\d{4,5}$/i;
+                  if (cvePattern.test(normalizedCve)) {
+                    validCves.push(normalizedCve.toUpperCase());
+                  } else {
+                    invalidCves.push(cve);
                   }
-                  
-                  setFormData({...formData, cveIds: validCves});
-                }}
+                });
+                
+                if (invalidCves.length > 0) {
+                  setCveError(`Invalid CVE format: ${invalidCves.join(', ')}. Please use format CVE-YYYY-NNNN or CVE-YYYY-NNNNN`);
+                }
+                
+                setFormData({...formData, cveIds: validCves});
+              }}
                 placeholder="CVE-2024-1234, CVE-2024-56789"
                 className="w-full"
               />
