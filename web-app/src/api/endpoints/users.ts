@@ -21,6 +21,11 @@ export const usersApi = {
     return response.data;
   },
 
+  getByEmail: async (email: string): Promise<User> => {
+    const response = await api.get(`/users/email/${email}`);
+    return response.data.user;
+  },
+
   create: async (userData: CreateUserDTO): Promise<User> => {
     const response = await api.post('/users', userData);
     return response.data;

@@ -24,6 +24,11 @@ export const userRouter = (db: Firestore) => {
     userController.getAllUsers(req, res),
   );
   
+  // Get user by email - Admin only (for adding users to organization)
+  router.get('/email/:email', requireAdmin, (req: AuthenticatedRequest, res) =>
+    userController.getUserByEmail(req, res),
+  );
+  
   // Get user by ID - Any authenticated user
   router.get('/:userId', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     userController.getUserById(req, res),

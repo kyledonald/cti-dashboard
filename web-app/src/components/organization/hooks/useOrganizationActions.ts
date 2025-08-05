@@ -126,18 +126,11 @@ export const useOrganizationActions = ({
     setAddUserError('');
     
     try {
-      // Find user by email
-      const allUsers = await usersApi.getAll();
-      const targetUser = allUsers.find((u: User) => u.email.toLowerCase() === addUserEmail.toLowerCase().trim());
+      // Find user by email using the new endpoint
+      const targetUser = await usersApi.getByEmail(addUserEmail.trim());
       
       if (!targetUser) {
         setAddUserError('User not found. They need to create an account first.');
-        return;
-      }
-      
-      // Check if user is unassigned
-      if (targetUser.organizationId && targetUser.organizationId.trim() !== '') {
-        setAddUserError('User is already assigned to another organization.');
         return;
       }
       

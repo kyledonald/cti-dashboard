@@ -38,5 +38,6 @@ playwright-report/
 test-results/
 coverage/
 *.lcov
+test-results.json
 
 dev-helper.sh

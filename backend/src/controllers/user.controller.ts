@@ -164,6 +164,44 @@ export class UserController {
     }
   }
 
+  async getUserByEmail(req: AuthenticatedRequest, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const { email } = req.params;
+      const user = await this.service.getUserByEmail(email);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Only admins can search for users by email (for adding to organization)
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({
+          error: 'Access denied',
+          message: 'Only admins can search for users by email'
+        });
+      }
+
+      // Admins can only search for unassigned users (to add to their organization)
+      if (user.organizationId && user.organizationId.trim() !== '') {
+        return res.status(403).json({
+          error: 'Access denied',
+          message: 'User is already assigned to an organization'
+        });
+      }
+
+      res.status(200).json({ user: user });
+    } catch (error: any) {
+      console.error('Error in getUserByEmail controller:', error);
+      res
+        .status(500)
+        .json({ error: 'Failed to fetch user', details: error.message });
+    }
+  }
+
   async updateUser(req: AuthenticatedRequest, res: Response) {
     try {
       const { userId } = req.params;
