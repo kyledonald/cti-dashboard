@@ -12,6 +12,6 @@
     "dev:frontend": "cd web-app && npm run dev"
   },
   "keywords": ["cybersecurity", "threat-intelligence", "dashboard"],
-  "author": "",
+  "author": "Kyle Donald",
   "license": "ISC"
 } 

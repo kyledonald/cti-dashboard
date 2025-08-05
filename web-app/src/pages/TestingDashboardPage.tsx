@@ -158,8 +158,8 @@ const TestingDashboardPage: React.FC = () => {
         test.requirementId === selectedRequirement
       );
 
-  // Get unique requirements for filter dropdown
-  const uniqueRequirements = Array.from(new Set(testResults.map(test => test.requirementId).filter(Boolean)));
+  // Get unique requirements for filter dropdown (sorted)
+  const uniqueRequirements = Array.from(new Set(testResults.map(test => test.requirementId).filter(Boolean))).sort();
 
   const totalTests = testResults.length;
   const passedTests = testResults.filter(t => t.status === 'pass').length;

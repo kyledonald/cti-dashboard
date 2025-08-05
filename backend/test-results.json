@@ -1,124 +1,285 @@
 {
   "testResults": [
     {
-      "id": "FR01-1",
+      "id": "FR03-1",
+      "requirementId": "FR03",
+      "name": "should reject update with no fields provided",
+      "description": "should reject update with no fields provided",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.025,
+      "lastRun": "2025-08-05T20:05:24.642Z"
+    },
+    {
+      "id": "FR03-2",
+      "requirementId": "FR03",
+      "name": "should reject update with existing email",
+      "description": "should reject update with existing email",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR03-3",
+      "requirementId": "FR03",
+      "name": "should reject update with same password",
+      "description": "should reject update with same password",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR03-4",
+      "requirementId": "FR03",
+      "name": "should allow valid profile update",
+      "description": "should allow valid profile update",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR04-5",
+      "requirementId": "FR04",
+      "name": "should reject role assignment by non-admin users",
+      "description": "should reject role assignment by non-admin users",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.025,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR04-6",
+      "requirementId": "FR04",
+      "name": "should reject role assignment with invalid role",
+      "description": "should reject role assignment with invalid role",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR04-7",
+      "requirementId": "FR04",
+      "name": "should reject role assignment for non-existent user",
+      "description": "should reject role assignment for non-existent user",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR04-8",
+      "requirementId": "FR04",
+      "name": "should reject role assignment for user in different organization",
+      "description": "should reject role assignment for user in different organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR04-9",
+      "requirementId": "FR04",
+      "name": "should reject admin trying to change their own role",
+      "description": "should reject admin trying to change their own role",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR04-10",
+      "requirementId": "FR04",
+      "name": "should allow admin to assign valid role to user in same organization",
+      "description": "should allow admin to assign valid role to user in same organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR05-11",
+      "requirementId": "FR05",
+      "name": "should allow admin to view all users in their organization",
+      "description": "should allow admin to view all users in their organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR05-12",
+      "requirementId": "FR05",
+      "name": "should allow admin to view specific user in their organization",
+      "description": "should allow admin to view specific user in their organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR05-13",
+      "requirementId": "FR05",
+      "name": "should reject admin viewing user from different organization",
+      "description": "should reject admin viewing user from different organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR05-14",
+      "requirementId": "FR05",
+      "name": "should show updated role after role assignment",
+      "description": "should show updated role after role assignment",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.005,
+      "lastRun": "2025-08-05T20:05:24.643Z"
+    },
+    {
+      "id": "FR01-15",
       "requirementId": "FR01",
       "name": "should reject registration with no username/password",
       "description": "should reject registration with no username/password",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.025,
-      "lastRun": "2025-08-05T15:36:15.721Z"
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR01-2",
+      "id": "FR01-16",
       "requirementId": "FR01",
       "name": "should reject registration with missing fields",
       "description": "should reject registration with missing fields",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:36:15.721Z"
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR01-3",
+      "id": "FR01-17",
       "requirementId": "FR01",
       "name": "should reject registration with insufficiently complex password",
       "description": "should reject registration with insufficiently complex password",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-05T15:36:15.721Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR01-4",
+      "id": "FR01-18",
       "requirementId": "FR01",
       "name": "should accept registration with valid credentials",
       "description": "should accept registration with valid credentials",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:36:15.721Z"
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR01-5",
+      "id": "FR01-19",
       "requirementId": "FR01",
       "name": "should reject registration with XSS attempt",
       "description": "should reject registration with XSS attempt",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:36:15.721Z"
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR01-6",
+      "id": "FR01-20",
       "requirementId": "FR01",
       "name": "should reject dashboard access without authentication",
       "description": "should reject dashboard access without authentication",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-05T15:36:15.721Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR01-7",
+      "id": "FR01-21",
       "requirementId": "FR01",
       "name": "should allow dashboard access with valid authentication",
       "description": "should allow dashboard access with valid authentication",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:36:15.721Z"
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR02-8",
+      "id": "FR02-22",
       "requirementId": "FR02",
       "name": "should reject logout without authentication",
       "description": "should reject logout without authentication",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.001,
-      "lastRun": "2025-08-05T15:36:15.721Z"
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR02-9",
+      "id": "FR02-23",
       "requirementId": "FR02",
       "name": "should reject logout with invalid token",
       "description": "should reject logout with invalid token",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-05T15:36:15.722Z"
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR02-10",
+      "id": "FR02-24",
       "requirementId": "FR02",
       "name": "should allow logout with valid token",
       "description": "should allow logout with valid token",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-05T15:36:15.722Z"
+      "executionTime": 0.003,
+      "lastRun": "2025-08-05T20:05:24.643Z"
     },
     {
-      "id": "FR02-11",
+      "id": "FR02-25",
       "requirementId": "FR02",
       "name": "should handle logout with any valid token format",
       "description": "should handle logout with any valid token format",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-05T15:36:15.722Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-05T20:05:24.643Z"
     }
   ],
   "summary": {
-    "totalTests": 11,
-    "passedTests": 11,
+    "totalTests": 25,
+    "passedTests": 25,
     "failedTests": 0,
     "successRate": 100,
-    "lastUpdated": "2025-08-05T15:36:15.722Z"
+    "lastUpdated": "2025-08-05T20:05:24.643Z"
   },
   "requirements": {
+    "FR03": {
+      "id": "FR03",
+      "testCount": 4,
+      "passedCount": 4,
+      "failedCount": 0,
+      "successRate": 100
+    },
+    "FR04": {
+      "id": "FR04",
+      "testCount": 6,
+      "passedCount": 6,
+      "failedCount": 0,
+      "successRate": 100
+    },
+    "FR05": {
+      "id": "FR05",
+      "testCount": 4,
+      "passedCount": 4,
+      "failedCount": 0,
+      "successRate": 100
+    },
     "FR01": {
       "id": "FR01",
       "testCount": 7,

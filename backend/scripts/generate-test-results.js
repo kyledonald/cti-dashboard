@@ -28,10 +28,21 @@ try {
     jestResults.testResults.forEach((testFile, fileIndex) => {
       if (testFile.assertionResults && Array.isArray(testFile.assertionResults)) {
         testFile.assertionResults.forEach((test, testIndex) => {
-          // Extract requirement ID from ancestor titles (e.g., "FR01: User Authentication & Dashboard Access")
-          const requirementMatch = test.ancestorTitles && test.ancestorTitles[0] ? 
-            test.ancestorTitles[0].match(/^([A-Z]{2}\d+):/) : null;
-          const requirementId = requirementMatch ? requirementMatch[1] : 'UNKNOWN';
+          // Extract requirement ID from ancestor titles (e.g., "FR01: User Authentication & Dashboard Access" or "FR04-FR05: User Role Management")
+          let requirementId = 'UNKNOWN';
+          if (test.ancestorTitles && test.ancestorTitles.length > 0) {
+            // Check first ancestor title for FR pattern
+            const firstAncestorMatch = test.ancestorTitles[0].match(/^([A-Z]{2}\d+(?:-[A-Z]{2}\d+)?):/);
+            if (firstAncestorMatch) {
+              requirementId = firstAncestorMatch[1];
+            } else if (test.ancestorTitles.length > 1) {
+              // Check second ancestor title (for nested describes)
+              const secondAncestorMatch = test.ancestorTitles[1].match(/^([A-Z]{2}\d+):/);
+              if (secondAncestorMatch) {
+                requirementId = secondAncestorMatch[1];
+              }
+            }
+          }
 
           testResults.push({
             id: `${requirementId}-${testId++}`,
