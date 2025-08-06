@@ -45,7 +45,7 @@ test.describe('Create Incident with AI Summary', () => {
 
     const downloadPromise = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Export PDF' }).click();
-    const download = await downloadPromise;
+    await downloadPromise;
 
     await page.getByRole('button', { name: 'Close' }).first().click();
 
