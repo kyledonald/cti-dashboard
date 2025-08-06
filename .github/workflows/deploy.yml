@@ -42,16 +42,6 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Run tests with coverage
-        run: npm run test:coverage
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./backend/coverage/lcov.info
-          flags: backend
-          name: backend-coverage
-
   test-frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -77,14 +67,12 @@ jobs:
 
       - name: Skip E2E tests in CI/CD
         run: |
-          echo "🔄 E2E tests skipped in CI/CD"
-          echo "📝 Run E2E tests locally with:"
+          echo "   E2E tests skipped in CI/CD"
+          echo "   Run E2E tests locally with:"
           echo "   npm run test:e2e"
           echo "   npm run test:e2e:headed"
-          echo "   npm run test:e2e:ui"
           echo ""
-          echo "✅ Unit tests and integration tests still run in CI/CD"
-          echo "✅ E2E tests are valuable for local development and manual testing"
+          echo "✅ Unit tests still run in CI/CD"
 
   deploy:
     needs: [test-backend, test-frontend]

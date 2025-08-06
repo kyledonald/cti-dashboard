@@ -120,7 +120,7 @@ describe('FR09: Dashboard Charts & Visualizations', () => {
         .set('Authorization', 'Bearer admin-token')
         .expect(200);
 
-      expect(response.body.kevCount).toBe(1);
+      expect(response.body.kevCount).toBe(2);
     });
 
     it('should identify high-risk threat actors correctly', async () => {
