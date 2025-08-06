@@ -6,15 +6,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Environment variables for test user (no fallbacks - must be set)
-const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL;
-const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD;
+const PLAYWRIGHT_ADMIN_EMAIL = process.env.PLAYWRIGHT_ADMIN_EMAIL;
+const PLAYWRIGHT_ADMIN_PASSWORD = process.env.PLAYWRIGHT_ADMIN_PASSWORD;
 
 test.describe('Recorded E2E Test - Login Flow', () => {
   test('User can login and access dashboard', async ({ page }) => {
     console.log('🚀 Starting recorded E2E test...');
     
     // Check if environment variables are set
-    if (!TEST_USER_EMAIL || !TEST_USER_PASSWORD) {
+    if (!PLAYWRIGHT_ADMIN_EMAIL || !PLAYWRIGHT_ADMIN_PASSWORD) {
       throw new Error('TEST_USER_EMAIL and TEST_USER_PASSWORD environment variables must be set');
     }
     
@@ -27,9 +27,9 @@ test.describe('Recorded E2E Test - Login Flow', () => {
     
     console.log('📋 Step 3: Enter credentials');
     await page.getByRole('textbox', { name: 'Email' }).click();
-    await page.getByRole('textbox', { name: 'Email' }).fill(TEST_USER_EMAIL);
+    await page.getByRole('textbox', { name: 'Email' }).fill(PLAYWRIGHT_ADMIN_EMAIL);
     await page.getByRole('textbox', { name: 'Password' }).click();
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_USER_PASSWORD);
+    await page.getByRole('textbox', { name: 'Password' }).fill(PLAYWRIGHT_ADMIN_PASSWORD);
     
     console.log('📋 Step 4: Complete login');
     await page.getByRole('button', { name: 'Sign In', exact: true }).click();

@@ -5,15 +5,16 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Environment variables for test user (no fallbacks - must be set)
-const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL;
-const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD;
+const PLAYWRIGHT_ADMIN_EMAIL = process.env.PLAYWRIGHT_ADMIN_EMAIL;
+const PLAYWRIGHT_ADMIN_PASSWORD = process.env.PLAYWRIGHT_ADMIN_PASSWORD;
 
 test.describe('Comprehensive Incident Management Journey', () => {
   test('User can create incident, add comments, generate AI summary, and delete incident', async ({ page }) => {
     console.log('🚀 Starting comprehensive incident management E2E test...');
     
     // Check if environment variables are set
-    if (!TEST_USER_EMAIL || !TEST_USER_PASSWORD) {
+    // Check if environment variables are set
+    if (!PLAYWRIGHT_ADMIN_EMAIL || !PLAYWRIGHT_ADMIN_PASSWORD) {
       throw new Error('TEST_USER_EMAIL and TEST_USER_PASSWORD environment variables must be set');
     }
     
@@ -22,9 +23,9 @@ test.describe('Comprehensive Incident Management Journey', () => {
     await page.getByRole('button', { name: 'Sign In' }).click();
     await page.getByRole('button', { name: 'Continue with Email' }).click();
     await page.getByRole('textbox', { name: 'Email' }).click();
-    await page.getByRole('textbox', { name: 'Email' }).fill(TEST_USER_EMAIL);
+    await page.getByRole('textbox', { name: 'Email' }).fill(PLAYWRIGHT_ADMIN_EMAIL);
     await page.getByRole('textbox', { name: 'Password' }).click();
-    await page.getByRole('textbox', { name: 'Password' }).fill(TEST_USER_PASSWORD);
+    await page.getByRole('textbox', { name: 'Password' }).fill(PLAYWRIGHT_ADMIN_PASSWORD);
     await page.getByRole('button', { name: 'Sign In', exact: true }).click();
     console.log('✅ Login successful');
     
@@ -79,7 +80,7 @@ test.describe('Comprehensive Incident Management Journey', () => {
     console.log('✅ Incident deleted successfully');
     
     console.log('📋 Step 7: Logout');
-    await page.getByRole('button', { name: 'PT Playwright Tester' }).click();
+    await page.getByRole('button', { name: 'PA Playwright Admin' }).click();
     await page.getByRole('button', { name: 'Sign out' }).click();
     console.log('✅ Logout successful');
     
