@@ -1,31 +1,14 @@
 import request from 'supertest';
-import express from 'express';
+import { createTestApp } from '../utils/test-setup';
+import { createMockAuthMiddleware } from '../utils/mock-auth';
+import { mockAISummary, mockPDFBuffer } from '../utils/test-data';
 
-// Mock Firebase Admin
-jest.mock('firebase-admin', () => ({
-  initializeApp: jest.fn(),
-  credential: {
-    applicationDefault: jest.fn()
-  },
-  firestore: jest.fn(() => ({
-    collection: jest.fn()
-  }))
-}));
+// Create test app
+const app = createTestApp();
 
-// Mock AI service responses
-const mockAISummary = {
-  summary: 'Critical vulnerability detected in Apache Log4j affecting multiple systems. Immediate patching required.',
-  recommendations: [
-    'Update Apache Log4j to version 2.17.0 or later',
-    'Implement network segmentation',
-    'Monitor for suspicious activity'
-  ],
-  riskLevel: 'Critical',
-  affectedSystems: ['Web Server', 'Database Server', 'Application Server']
-};
-
-// Mock PDF generation
-const mockPDFBuffer = Buffer.from('Mock PDF content for vulnerability summary');
+// Mock authentication middleware
+const mockAuthMiddleware = createMockAuthMiddleware();
+app.use(mockAuthMiddleware);
 
 // Mock incident data
 const mockIncident = {
@@ -41,69 +24,8 @@ const mockIncident = {
   tags: ['vulnerability', 'critical', 'apache', 'log4j']
 };
 
-// Mock users for authentication
-const mockUsers = [
-  {
-    userId: 'admin-user-id',
-    email: 'admin@example.com',
-    firstName: 'Admin',
-    lastName: 'User',
-    role: 'admin',
-    organizationId: 'org-1'
-  },
-  {
-    userId: 'editor-user-id',
-    email: 'editor@example.com',
-    firstName: 'Editor',
-    lastName: 'User',
-    role: 'editor',
-    organizationId: 'org-1'
-  },
-  {
-    userId: 'viewer-user-id',
-    email: 'viewer@example.com',
-    firstName: 'Viewer',
-    lastName: 'User',
-    role: 'viewer',
-    organizationId: 'org-1'
-  }
-];
-
-// Mock authentication middleware
-const mockAuthMiddleware = (req: any, res: any, next: any) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      error: 'No valid authorization header found',
-      message: 'Authorization header is required'
-    });
-  }
-
-  const token = authHeader.substring(7);
-  
-  // Mock different users based on token
-  if (token === 'admin-token') {
-    req.user = mockUsers[0]; // admin user
-  } else if (token === 'editor-token') {
-    req.user = mockUsers[1]; // editor user
-  } else if (token === 'viewer-token') {
-    req.user = mockUsers[2]; // viewer user
-  } else {
-    return res.status(401).json({
-      error: 'Invalid token',
-      message: 'Token is invalid or expired'
-    });
-  }
-  
-  next();
-};
-
-// Create Express app for testing
-const app = express();
-app.use(express.json());
-
 // Mock AI summary endpoint
-app.post('/incidents/:incidentId/ai-summary', mockAuthMiddleware, (req: any, res) => {
+app.post('/incidents/:incidentId/ai-summary', (req: any, res) => {
   const { incidentId } = req.params;
   
   // Check if incident exists and belongs to user's organization
@@ -132,7 +54,7 @@ app.post('/incidents/:incidentId/ai-summary', mockAuthMiddleware, (req: any, res
 });
 
 // Mock PDF export endpoint
-app.post('/incidents/:incidentId/export-pdf', mockAuthMiddleware, (req: any, res) => {
+app.post('/incidents/:incidentId/export-pdf', (req: any, res) => {
   const { incidentId } = req.params;
   
   // Check if incident exists and belongs to user's organization
@@ -259,4 +181,4 @@ describe('AI Summary & PDF Export', () => {
       expect(response.body.message).toBe('The specified incident does not exist');
     });
   });
-}); 
+});

@@ -1,111 +1,15 @@
 import request from 'supertest';
-import express from 'express';
-import cors from 'cors';
-
-// Mock Firebase Admin
-jest.mock('firebase-admin', () => ({
-  auth: () => ({
-    verifyIdToken: jest.fn(),
-    setCustomUserClaims: jest.fn()
-  }),
-  initializeApp: jest.fn(),
-  apps: [],
-  credential: {
-    applicationDefault: jest.fn()
-  }
-}));
-
-// Mock Firestore with realistic data
-let mockUsers = [
-  {
-    userId: 'admin-user-id',
-    email: 'admin@example.com',
-    firstName: 'Admin',
-    lastName: 'User',
-    role: 'admin',
-    organizationId: 'org-1'
-  },
-  {
-    userId: 'second-admin-user-id',
-    email: 'second-admin@example.com',
-    firstName: 'Second',
-    lastName: 'Admin',
-    role: 'admin',
-    organizationId: 'org-1'
-  },
-  {
-    userId: 'editor-user-id',
-    email: 'editor@example.com',
-    firstName: 'Editor',
-    lastName: 'User',
-    role: 'editor',
-    organizationId: 'org-1'
-  },
-  {
-    userId: 'viewer-user-id',
-    email: 'viewer@example.com',
-    firstName: 'Viewer',
-    lastName: 'User',
-    role: 'viewer',
-    organizationId: 'org-1'
-  },
-  {
-    userId: 'other-org-user-id',
-    email: 'other@example.com',
-    firstName: 'Other',
-    lastName: 'User',
-    role: 'admin',
-    organizationId: 'org-2'
-  }
-];
-
-const mockDb = {
-  collection: jest.fn().mockReturnThis(),
-  doc: jest.fn().mockReturnThis(),
-  get: jest.fn(),
-  set: jest.fn(),
-  update: jest.fn(),
-  where: jest.fn().mockReturnThis(),
-  limit: jest.fn().mockReturnThis(),
-  add: jest.fn()
-};
+import { createTestApp } from '../utils/test-setup';
+import { createMockAuthMiddleware, mockUsers as originalMockUsers, resetMockUsers } from '../utils/mock-auth';
 
 // Create test app
-const app = express();
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+const app = createTestApp();
 
-// Mock authentication middleware with role-based access
-const mockAuthMiddleware = (req: any, res: any, next: any) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      error: 'Authentication required',
-      message: 'No valid authorization header found'
-    });
-  }
-  
-  const token = authHeader.replace('Bearer ', '');
-  
-  // Mock different users based on token
-  if (token === 'admin-token') {
-    req.user = mockUsers[0]; // admin user
-  } else if (token === 'second-admin-token') {
-    req.user = mockUsers[1]; // second admin user
-  } else if (token === 'editor-token') {
-    req.user = mockUsers[2]; // editor user
-  } else if (token === 'viewer-token') {
-    req.user = mockUsers[3]; // viewer user
-  } else {
-    return res.status(401).json({
-      error: 'Invalid token',
-      message: 'Token is invalid or expired'
-    });
-  }
-  
-  next();
-};
+// Create a mutable copy of mock users
+let mockUsers = [...originalMockUsers];
 
+// Mock authentication middleware
+const mockAuthMiddleware = createMockAuthMiddleware();
 app.use(mockAuthMiddleware);
 
 // Mock get all users endpoint (FR05)
@@ -174,14 +78,15 @@ app.put('/users/:userId/role', (req: any, res) => {
   }
   
   // Test 4: User exists and is in same organization
-  const user = mockUsers.find(u => u.userId === userId);
-  if (!user) {
+  const userIndex = mockUsers.findIndex(u => u.userId === userId);
+  if (userIndex === -1) {
     return res.status(404).json({
       error: 'User not found',
       message: 'User does not exist'
     });
   }
   
+  const user = mockUsers[userIndex];
   if (user.organizationId !== req.user.organizationId) {
     return res.status(403).json({
       error: 'Access denied',
@@ -204,64 +109,18 @@ app.put('/users/:userId/role', (req: any, res) => {
   }
   
   // Test 6: Successful role update
-  const updatedUser = { ...user, role: role };
-  // Update the mock data to simulate database update
-  const userIndex = mockUsers.findIndex(u => u.userId === userId);
-  if (userIndex !== -1) {
-    mockUsers[userIndex] = updatedUser;
-  }
+  mockUsers[userIndex] = { ...user, role: role };
   
   return res.status(200).json({
     message: 'User role updated successfully',
-    user: updatedUser
+    user: mockUsers[userIndex]
   });
 });
 
 describe('User Role Management & Viewing', () => {
   // Reset mock data before each test
   beforeEach(() => {
-    mockUsers = [
-      {
-        userId: 'admin-user-id',
-        email: 'admin@example.com',
-        firstName: 'Admin',
-        lastName: 'User',
-        role: 'admin',
-        organizationId: 'org-1'
-      },
-      {
-        userId: 'second-admin-user-id',
-        email: 'second-admin@example.com',
-        firstName: 'Second',
-        lastName: 'Admin',
-        role: 'admin',
-        organizationId: 'org-1'
-      },
-      {
-        userId: 'editor-user-id',
-        email: 'editor@example.com',
-        firstName: 'Editor',
-        lastName: 'User',
-        role: 'editor',
-        organizationId: 'org-1'
-      },
-      {
-        userId: 'viewer-user-id',
-        email: 'viewer@example.com',
-        firstName: 'Viewer',
-        lastName: 'User',
-        role: 'viewer',
-        organizationId: 'org-1'
-      },
-      {
-        userId: 'other-org-user-id',
-        email: 'other@example.com',
-        firstName: 'Other',
-        lastName: 'User',
-        role: 'admin',
-        organizationId: 'org-2'
-      }
-    ];
+    mockUsers = [...originalMockUsers];
   });
 
   describe('FR04: Admin Role Assignment', () => {
@@ -275,8 +134,6 @@ describe('User Role Management & Viewing', () => {
       expect(response.body.error).toBe('Access denied');
       expect(response.body.message).toBe('Only admins can assign user roles');
     });
-
-
 
     it('should reject role assignment with invalid role', async () => {
       const response = await request(app)
@@ -313,8 +170,9 @@ describe('User Role Management & Viewing', () => {
 
     it('should reject admin trying to change their own role when they are the only admin', async () => {
       // Temporarily remove the second admin to create a single admin scenario
-      const originalMockUsers = [...mockUsers];
-      mockUsers = mockUsers.filter(u => u.userId !== 'second-admin-user-id');
+      const singleAdminUsers = mockUsers.filter(u => u.userId !== 'second-admin-user-id');
+      const originalUsers = [...mockUsers];
+      mockUsers = singleAdminUsers;
       
       const response = await request(app)
         .put('/users/admin-user-id/role')
@@ -326,7 +184,7 @@ describe('User Role Management & Viewing', () => {
       expect(response.body.message).toBe('You cannot change your own role as you are the only admin in the organization');
       
       // Restore the original mock data
-      mockUsers = originalMockUsers;
+      mockUsers = originalUsers;
     });
 
     it('should allow admin to change their own role when there are other admins', async () => {
@@ -389,8 +247,6 @@ describe('User Role Management & Viewing', () => {
       expect(response.body.message).toBe('You can only view users in your organization');
     });
 
-
-
     it('should show updated role after role assignment', async () => {
       // First assign a role
       await request(app)
@@ -408,4 +264,4 @@ describe('User Role Management & Viewing', () => {
       expect(response.body.user.role).toBe('editor');
     });
   });
-}); 
+});
