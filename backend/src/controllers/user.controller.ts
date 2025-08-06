@@ -13,11 +13,19 @@ export class UserController {
 
   async createUser(req: AuthenticatedRequest, res: Response) {
     try {
-      // Disable admin user creation - all users must self-register
-      return res.status(403).json({ 
-        error: 'User creation disabled', 
-        message: 'Users must register themselves through the application. Admins cannot create user accounts.' 
-      });
+      const userData: CreateUserDTO = req.body;
+  
+      if (
+        !userData.email ||
+        !userData.googleId
+      ) {
+        return res.status(400).json({ error: 'Missing required user fields: email, googleId.' });
+      }
+  
+      const newUser = await this.service.createUser(userData);
+      res
+        .status(201)
+        .json({ message: 'User created successfully', user: newUser });
     } catch (error: any) {
       console.error('Error in createUser controller:', error);
       res
@@ -203,19 +211,23 @@ export class UserController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
   
-      // Authorization logic: Users can only update themselves
+      // Authorization logic: Users can update themselves, admins can update anyone
       const isUpdatingSelf = req.user.userId === userId;
+      const isAdmin = req.user.role === 'admin';
   
-      if (!isUpdatingSelf) {
+      if (!isUpdatingSelf && !isAdmin) {
         return res.status(403).json({ 
           error: 'Insufficient permissions', 
-          message: 'You can only update your own profile' 
+          message: 'You can only update your own profile unless you are an admin' 
         });
       }
   
-      // Define allowed fields for self-updates
+      // Define allowed fields based on permissions
       let allowedFields: (keyof UpdateUserDTO)[];
-      if (req.user.role === 'unassigned') {
+      if (isAdmin) {
+        // Admins can update all fields
+        allowedFields = ['firstName', 'lastName', 'profilePictureUrl', 'role', 'organizationId', 'status'];
+      } else if (isUpdatingSelf && req.user.role === 'unassigned') {
         // Unassigned users can update their basic info AND join organizations (become admin/editor/viewer)
         allowedFields = ['firstName', 'lastName', 'profilePictureUrl', 'role', 'organizationId'];
       } else {
@@ -279,13 +291,14 @@ export class UserController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
   
-      // Authorization logic: Users can only delete themselves
+      // Authorization logic: Users can delete themselves, admins can delete anyone
       const isDeletingSelf = req.user.userId === userId;
+      const isAdmin = req.user.role === 'admin';
   
-      if (!isDeletingSelf) {
+      if (!isDeletingSelf && !isAdmin) {
         return res.status(403).json({ 
           error: 'Insufficient permissions', 
-          message: 'You can only delete your own account' 
+          message: 'You can only delete your own account unless you are an admin' 
         });
       }
   
