@@ -14,8 +14,12 @@ export class IncidentController {
     this.cveService = cveService;
   }
 
-  async createIncident(req: Request, res: Response) {
+  async createIncident(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const incidentData: CreateIncidentDTO = req.body;
 
       if (
@@ -24,15 +28,23 @@ export class IncidentController {
         !incidentData.status ||
         !incidentData.priority ||
         !incidentData.reportedByUserId ||
-        !incidentData.reportedByUserName ||
-        !incidentData.organizationId
+        !incidentData.reportedByUserName
       ) {
         return res
           .status(400)
           .json({ error: 'Missing required incident fields.' });
       }
+
+      // Enforce organization isolation - users can only create incidents for their own organization
+      const userOrganizationId = req.user.organizationId;
+      
+      // Override the organizationId from request body with the authenticated user's organization
+      const validatedIncidentData = {
+        ...incidentData,
+        organizationId: userOrganizationId
+      };
   
-      const newIncident = await this.service.createIncident(incidentData);
+      const newIncident = await this.service.createIncident(validatedIncidentData);
       res.status(201).json({
         message: 'Incident created successfully',
         incident: newIncident,
