@@ -13,19 +13,11 @@ export class UserController {
 
   async createUser(req: AuthenticatedRequest, res: Response) {
     try {
-      const userData: CreateUserDTO = req.body;
-
-      if (
-        !userData.email ||
-        !userData.googleId
-      ) {
-        return res.status(400).json({ error: 'Missing required user fields: email, googleId.' });
-      }
-
-      const newUser = await this.service.createUser(userData);
-      res
-        .status(201)
-        .json({ message: 'User created successfully', user: newUser });
+      // Disable admin user creation - all users must self-register
+      return res.status(403).json({ 
+        error: 'User creation disabled', 
+        message: 'Users must register themselves through the application. Admins cannot create user accounts.' 
+      });
     } catch (error: any) {
       console.error('Error in createUser controller:', error);
       res
@@ -210,39 +202,35 @@ export class UserController {
       if (!req.user) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
-
-      // Authorization logic: Users can update themselves, admins can update anyone
+  
+      // Authorization logic: Users can only update themselves
       const isUpdatingSelf = req.user.userId === userId;
-      const isAdmin = req.user.role === 'admin';
-
-      if (!isUpdatingSelf && !isAdmin) {
+  
+      if (!isUpdatingSelf) {
         return res.status(403).json({ 
           error: 'Insufficient permissions', 
-          message: 'You can only update your own profile unless you are an admin' 
+          message: 'You can only update your own profile' 
         });
       }
-
-      // Define allowed fields based on permissions
+  
+      // Define allowed fields for self-updates
       let allowedFields: (keyof UpdateUserDTO)[];
-      if (isAdmin) {
-        // Admins can update all fields
-        allowedFields = ['firstName', 'lastName', 'profilePictureUrl', 'role', 'organizationId', 'status'];
-      } else if (isUpdatingSelf && req.user.role === 'unassigned') {
+      if (req.user.role === 'unassigned') {
         // Unassigned users can update their basic info AND join organizations (become admin/editor/viewer)
         allowedFields = ['firstName', 'lastName', 'profilePictureUrl', 'role', 'organizationId'];
       } else {
         // Other users can only update their own basic info
         allowedFields = ['firstName', 'lastName', 'profilePictureUrl'];
       }
-
-             // Filter updateData to only allowed fields
-       const filteredUpdateData: UpdateUserDTO = {};
-       for (const field of allowedFields) {
-         if (updateData[field] !== undefined) {
-           (filteredUpdateData as any)[field] = updateData[field];
-         }
-       }
-
+  
+      // Filter updateData to only allowed fields
+      const filteredUpdateData: UpdateUserDTO = {};
+      for (const field of allowedFields) {
+        if (updateData[field] !== undefined) {
+          (filteredUpdateData as any)[field] = updateData[field];
+        }
+      }
+  
       // Check if any valid fields were provided
       if (Object.keys(filteredUpdateData).length === 0) {
         return res.status(400).json({ 
@@ -250,9 +238,9 @@ export class UserController {
           allowedFields: allowedFields 
         });
       }
-
+  
       const updatedUser = await this.service.updateUser(userId, filteredUpdateData);
-
+  
       if (!updatedUser) {
         return res.status(404).json({ error: 'User not found.' });
       }
@@ -290,20 +278,19 @@ export class UserController {
       if (!req.user) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
-
-      // Authorization logic: Users can delete themselves, admins can delete anyone
+  
+      // Authorization logic: Users can only delete themselves
       const isDeletingSelf = req.user.userId === userId;
-      const isAdmin = req.user.role === 'admin';
-
-      if (!isDeletingSelf && !isAdmin) {
+  
+      if (!isDeletingSelf) {
         return res.status(403).json({ 
           error: 'Insufficient permissions', 
-          message: 'You can only delete your own account unless you are an admin' 
+          message: 'You can only delete your own account' 
         });
       }
-
+  
       const deleted = await this.service.deleteUser(userId);
-
+  
       if (!deleted) {
         return res.status(404).json({ error: 'User not found.' });
       }
