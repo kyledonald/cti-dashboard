@@ -72,6 +72,27 @@ app.get('/api/dashboard/chart-data', (req: any, res) => {
   res.json({ pieData, barData });
 });
 
+app.get('/api/dashboard/critical-cve-resolution', (req: any, res) => {
+  // Filter critical CVEs (CVSS >= 9.0)
+  const criticalCVEs = mockCVEs.filter(cve => cve.cvss >= 9.0);
+  
+  // Mock resolution status for critical CVEs
+  const resolutionData = {
+    labels: ['Resolved', 'In Progress', 'Open', 'Not Applicable'],
+    datasets: [{
+      label: 'Critical CVEs by Resolution Status',
+      data: [1, 1, 1, 0], // Mock data: 1 resolved, 1 in progress, 1 open, 0 not applicable
+      backgroundColor: ['#10b981', '#fbbf24', '#ef4444', '#6b7280']
+    }]
+  };
+
+  res.json({
+    criticalCVEs: criticalCVEs.length,
+    resolutionData,
+    totalCritical: criticalCVEs.length
+  });
+});
+
 describe('FR09: Dashboard Charts & Visualizations', () => {
   describe('Dashboard Metrics Calculation', () => {
     it('should calculate correct incident status counts', async () => {
@@ -166,7 +187,7 @@ describe('FR09: Dashboard Charts & Visualizations', () => {
       // All incidents should belong to org1
       expect(response.body.totalIncidents).toBe(3);
       // Verify no incidents from other organizations are included
-      expect(mockIncidents.every(inc => inc.organizationId === 'org1')).toBe(true);
+      expect(mockIncidents.every(inc => inc.organizationId === 'org-1')).toBe(true);
     });
   });
 
@@ -182,6 +203,29 @@ describe('FR09: Dashboard Charts & Visualizations', () => {
     it('should require authentication to access chart data', async () => {
       const response = await request(app)
         .get('/api/dashboard/chart-data')
+        .expect(401);
+
+      expect(response.body.error).toBe('Authentication required');
+    });
+  });
+
+  describe('FR23: Display Resolution Status Chart', () => {
+    it('should display resolution status chart for critical CVEs', async () => {
+      const response = await request(app)
+        .get('/api/dashboard/critical-cve-resolution')
+        .set('Authorization', 'Bearer admin-token')
+        .expect(200);
+
+      expect(response.body.criticalCVEs).toBeGreaterThan(0);
+      expect(response.body.totalCritical).toBeGreaterThan(0);
+      expect(response.body.resolutionData).toBeDefined();
+      expect(response.body.resolutionData.labels).toEqual(['Resolved', 'In Progress', 'Open', 'Not Applicable']);
+      expect(response.body.resolutionData.datasets[0].data).toHaveLength(4);
+    });
+
+    it('should require authentication to access critical CVE resolution chart', async () => {
+      const response = await request(app)
+        .get('/api/dashboard/critical-cve-resolution')
         .expect(401);
 
       expect(response.body.error).toBe('Authentication required');

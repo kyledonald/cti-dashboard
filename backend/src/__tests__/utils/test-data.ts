@@ -5,7 +5,7 @@ export const mockIncidents: any[] = [
       description: 'Unauthorized access detected',
       status: 'Open',
       priority: 'Critical',
-      organizationId: 'org1',
+      organizationId: 'org-1',
       dateCreated: { _seconds: Date.now() / 1000 - 86400 }, // 1 day ago
       reportedByUserId: 'user1',
       reportedByUserName: 'Admin User',
@@ -17,7 +17,7 @@ export const mockIncidents: any[] = [
       description: 'Suspicious activity',
       status: 'In Progress',
       priority: 'Medium',
-      organizationId: 'org1',
+      organizationId: 'org-1',
       dateCreated: { _seconds: Date.now() / 1000 - 172800 }, // 2 days ago
       reportedByUserId: 'user1',
       reportedByUserName: 'Admin User',
@@ -29,7 +29,7 @@ export const mockIncidents: any[] = [
       description: 'Data breach attempt',
       status: 'Closed',
       priority: 'High',
-      organizationId: 'org1',
+      organizationId: 'org-1',
       dateCreated: { _seconds: Date.now() / 1000 - 259200 }, // 3 days ago
       reportedByUserId: 'user1',
       reportedByUserName: 'Admin User',
@@ -89,13 +89,13 @@ export const mockIncidents: any[] = [
       threatActorId: 'ta1',
       name: 'Advanced Persistent Threat',
       sophistication: 'Advanced',
-      organizationId: 'org1'
+      organizationId: 'org-1'
     },
     {
       threatActorId: 'ta2',
       name: 'Script Kiddie',
       sophistication: 'Individual',
-      organizationId: 'org1'
+      organizationId: 'org-1'
     }
   ];
   

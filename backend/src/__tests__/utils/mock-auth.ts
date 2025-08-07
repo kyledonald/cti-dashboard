@@ -121,6 +121,8 @@ export interface MockUser {
         req.user = mockUsers[2]; // editor user
       } else if (token === 'viewer-token') {
         req.user = mockUsers[3]; // viewer user
+      } else if (token === 'other-org-token') {
+        req.user = mockUsers[4]; // other org user
       } else if (token === 'test-token') {
         req.user = {
           userId: 'test-user-id',
