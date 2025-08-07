@@ -25,7 +25,7 @@ test.describe('Vulnerable Software Scanning', () => {
     await page.getByRole('textbox', { name: 'e.g., Microsoft Office, Adobe' }).fill('a');
     await page.getByRole('button', { name: 'Add' }).click();
     await page.getByRole('heading', { name: 'Vulnerabilities Potentially' }).click();
-    await page.getByText('Software Inventory (1)EditaRemove').click();
+    await page.getByText('Software Inventory (1)AddaRemove').click();
     await page.getByRole('button', { name: 'Remove' }).click();
     await page.getByText('Software Inventory (0)+ Add SoftwareNo software added yetAdd your organization\'').click();
 

@@ -14,7 +14,10 @@ export const UsersPageHeader: React.FC<UsersPageHeaderProps> = ({
       <div>
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Users</h2>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Manage and view all users in your organization
+          View and filter users in your organization
+        </p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          To manage users in your org and their roles, visit the organization page as an admin.
         </p>
       </div>
       

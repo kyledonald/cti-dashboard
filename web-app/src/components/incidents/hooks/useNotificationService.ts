@@ -27,8 +27,9 @@ export const useNotificationService = ({ user }: UseNotificationServiceProps) =>
       priority: 'high' as const,
       organizationId: user.organizationId,
       sentBy: user.userId,
-      actionUrl: '/incidents',
-      actionText: 'View Incidents'
+      actionUrl: `/incidents?incidentId=${incident.incidentId}`,
+      actionText: 'View this incident',
+      incidentId: incident.incidentId
     };
 
     // Store notification specifically for the assigned user
@@ -57,8 +58,9 @@ export const useNotificationService = ({ user }: UseNotificationServiceProps) =>
       priority: 'medium' as const,
       organizationId: user.organizationId,
       sentBy: user.userId,
-      actionUrl: '/incidents',
-      actionText: 'View Incidents'
+      actionUrl: `/incidents?incidentId=${incident.incidentId}`,
+      actionText: 'View this incident',
+      incidentId: incident.incidentId
     };
 
     // Store notification specifically for the assigned user

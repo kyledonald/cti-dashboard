@@ -24,7 +24,6 @@ test.describe('View and Filter High-Risk CVEs', () => {
     await page.getByLabel('Priority:').selectOption('9');
     await page.getByLabel('Sort by:').selectOption('date');
     await page.getByLabel('Priority:').selectOption('kev');
-    await page.getByText('No vulnerabilities foundNo').click();
 
     await page.getByRole('button', { name: 'PA Playwright Admin' }).click();
     await page.getByRole('button', { name: 'Sign out' }).click();

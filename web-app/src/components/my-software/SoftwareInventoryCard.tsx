@@ -59,7 +59,7 @@ export const SoftwareInventoryCard: React.FC<SoftwareInventoryCardProps> = ({
         </div>
         {canManageSoftwareInventory && (
           <Button onClick={onToggleAddForm}>
-            {showAddForm ? 'Cancel' : (softwareList.length > 0 ? 'Edit' : '+ Add Software')}
+            {showAddForm ? 'Cancel' : (softwareList.length > 0 ? 'Add' : '+ Add Software')}
           </Button>
         )}
       </div>

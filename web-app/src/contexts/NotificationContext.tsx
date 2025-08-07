@@ -10,6 +10,7 @@ export interface Notification {
   read: boolean;
   actionUrl?: string;
   actionText?: string;
+  incidentId?: string; // For incident-specific notifications
   priority: 'low' | 'medium' | 'high';
   organizationId?: string; // For organization-scoped notifications
   sentBy?: string; // User ID of who sent the notification

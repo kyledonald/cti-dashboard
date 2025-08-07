@@ -75,6 +75,9 @@ export const OrganizationNotificationsCard: React.FC<OrganizationNotificationsCa
         <div className="space-y-3">
           <div>
             <h4 className="font-medium text-gray-900 dark:text-white mb-2">Quick Org Actions</h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              These actions trigger a notification for all members in your org.
+            </p>
             <Button 
               onClick={onTriggerPasswordReminder} 
               className="bg-yellow-600 text-white hover:bg-yellow-700 border-yellow-600 hover:border-yellow-700"
@@ -244,10 +247,15 @@ export const OrganizationNotificationsCard: React.FC<OrganizationNotificationsCa
             <Button 
               onClick={onSendCustomNotification}
               disabled={loading || schedulingNotification || !customTitle.trim() || !customMessage.trim() || selectedUsers.length === 0}
-              className="w-full"
+              className={`w-full ${
+                notificationMessage?.type === 'success' 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
             >
               {loading ? 'Loading users...' : 
                schedulingNotification ? 'Scheduling...' : 
+               notificationMessage?.type === 'success' ? 'Sent / Scheduled' :
                scheduleDate && scheduleTime ? 'Schedule Notification' : 'Send Notification'}
             </Button>
           </div>

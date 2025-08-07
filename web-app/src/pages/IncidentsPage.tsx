@@ -185,15 +185,20 @@ const IncidentsPage: React.FC = () => {
     }
   }, [user?.organizationId]);
 
-  // Auto-open incident modal if ?view=INCIDENT_ID is present in the URL
+  // Auto-open incident modal if ?view=INCIDENT_ID or ?incidentId=INCIDENT_ID is present in the URL
   useEffect(() => {
     if (!incidents.length) return;
     const params = new URLSearchParams(location.search);
-    const viewId = params.get('view');
+    const viewId = params.get('view') || params.get('incidentId');
     if (viewId) {
       const incident = incidents.find(i => i.incidentId === viewId);
       if (incident) {
         openViewModal(incident);
+        // Clear the URL parameter to prevent reopening on refresh
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('view');
+        newUrl.searchParams.delete('incidentId');
+        window.history.replaceState({}, '', newUrl.toString());
       }
     }
     // Only run when incidents or location.search changes
