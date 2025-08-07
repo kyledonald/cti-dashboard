@@ -1,4 +1,4 @@
-export const mockIncidents = [
+export const mockIncidents: any[] = [
     {
       incidentId: 'inc1',
       title: 'Critical Security Breach',
@@ -8,7 +8,8 @@ export const mockIncidents = [
       organizationId: 'org1',
       dateCreated: { _seconds: Date.now() / 1000 - 86400 }, // 1 day ago
       reportedByUserId: 'user1',
-      reportedByUserName: 'Admin User'
+      reportedByUserName: 'Admin User',
+      resolutionComments: []
     },
     {
       incidentId: 'inc2',
@@ -19,7 +20,8 @@ export const mockIncidents = [
       organizationId: 'org1',
       dateCreated: { _seconds: Date.now() / 1000 - 172800 }, // 2 days ago
       reportedByUserId: 'user1',
-      reportedByUserName: 'Admin User'
+      reportedByUserName: 'Admin User',
+      resolutionComments: []
     },
     {
       incidentId: 'inc3',
@@ -30,7 +32,8 @@ export const mockIncidents = [
       organizationId: 'org1',
       dateCreated: { _seconds: Date.now() / 1000 - 259200 }, // 3 days ago
       reportedByUserId: 'user1',
-      reportedByUserName: 'Admin User'
+      reportedByUserName: 'Admin User',
+      resolutionComments: []
     }
   ];
   
