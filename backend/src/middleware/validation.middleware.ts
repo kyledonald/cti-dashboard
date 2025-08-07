@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 
-// Type definitions for validation rules
 interface ValidationRule {
   required?: boolean;
   type?: string;
@@ -14,7 +13,6 @@ interface ValidationSchema {
   params?: Record<string, ValidationRule>;
 }
 
-// Human-readable validation functions
 const validationRules = {
   email: (email: string): boolean => {
     if (!email || typeof email !== 'string') return false;

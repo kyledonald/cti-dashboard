@@ -21,16 +21,10 @@ let firestoreConfig: any = {};
 const projectId = process.env.GCLOUD_PROJECT || 'cti-dashboard-459422';
 const databaseId = process.env.FIRESTORE_DATABASE_ID || 'cti-db';
 
-
-
-
-
 firestoreConfig.projectId = projectId;
 firestoreConfig.databaseId = databaseId;
 
-
 export const db = new Firestore(firestoreConfig);
-
 
 const app = express();
 

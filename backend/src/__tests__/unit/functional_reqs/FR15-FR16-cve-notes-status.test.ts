@@ -1,7 +1,7 @@
 import request from 'supertest';
-import { createTestApp } from '../utils/test-setup';
-import { createMockAuthMiddleware } from '../utils/mock-auth';
-import { mockIncidents } from '../utils/test-data';
+import { createTestApp } from '../../utils/test-setup';
+import { createMockAuthMiddleware } from '../../utils/mock-auth';
+import { mockIncidents } from '../../utils/test-data';
 
 // Create test app
 const app = createTestApp();

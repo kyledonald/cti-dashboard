@@ -1,6 +1,6 @@
 import request from 'supertest';
-import { createTestApp } from '../utils/test-setup';
-import { createMockAuthMiddleware } from '../utils/mock-auth';
+import { createTestApp } from '../../utils/test-setup';
+import { createMockAuthMiddleware } from '../../utils/mock-auth';
 
 // Create test app
 const app = createTestApp();
