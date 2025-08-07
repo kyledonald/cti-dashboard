@@ -120,10 +120,11 @@ export const OrganizationNotificationsCard: React.FC<OrganizationNotificationsCa
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="notification-priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Priority
               </label>
               <select
+                id="notification-priority"
                 value={notificationPriority}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onNotificationPriorityChange(e.target.value as 'low' | 'medium' | 'high')}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -139,10 +140,11 @@ export const OrganizationNotificationsCard: React.FC<OrganizationNotificationsCa
               <h5 className="font-medium text-gray-900 dark:text-white">Schedule (Optional)</h5>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="schedule-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Date
                   </label>
                   <Input
+                    id="schedule-date"
                     type="date"
                     value={scheduleDate}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => onScheduleDateChange(e.target.value)}
@@ -151,10 +153,11 @@ export const OrganizationNotificationsCard: React.FC<OrganizationNotificationsCa
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="schedule-time" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Time
                   </label>
                   <Input
+                    id="schedule-time"
                     type="time"
                     value={scheduleTime}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => onScheduleTimeChange(e.target.value)}

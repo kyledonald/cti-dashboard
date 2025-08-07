@@ -41,7 +41,11 @@ export const UsersFiltersCard: React.FC<UsersFiltersCardProps> = ({
           
           {/* Role Filter */}
           <div className="sm:w-48">
+            <label htmlFor="role-filter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Filter by Role
+            </label>
             <select
+              id="role-filter"
               value={roleFilter}
               onChange={(e) => onRoleFilterChange(e.target.value)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

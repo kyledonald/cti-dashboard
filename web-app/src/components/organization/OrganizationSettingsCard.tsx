@@ -116,7 +116,7 @@ export const OrganizationSettingsCard: React.FC<OrganizationSettingsCardProps> =
                     {organization?.name || 'No organization name set'}
                   </div>
                   {organization?.description && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <div className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                       {organization.description}
                     </div>
                   )}
@@ -159,7 +159,7 @@ export const OrganizationSettingsCard: React.FC<OrganizationSettingsCardProps> =
             Organization ID
           </label>
           <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <span className="text-gray-600 dark:text-gray-400 text-sm">
+            <span className="text-gray-700 dark:text-gray-300 text-sm">
               {editingOrg 
                 ? (user?.organizationId || 'Not assigned to organization')
                 : (user?.organizationId ? '••••••••••••••••••••' : 'Not assigned to organization')
