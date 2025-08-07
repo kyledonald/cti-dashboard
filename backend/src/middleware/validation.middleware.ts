@@ -14,34 +14,34 @@ interface ValidationSchema {
   params?: Record<string, ValidationRule>;
 }
 
-// Validation rules
+// Human-readable validation functions
 const validationRules = {
   email: (email: string): boolean => {
     if (!email || typeof email !== 'string') return false;
     
-    // Trim whitespace and check length
     const trimmedEmail = email.trim();
     if (trimmedEmail.length === 0 || trimmedEmail.length > 254) return false;
     
-    // Basic email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) return false;
-    
-    // Check for multiple @ symbols
+    // Check for exactly one @ symbol
     const atCount = (trimmedEmail.match(/@/g) || []).length;
     if (atCount !== 1) return false;
     
-    // Split and validate parts
+    // Split into local part and domain
     const [localPart, domain] = trimmedEmail.split('@');
     if (!localPart || !domain) return false;
     
     // RFC 5321: local part max 64 chars, domain max 253 chars
     if (localPart.length > 64 || domain.length > 253) return false;
     
-    // Domain must have at least one dot and valid TLD
+    // Domain must have at least one dot and valid TLD (at least 2 chars)
     if (!domain.includes('.') || domain.split('.').pop()!.length < 2) return false;
     
-    return true;
+    // Basic format check: no spaces, has @, has domain with dot
+    const hasValidFormat = trimmedEmail.includes('@') && 
+                          !trimmedEmail.includes(' ') && 
+                          domain.includes('.');
+    
+    return hasValidFormat;
   },
   
   userId: (userId: string): boolean => {
@@ -65,8 +65,24 @@ const validationRules = {
   },
   
   cveId: (cveId: string): boolean => {
-    const cveRegex = /^CVE-\d{4}-\d{4,5}$/i;
-    return cveRegex.test(cveId);
+    if (!cveId || typeof cveId !== 'string') return false;
+    
+    // Must start with "CVE-" (case insensitive)
+    if (!cveId.toUpperCase().startsWith('CVE-')) return false;
+    
+    // Split into parts: CVE, year, number
+    const parts = cveId.split('-');
+    if (parts.length !== 3) return false;
+    
+    const [, year, number] = parts;
+    
+    // Year must be 4 digits
+    if (!/^\d{4}$/.test(year)) return false;
+    
+    // Number must be 4-5 digits
+    if (!/^\d{4,5}$/.test(number)) return false;
+    
+    return true;
   },
   
   priority: (priority: string): boolean => {
@@ -187,4 +203,4 @@ export const validationSchemas = {
       incidentId: { required: true, validate: validationRules.userId, message: 'Valid incident ID is required' }
     }
   }
-}; 
+};
