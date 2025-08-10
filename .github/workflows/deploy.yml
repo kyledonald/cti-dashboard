@@ -65,15 +65,6 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Skip E2E tests in CI/CD
-        run: |
-          echo "   E2E tests skipped in CI/CD"
-          echo "   Run E2E tests locally with:"
-          echo "   npm run test:e2e"
-          echo "   npm run test:e2e:headed"
-          echo ""
-          echo "✅ Unit tests still run in CI/CD"
-
   deploy:
     needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
@@ -140,3 +131,4 @@ jobs:
           cat .firebaserc
           echo "Deploying to Firebase..."
           firebase deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}" 
+          

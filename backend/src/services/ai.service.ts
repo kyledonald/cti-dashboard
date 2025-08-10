@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// In-memory rate limiting for AI summary requests
 const aiSummaryRequests = new Map<string, { count: number; resetTime: number }>();
 
 export interface AISummaryRequest {
@@ -32,7 +31,6 @@ export class AIService {
     const userRequests = aiSummaryRequests.get(userId);
     
     if (!userRequests || now > userRequests.resetTime) {
-      // First request or window expired
       aiSummaryRequests.set(userId, { count: 1, resetTime: now + windowMs });
   
       return { allowed: true };
@@ -49,31 +47,25 @@ export class AIService {
     return { allowed: true };
   }
 
-  // Generate AI summary for incidents
   async generateIncidentSummary(request: AISummaryRequest): Promise<string> {
 
-    // Validate required data
     if (!request.incident) {
       throw new Error('Incident data is required');
     }
     
-    // Check if API key is available
     if (!this.apiKey) {
       throw new Error('Gemini API key not configured on server');
     }
     
-    // Get assigned user name
     const assignedUser = request.users?.find((u: any) => u.userId === request.incident.assignedToUserId);
     const assignedUserName = assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName}` : 'Unassigned';
     
-    // Get threat actor names
     const incidentThreatActors = request.threatActors?.filter((ta: any) => 
       request.incident.threatActorIds?.includes(ta.threatActorId)
     ) || [];
     const threatActorNames = incidentThreatActors.map((ta: any) => ta.name).join(', ') || 'None identified';
     
-    // Create the prompt for AI analysis
-    const prompt = `Analyze this cybersecurity incident and provide a structured threat intelligence summary for small and medium enterprises (SMEs).
+    const prompt = `Analyse this cybersecurity incident and provide a structured threat intelligence summary for small and medium enterprises (SMEs).
 
 INCIDENT DETAILS:
 - Title: ${request.incident.title}
@@ -98,16 +90,13 @@ Describe how to detect this type of threat and immediate response actions. Provi
 
 Format your response exactly as shown above with these 3 sections. Keep it short and concise. Use professional language suitable for business stakeholders who may not have deep technical knowledge.`;
 
-
-
     // Call Gemini API with exponential backoff retry for 503 errors
     const maxRetries = 3;
-    const baseDelay = 1000; // 1 second base delay
+    const baseDelay = 1000;
     let geminiResponse: any;
     
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-
         
         geminiResponse = await axios.post(
           `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`,
@@ -126,26 +115,21 @@ Format your response exactly as shown above with these 3 sections. Keep it short
           }
         );
         
-
-        break; // Success, exit retry loop
+        break;
         
       } catch (error: any) {
         console.error(`❌ Gemini API attempt ${attempt + 1} failed:`, error.response?.status, error.message);
         
-        // If it's a 503 error and we haven't exhausted retries, wait and retry
         if (error.response?.status === 503 && attempt < maxRetries) {
-          const delay = baseDelay * Math.pow(2, attempt); // Exponential backoff: 1s, 2s, 4s
+          const delay = baseDelay * Math.pow(2, attempt);
 
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
         
-        // For other errors or final attempt, re-throw the error
         throw error;
       }
     }
-
-
 
     if (!(geminiResponse.data as any)?.candidates?.[0]?.content?.parts?.[0]?.text) {
       console.error('Invalid Gemini API response structure:', geminiResponse.data);
@@ -154,7 +138,6 @@ Format your response exactly as shown above with these 3 sections. Keep it short
 
     const summary = (geminiResponse.data as any).candidates[0].content.parts[0].text;
 
-    
     return summary;
   }
 }

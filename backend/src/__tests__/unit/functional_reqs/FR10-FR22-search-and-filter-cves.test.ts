@@ -3,14 +3,11 @@ import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware } from '../../utils/mock-auth';
 import { mockCVEs } from '../../utils/test-data';
 
-// Create test app
 const app = createTestApp();
 
-// Mock authentication middleware
 const mockAuthMiddleware = createMockAuthMiddleware();
 app.use(mockAuthMiddleware);
 
-// Mock CVE search endpoint
 app.get('/api/cves/search', (req: any, res) => {
   const { software, limit = 10, minSeverity, maxSeverity, sortBy = 'cvss', sortOrder = 'desc' } = req.query;
   
@@ -47,7 +44,6 @@ app.get('/api/cves/search', (req: any, res) => {
     }
   }
 
-  // Sort by severity
   if (sortBy === 'cvss') {
     filteredCVEs.sort((a, b) => {
       if (sortOrder === 'desc') {
@@ -86,7 +82,6 @@ describe('FR10: Search CVEs by Software', () => {
       expect(response.body.total).toBeGreaterThan(0);
       expect(response.body.searchTerm).toBe('Microsoft');
       
-      // Verify all returned CVEs contain Microsoft in summary
       response.body.cves.forEach((cve: any) => {
         expect(cve.summary.toLowerCase()).toContain('microsoft');
       });
@@ -159,7 +154,6 @@ describe('FR10: Search CVEs by Software', () => {
       expect(response.body.cves).toBeDefined();
       expect(response.body.total).toBeGreaterThan(0);
       
-      // Verify all returned CVEs have CVSS >= 8.0
       response.body.cves.forEach((cve: any) => {
         expect(cve.cvss).toBeGreaterThanOrEqual(8.0);
       });
@@ -174,7 +168,6 @@ describe('FR10: Search CVEs by Software', () => {
 
       expect(response.body.cves).toBeDefined();
       
-      // Verify all returned CVEs have CVSS <= 7.0
       response.body.cves.forEach((cve: any) => {
         expect(cve.cvss).toBeLessThanOrEqual(7.0);
       });
@@ -189,7 +182,6 @@ describe('FR10: Search CVEs by Software', () => {
 
       expect(response.body.cves).toBeDefined();
       
-      // Verify all returned CVEs have CVSS between 7.0 and 9.0
       response.body.cves.forEach((cve: any) => {
         expect(cve.cvss).toBeGreaterThanOrEqual(7.0);
         expect(cve.cvss).toBeLessThanOrEqual(9.0);
@@ -206,7 +198,6 @@ describe('FR10: Search CVEs by Software', () => {
       expect(response.body.cves).toBeDefined();
       expect(response.body.cves.length).toBeGreaterThan(1);
       
-      // Verify CVEs are sorted from highest to lowest CVSS
       for (let i = 0; i < response.body.cves.length - 1; i++) {
         expect(response.body.cves[i].cvss).toBeGreaterThanOrEqual(response.body.cves[i + 1].cvss);
       }
@@ -222,7 +213,6 @@ describe('FR10: Search CVEs by Software', () => {
       expect(response.body.cves).toBeDefined();
       expect(response.body.cves.length).toBeGreaterThan(1);
       
-      // Verify CVEs are sorted from lowest to highest CVSS
       for (let i = 0; i < response.body.cves.length - 1; i++) {
         expect(response.body.cves[i].cvss).toBeLessThanOrEqual(response.body.cves[i + 1].cvss);
       }
@@ -243,7 +233,6 @@ describe('FR10: Search CVEs by Software', () => {
       expect(response.body.cves).toBeDefined();
       expect(response.body.total).toBeGreaterThan(0);
       
-      // Verify all returned CVEs have CVSS >= 9.0 and are sorted highest to lowest
       response.body.cves.forEach((cve: any) => {
         expect(cve.cvss).toBeGreaterThanOrEqual(9.0);
         expect(cve.summary.toLowerCase()).toContain('microsoft');
@@ -265,7 +254,6 @@ describe('FR10: Search CVEs by Software', () => {
         .set('Authorization', 'Bearer admin-token')
         .expect(200);
 
-      // Should return all matching CVEs when invalid values are provided
       expect(response.body.cves).toBeDefined();
       expect(response.body.total).toBeGreaterThan(0);
     });

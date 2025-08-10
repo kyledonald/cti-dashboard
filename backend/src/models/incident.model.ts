@@ -12,7 +12,7 @@ export interface Incident {
   incidentId: string;
   title: string;
   description: string;
-  resolutionNotes?: string | null; // Keep for backward compatibility
+  resolutionNotes?: string | null;
   resolutionComments?: ResolutionComment[];
   status: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
@@ -45,7 +45,7 @@ export interface CreateIncidentDTO {
 export interface UpdateIncidentDTO {
   title?: string;
   description?: string;
-  resolutionNotes?: string | null; // Keep for backward compatibility
+  resolutionNotes?: string | null;
   resolutionComments?: ResolutionComment[];
   status?: 'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed';
   priority?: 'Low' | 'Medium' | 'High' | 'Critical';

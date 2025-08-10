@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 
-// Mock Firebase Admin
 jest.mock('firebase-admin', () => ({
   auth: () => ({
     verifyIdToken: jest.fn(),
@@ -18,7 +17,6 @@ jest.mock('firebase-admin', () => ({
   }))
 }));
 
-// Mock Firestore
 export const mockFirestore = {
   collection: jest.fn().mockReturnThis(),
   doc: jest.fn().mockReturnThis(),
@@ -31,7 +29,6 @@ export const mockFirestore = {
   orderBy: jest.fn().mockReturnThis()
 };
 
-// Create test app
 export const createTestApp = () => {
   const app = express();
   app.use(cors());

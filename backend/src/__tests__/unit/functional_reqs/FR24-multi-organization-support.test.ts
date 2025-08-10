@@ -3,14 +3,11 @@ import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware } from '../../utils/mock-auth';
 import { mockIncidents } from '../../utils/test-data';
 
-// Create test app
 const app = createTestApp();
 
-// Mock authentication middleware
 const mockAuthMiddleware = createMockAuthMiddleware();
 app.use(mockAuthMiddleware);
 
-// Mock incidents endpoint with organization filtering
 app.get('/api/incidents', (req: any, res) => {
   const user = req.user;
   
@@ -21,7 +18,7 @@ app.get('/api/incidents', (req: any, res) => {
     });
   }
 
-  // Filter incidents by user's organization
+  // Filter incidents by user's org
   const userIncidents = mockIncidents.filter(incident => 
     incident.organizationId === user.organizationId
   );
@@ -33,7 +30,6 @@ app.get('/api/incidents', (req: any, res) => {
   });
 });
 
-// Mock single incident endpoint with organization validation
 app.get('/api/incidents/:incidentId', (req: any, res) => {
   const { incidentId } = req.params;
   const user = req.user;
@@ -45,7 +41,6 @@ app.get('/api/incidents/:incidentId', (req: any, res) => {
     });
   }
 
-  // Find incident and check organization access
   const incident = mockIncidents.find(inc => inc.incidentId === incidentId);
   
   if (!incident) {
@@ -65,7 +60,6 @@ app.get('/api/incidents/:incidentId', (req: any, res) => {
   res.json({ incident });
 });
 
-// Mock create incident endpoint with organization assignment
 app.post('/api/incidents', (req: any, res) => {
   const { title, description, priority, status } = req.body;
   const user = req.user;
@@ -84,7 +78,6 @@ app.post('/api/incidents', (req: any, res) => {
     });
   }
 
-  // Create incident with user's organization
   const newIncident = {
     incidentId: `inc-${Date.now()}`,
     title,
@@ -104,7 +97,6 @@ app.post('/api/incidents', (req: any, res) => {
   });
 });
 
-// Mock update incident endpoint with organization validation
 app.put('/api/incidents/:incidentId', (req: any, res) => {
   const { incidentId } = req.params;
   const updates = req.body;
@@ -117,7 +109,6 @@ app.put('/api/incidents/:incidentId', (req: any, res) => {
     });
   }
 
-  // Find incident and check organization access
   const incident = mockIncidents.find(inc => inc.incidentId === incidentId);
   
   if (!incident) {
@@ -134,7 +125,6 @@ app.put('/api/incidents/:incidentId', (req: any, res) => {
     });
   }
 
-  // Update incident
   const updatedIncident = { ...incident, ...updates };
   
   res.json({
@@ -143,7 +133,6 @@ app.put('/api/incidents/:incidentId', (req: any, res) => {
   });
 });
 
-// Mock delete incident endpoint with organization validation
 app.delete('/api/incidents/:incidentId', (req: any, res) => {
   const { incidentId } = req.params;
   const user = req.user;
@@ -155,7 +144,6 @@ app.delete('/api/incidents/:incidentId', (req: any, res) => {
     });
   }
 
-  // Find incident and check organization access
   const incident = mockIncidents.find(inc => inc.incidentId === incidentId);
   
   if (!incident) {
@@ -288,7 +276,7 @@ describe('FR24: Multi-Organisation Support', () => {
         .post('/api/incidents')
         .send({
           title: 'Test Incident'
-          // Missing: description, priority, status
+          // Missing: description, priority, status etc
         })
         .set('Authorization', 'Bearer admin-token')
         .expect(400);

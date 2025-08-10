@@ -2,19 +2,15 @@ import request from 'supertest';
 import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware, mockUsers as originalMockUsers, resetMockUsers } from '../../utils/mock-auth';
 
-// Create test app
 const app = createTestApp();
 
 // Create a mutable copy of mock users
 let mockUsers = [...originalMockUsers];
 
-// Mock authentication middleware
 const mockAuthMiddleware = createMockAuthMiddleware();
 app.use(mockAuthMiddleware);
 
-// Mock get all users endpoint (FR05)
 app.get('/users', (req: any, res) => {
-  // Only return users from the same organization
   const orgUsers = mockUsers.filter(user => user.organizationId === req.user.organizationId);
   
   return res.status(200).json({
@@ -22,7 +18,6 @@ app.get('/users', (req: any, res) => {
   });
 });
 
-// Mock get specific user endpoint
 app.get('/users/:userId', (req: any, res) => {
   const { userId } = req.params;
   const user = mockUsers.find(u => u.userId === userId);
@@ -34,7 +29,6 @@ app.get('/users/:userId', (req: any, res) => {
     });
   }
   
-  // Check organization isolation
   if (user.organizationId !== req.user.organizationId) {
     return res.status(403).json({
       error: 'Access denied',
@@ -47,12 +41,10 @@ app.get('/users/:userId', (req: any, res) => {
   });
 });
 
-// Mock update user role endpoint (FR04)
 app.put('/users/:userId/role', (req: any, res) => {
   const { userId } = req.params;
   const { role } = req.body;
   
-  // Test 1: Only admins can assign roles
   if (req.user.role !== 'admin') {
     return res.status(403).json({
       error: 'Access denied',
@@ -60,7 +52,6 @@ app.put('/users/:userId/role', (req: any, res) => {
     });
   }
   
-  // Test 2: Role is required
   if (!role) {
     return res.status(400).json({
       error: 'Role required',
@@ -68,7 +59,6 @@ app.put('/users/:userId/role', (req: any, res) => {
     });
   }
   
-  // Test 3: Valid role values
   const validRoles = ['admin', 'editor', 'viewer'];
   if (!validRoles.includes(role)) {
     return res.status(400).json({
@@ -77,7 +67,6 @@ app.put('/users/:userId/role', (req: any, res) => {
     });
   }
   
-  // Test 4: User exists and is in same organization
   const userIndex = mockUsers.findIndex(u => u.userId === userId);
   if (userIndex === -1) {
     return res.status(404).json({
@@ -94,9 +83,8 @@ app.put('/users/:userId/role', (req: any, res) => {
     });
   }
   
-  // Test 5: Cannot change your own role if you're the only admin
+  // Cannot change your own role if you're the only admin
   if (userId === req.user.userId) {
-    // Check if this user is the only admin in the organization
     const orgUsers = mockUsers.filter(u => u.organizationId === req.user.organizationId);
     const adminUsers = orgUsers.filter(u => u.role === 'admin');
     
@@ -108,7 +96,6 @@ app.put('/users/:userId/role', (req: any, res) => {
     }
   }
   
-  // Test 6: Successful role update
   mockUsers[userIndex] = { ...user, role: role };
   
   return res.status(200).json({
@@ -248,14 +235,12 @@ describe('User Role Management & Viewing', () => {
     });
 
     it('should show updated role after role assignment', async () => {
-      // First assign a role
       await request(app)
         .put('/users/viewer-user-id/role')
         .set('Authorization', 'Bearer admin-token')
         .send({ role: 'editor' })
         .expect(200);
 
-      // Then verify the role change is visible
       const response = await request(app)
         .get('/users/viewer-user-id')
         .set('Authorization', 'Bearer admin-token')

@@ -18,7 +18,6 @@ export interface ShodanCVE {
 export class CVEService {
   private SHODAN_CVE_API_BASE_URL = 'https://cvedb.shodan.io';
 
-  // Helper function to extract vendors from summary
   private extractVendorsFromSummary(summary: string): string[] {
     const commonVendors = [
       'Microsoft', 'Adobe', 'Oracle', 'Cisco', 'Apple', 'Google', 'VMware',
@@ -39,10 +38,8 @@ export class CVEService {
     return foundVendors;
   }
 
-  // Get latest CVEs from Shodan API
   async getLatestCVEs(limit: number = 50, minCvssScore: number = 0): Promise<ShodanCVE[]> {
     try {
-      // Fetch from Shodan API directly (no CORS issues from backend)
       const response = await axios.get(`https://cvedb.shodan.io/cves?latest&limit=${Math.min(limit * 2, 200)}`, {
         headers: {
           'Accept': 'application/json',
@@ -56,7 +53,6 @@ export class CVEService {
 
       let cvesData: any[];
 
-      // Handle Shodan API response format
       if ((response.data as any).cves && Array.isArray((response.data as any).cves)) {
         cvesData = (response.data as any).cves;
       } else if (Array.isArray(response.data)) {
@@ -65,7 +61,6 @@ export class CVEService {
         throw new Error('Unexpected response format from Shodan API');
       }
 
-      // Map to our interface
       const mappedCves = cvesData.map((cveItem: any) => ({
         cve: cveItem.cve_id || cveItem.cve,
         summary: cveItem.summary || '',
@@ -95,7 +90,6 @@ export class CVEService {
     }
   }
 
-  // Get CVE by ID
   async getCVEById(cveId: string): Promise<any> {
     try {
       const response = await axios.get(`${this.SHODAN_CVE_API_BASE_URL}/cve/${cveId}`);
@@ -127,7 +121,6 @@ export class CVEService {
     }
   }
 
-  // Legacy method for backward compatibility
   async getLatestCVEsWithFilter(minCvssScore: number = 7.5, limit: number = 10): Promise<ShodanCVE[]> {
     return this.getLatestCVEs(limit, minCvssScore);
   }

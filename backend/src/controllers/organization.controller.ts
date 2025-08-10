@@ -15,7 +15,6 @@ export class OrganizationController {
 
   async createOrganization(req: AuthenticatedRequest, res: Response) {
     try {
-      // Check if user is authenticated
       if (!req.user) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -23,7 +22,7 @@ export class OrganizationController {
         });
       }
 
-      // Only unassigned users can create organizations
+      // Only unassigned users can create an org
       if (req.user.role !== 'unassigned') {
         return res.status(403).json({ 
           error: 'Access denied', 
@@ -39,7 +38,7 @@ export class OrganizationController {
           .json({ error: 'Organization name is required.' });
       }
 
-      // Create the organization and automatically assign the user as admin
+      // Create the org and automatically assign the user as admin
       const newOrganization = await this.service.createOrganizationAndAssignUser(orgData, req.user.userId);
       
       res.status(201).json({
@@ -61,10 +60,8 @@ export class OrganizationController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // Enforce organization isolation - users can only see their own organization
       const userOrganizationId = req.user.organizationId;
       
-      // Get all organizations and filter to only return the user's organization
       const allOrganizations = await this.service.getAllOrganizations();
       const userOrganization = allOrganizations.find(org => org.organizationId === userOrganizationId);
       
@@ -96,7 +93,6 @@ export class OrganizationController {
         return res.status(404).json({ error: 'Organization not found.' });
       }
 
-      // Enforce organization isolation - users can only see their own organization
       if (organization.organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 
@@ -123,7 +119,6 @@ export class OrganizationController {
       const { organizationId } = req.params;
       const updateData: UpdateOrganizationDTO = req.body;
 
-      // Enforce organization isolation - users can only update their own organization
       if (organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 
@@ -157,7 +152,6 @@ export class OrganizationController {
 
       const { organizationId } = req.params;
 
-      // Enforce organization isolation - users can only delete their own organization
       if (organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 

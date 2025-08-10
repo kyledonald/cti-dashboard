@@ -1,6 +1,10 @@
-# CTI Dashboard
+# CTI Dashboard for SMEs - Final Year University Project
 
 A comprehensive Cyber Threat Intelligence dashboard for SMEs to manage security incidents, track threat actors, monitor CVEs, and generate AI-powered threat summaries.
+
+## Note
+
+This is a university project so there will be no active development or support for this application.
 
 ## Features
 
@@ -10,7 +14,6 @@ A comprehensive Cyber Threat Intelligence dashboard for SMEs to manage security 
 - **CVE Monitoring**: Real-time CVE data from Shodan with CVSS scoring and known exploited vulnerabilities (KEV)
 - **User Management**: Role-based access control (Admin, Editor, Viewer) with organization-specific data
 - **AI Summary Generation**: Generate downloadable threat summaries for any security incident
-
 
 ## Technology Stack
 
@@ -22,6 +25,21 @@ A comprehensive Cyber Threat Intelligence dashboard for SMEs to manage security 
 - **CVE Data**: Shodan API
 
 
-## License
+## Code Summary
 
-This project is licensed under the MIT License.
+The backend code consists of:
+
+- 51 total files created or modified, including backend logic (controllers, services, middleware, models, routes)
+- 14 unit test suites (containing a total of 133 mocked unit tests)
+- 1 Deployment file detailing the CI/CD process
+- ~6644 lines of created or modified code
+
+The React web app consists of:
+
+- X web pages (including the local /testing page)
+- X manually created/modified files
+- X automated end-to-end tests using Playwright (that run against our live Cloud functions)
+- ~X lines of created or modified code
+
+In total the project contains approximately:
+- X created/modified files by the developer, across a total of ~X lines of created or modified code.

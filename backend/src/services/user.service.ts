@@ -17,12 +17,9 @@ export class UserService {
     const userRef = this.collection.doc();
     const userId = userRef.id;
 
-    // New users are unassigned by default (no org, no access)
+    // New users are unassigned by default (no org, no access to anything)
     let organizationId = userData.organizationId || '';
     let role = userData.role || 'unassigned';
-    
-    // All new users start unassigned, regardless of whether they're first or not
-    // They will get appropriate roles when they create or join an organization
 
     const newUser: User = {
       userId: userId,
@@ -50,7 +47,6 @@ export class UserService {
         query = query.where('organizationId', '==', organizationId);
       }
       
-      // Get all users without ordering for now (we'll sort on frontend)
       const snapshot = await query.get();
       
       const users: User[] = [];
@@ -58,7 +54,6 @@ export class UserService {
         users.push(doc.data() as User);
       });
       
-      // Sort by lastName on the backend
       return users.sort((a, b) => {
         const aLastName = a.lastName || '';
         const bLastName = b.lastName || '';
@@ -126,7 +121,6 @@ export class UserService {
 
     await userRef.update(dataToUpdate);
     
-    // Fetch and return the updated user
     const updatedDoc = await userRef.get();
     const updatedUser = updatedDoc.data() as User;
     return updatedUser;
@@ -145,7 +139,6 @@ export class UserService {
       updatedAt: FieldValue.serverTimestamp()
     });
     
-    // Fetch and return the updated user
     const updatedDoc = await userRef.get();
     return updatedDoc.data() as User;
   }
@@ -162,13 +155,11 @@ export class UserService {
     return true;
   }
 
-  // Helper method to get total user count
   async getUserCount(): Promise<number> {
     const snapshot = await this.collection.get();
     return snapshot.size;
   }
 
-  // Method to allow users to leave their organization
   async leaveOrganization(userId: string): Promise<User | null> {
     const userRef = this.collection.doc(userId);
     const doc = await userRef.get();
@@ -179,7 +170,7 @@ export class UserService {
 
     const user = doc.data() as User;
     
-    // Only allow non-admin users to leave organization
+    // Only allow non-admin users to leave org
     if (user.role === 'admin') {
       throw new Error('Admin users cannot leave their organization. Please transfer admin role first.');
     }
@@ -192,10 +183,8 @@ export class UserService {
 
     await userRef.update(dataToUpdate);
     
-    // Fetch and return the updated user
     const updatedDoc = await userRef.get();
     const updatedUser = updatedDoc.data() as User;
     return updatedUser;
   }
-
 }

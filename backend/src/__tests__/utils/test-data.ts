@@ -2,7 +2,7 @@ export const mockIncidents: any[] = [
     {
       incidentId: 'inc1',
       title: 'Critical Security Breach',
-      description: 'Unauthorized access detected',
+      description: 'Unauthorised access detected',
       status: 'Open',
       priority: 'Critical',
       organizationId: 'org-1',

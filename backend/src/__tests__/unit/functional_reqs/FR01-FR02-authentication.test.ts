@@ -2,35 +2,27 @@ import request from 'supertest';
 import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware } from '../../utils/mock-auth';
 
-// Create test app
 const app = createTestApp();
 
-// Mock authentication middleware - exclude test endpoints from auth
 const mockAuthMiddleware = createMockAuthMiddleware(['/users/register', '/users/login', '/users/logout']);
 app.use(mockAuthMiddleware);
 
-// Human-readable password validation function
 const validatePassword = (password: string): boolean => {
   if (!password || typeof password !== 'string') return false;
   
-  // Check minimum length
   if (password.length < 8) return false;
   
-  // Check for required character types
   const hasLowercase = /[a-z]/.test(password);
   const hasUppercase = /[A-Z]/.test(password);
   const hasNumber = /\d/.test(password);
   const hasSpecialChar = /[@$!%*?&]/.test(password);
   
-  // All requirements must be met
   return hasLowercase && hasUppercase && hasNumber && hasSpecialChar;
 };
 
-// Mock user registration endpoint
 app.post('/users/register', (req, res) => {
   const { email, password, firstName, lastName } = req.body;
 
-  // Test 1: No username/password
   if (!email || !password) {
     return res.status(400).json({
       error: 'Missing required fields',
@@ -38,7 +30,6 @@ app.post('/users/register', (req, res) => {
     });
   }
 
-  // Test 2: Missing fields
   if (!firstName || !lastName) {
     return res.status(400).json({
       error: 'Missing required fields',
@@ -46,7 +37,6 @@ app.post('/users/register', (req, res) => {
     });
   }
 
-  // Test 3: Password complexity validation
   if (!validatePassword(password)) {
     return res.status(400).json({
       error: 'Invalid password',
@@ -54,7 +44,6 @@ app.post('/users/register', (req, res) => {
     });
   }
 
-  // Test 4: XSS protection
   const sanitizedEmail = email.replace(/[<>]/g, '');
   const sanitizedFirstName = firstName.replace(/[<>]/g, '');
   const sanitizedLastName = lastName.replace(/[<>]/g, '');
@@ -66,7 +55,6 @@ app.post('/users/register', (req, res) => {
     });
   }
 
-  // Test 5: Successful registration
   res.status(201).json({
     message: 'User registered successfully',
     user: {
@@ -79,7 +67,6 @@ app.post('/users/register', (req, res) => {
   });
 });
 
-// Mock login endpoint
 app.post('/users/login', (req, res) => {
   const { email, password } = req.body;
 
@@ -90,7 +77,6 @@ app.post('/users/login', (req, res) => {
     });
   }
 
-  // Mock successful login
   res.json({
     message: 'Login successful',
     user: {
@@ -101,7 +87,6 @@ app.post('/users/login', (req, res) => {
   });
 });
 
-// Mock logout endpoint
 app.post('/users/logout', (req, res) => {
   res.json({
     message: 'Logout successful'

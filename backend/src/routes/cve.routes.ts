@@ -7,7 +7,7 @@ import { cveService } from '../services/cve.service';
 export const cveRouter = (db: Firestore) => {
   const router = express.Router();
 
-  // Generate AI summary for incidents (backend proxy to avoid CORS and API key exposure)
+  // Generate AI summary for INcs (backend proxy to avoid CORS and API key exposure)
   router.post('/ai-summary', rateLimitAI, async (req, res) => {
     try {
       const { incident, users, threatActors } = req.body;
@@ -47,7 +47,6 @@ export const cveRouter = (db: Firestore) => {
     }
   });
 
-  // Get latest CVEs from Shodan API (backend proxy to avoid CORS)
   router.get('/shodan/latest', async (req, res) => {
     try {
       const { limit = 50, minCvssScore = 0 } = req.query;

@@ -35,10 +35,9 @@ export class IncidentController {
           .json({ error: 'Missing required incident fields.' });
       }
 
-      // Enforce organization isolation - users can only create incidents for their own organization
+      // can only create INCs for ur own org
       const userOrganizationId = req.user.organizationId;
       
-      // Override the organizationId from request body with the authenticated user's organization
       const validatedIncidentData = {
         ...incidentData,
         organizationId: userOrganizationId
@@ -63,7 +62,6 @@ export class IncidentController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // Enforce organization isolation - users can only see incidents from their organization
       const userOrganizationId = req.user.organizationId;
       
       const incidents = await this.service.getAllIncidents(userOrganizationId);
@@ -89,7 +87,7 @@ export class IncidentController {
         return res.status(404).json({ error: 'Incident not found.' });
       }
 
-      // Enforce organization isolation - users can only see incidents from their organization
+      // users can only see incidents from their own org
       if (incident.organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 
@@ -120,13 +118,12 @@ export class IncidentController {
       const { incidentId } = req.params;
       const updateData: UpdateIncidentDTO = req.body;
       
-      // First get the incident to check organization access
       const incident = await this.service.getIncidentById(incidentId);
       if (!incident) {
         return res.status(404).json({ error: 'Incident not found.' });
       }
 
-      // Enforce organization isolation - users can only update incidents from their organization
+      // users can only update incidents from their own org
       if (incident.organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 
@@ -156,13 +153,13 @@ export class IncidentController {
 
       const { incidentId } = req.params;
       
-      // First get the incident to check organization access
+      // First get the incident to check org access
       const incident = await this.service.getIncidentById(incidentId);
       if (!incident) {
         return res.status(404).json({ error: 'Incident not found.' });
       }
 
-      // Enforce organization isolation - users can only delete incidents from their organization
+      // users can only delete incidents from their own org
       if (incident.organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 
@@ -213,14 +210,12 @@ export class IncidentController {
   async deleteComment(req: Request, res: Response) {
     try {
       const { incidentId, commentId } = req.params;
-      const { userId, userRole } = req.body; // In real app, this would come from auth middleware
+      const { userId, userRole } = req.body;
 
       if (!userId) {
         return res.status(400).json({ error: 'User ID is required.' });
       }
 
-  
-      // For now, we'll pass the user info in the request body
       const updatedIncident = await this.service.deleteComment(incidentId, commentId, userId, userRole);
 
       if (!updatedIncident) {

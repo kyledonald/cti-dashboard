@@ -2,24 +2,21 @@ import request from 'supertest';
 import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware } from '../../utils/mock-auth';
 
-// Create test app
 const app = createTestApp();
 
-// Mock authentication middleware
 const mockAuthMiddleware = createMockAuthMiddleware(['/api/incidents']);
 app.use(mockAuthMiddleware);
 
-// Mock incident creation endpoint with sanitization
 app.post('/api/incidents', (req: any, res) => {
   const { title, description, priority, status } = req.body;
 
   // Test sanitization logic
   const sanitizeInput = (input: any): any => {
     if (typeof input === 'string') {
-      // Remove HTML tags and their content
-      return input.replace(/<script[^>]*>.*?<\/script>/gi, '')  // Remove script tags and content
-                  .replace(/<style[^>]*>.*?<\/style>/gi, '')    // Remove style tags and content
-                  .replace(/<[^>]*>/g, '');                     // Remove remaining HTML tags
+      return input.replace(/<script[^>]*>.*?<\/script>/gi, '')
+                  .replace(/<style[^>]*>.*?<\/style>/gi, '')
+                  .replace(/<[^>]*>/g, '');
+      // regex patterns made with help from online resources
     }
     
     if (Array.isArray(input)) {
@@ -44,7 +41,6 @@ app.post('/api/incidents', (req: any, res) => {
     });
   }
 
-  // Sanitize all inputs
   const sanitizedData = sanitizeInput({
     title,
     description,

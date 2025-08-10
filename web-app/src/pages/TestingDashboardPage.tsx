@@ -4,7 +4,6 @@ import { Badge } from '../components/ui/badge';
 
 interface TestResult {
   id: string;
-  requirementId?: string;
   name: string;
   description: string;
   category: string;
@@ -16,12 +15,10 @@ interface TestResult {
 
 const TestingDashboardPage: React.FC = () => {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
-  const [selectedRequirement, setSelectedRequirement] = useState<string>('all');
 
   const realTestResults: TestResult[] = [
     {
-      id: 'FR01-1',
-      requirementId: 'FR01',
+      id: 'test-1',
       name: 'Reject registration with no username/password',
       description: 'Should return 400 if email or password is missing',
       category: 'unit',
@@ -30,8 +27,7 @@ const TestingDashboardPage: React.FC = () => {
       lastRun: '2023-10-27T10:00:00Z',
     },
     {
-      id: 'FR01-2',
-      requirementId: 'FR01',
+      id: 'test-2',
       name: 'Reject registration with missing fields',
       description: 'Should return 400 if first or last name is missing',
       category: 'unit',
@@ -40,8 +36,7 @@ const TestingDashboardPage: React.FC = () => {
       lastRun: '2023-10-27T10:05:00Z',
     },
     {
-      id: 'FR01-3',
-      requirementId: 'FR01',
+      id: 'test-3',
       name: 'Reject registration with insufficiently complex password',
       description: 'Should return 400 if password does not meet complexity requirements',
       category: 'unit',
@@ -50,8 +45,7 @@ const TestingDashboardPage: React.FC = () => {
       lastRun: '2023-10-27T10:10:00Z',
     },
     {
-      id: 'FR01-4',
-      requirementId: 'FR01',
+      id: 'test-4',
       name: 'Accept registration with valid credentials',
       description: 'Should return 201 and user object for valid registration',
       category: 'unit',
@@ -60,8 +54,7 @@ const TestingDashboardPage: React.FC = () => {
       lastRun: '2023-10-27T10:15:00Z',
     },
     {
-      id: 'FR01-5',
-      requirementId: 'FR01',
+      id: 'test-5',
       name: 'Reject registration with XSS attempt',
       description: 'Should return 400 if input contains XSS attempt',
       category: 'unit',
@@ -70,8 +63,7 @@ const TestingDashboardPage: React.FC = () => {
       lastRun: '2023-10-27T10:20:00Z',
     },
     {
-      id: 'FR01-6',
-      requirementId: 'FR01',
+      id: 'test-6',
       name: 'Reject dashboard access without authentication',
       description: 'Should return 401 if no auth token is provided',
       category: 'unit',
@@ -80,8 +72,7 @@ const TestingDashboardPage: React.FC = () => {
       lastRun: '2023-10-27T10:25:00Z',
     },
     {
-      id: 'FR01-7',
-      requirementId: 'FR01',
+      id: 'test-7',
       name: 'Allow dashboard access with valid authentication',
       description: 'Should return 200 and user object if auth token is valid',
       category: 'unit',
@@ -90,8 +81,6 @@ const TestingDashboardPage: React.FC = () => {
       lastRun: '2023-10-27T10:30:00Z',
     },
   ];
-
-
 
   useEffect(() => {
     const fetchTestResults = async () => {
@@ -102,7 +91,6 @@ const TestingDashboardPage: React.FC = () => {
           if (response.ok) {
             const data = await response.json();
             setTestResults(data.testResults || []);
-            
           } else {
             // Fallback to static data if JSON file doesn't exist
             setTestResults(realTestResults);
@@ -119,8 +107,6 @@ const TestingDashboardPage: React.FC = () => {
 
     fetchTestResults();
   }, []);
-
-
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -152,15 +138,6 @@ const TestingDashboardPage: React.FC = () => {
     }
   };
 
-  const filteredTests = selectedRequirement === 'all'
-    ? testResults 
-    : testResults.filter(test => 
-        test.requirementId === selectedRequirement
-      );
-
-  // Get unique requirements for filter dropdown (sorted)
-  const uniqueRequirements = Array.from(new Set(testResults.map(test => test.requirementId).filter(Boolean))).sort();
-
   const totalTests = testResults.length;
   const passedTests = testResults.filter(t => t.status === 'pass').length;
   const failedTests = testResults.filter(t => t.status === 'fail').length;
@@ -181,46 +158,44 @@ const TestingDashboardPage: React.FC = () => {
         </div>
       </div>
 
-                        {/* Summary Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Tests</p>
-                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalTests}</p>
-                          </div>
-                          <div className="text-3xl">📋</div>
-                        </div>
-                      </CardContent>
-                    </Card>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Tests</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalTests}</p>
+              </div>
+              <div className="text-3xl">📋</div>
+            </div>
+          </CardContent>
+        </Card>
 
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Passed</p>
-                            <p className="text-2xl font-bold text-green-600">{passedTests}</p>
-                          </div>
-                          <div className="text-3xl">✅</div>
-                        </div>
-                      </CardContent>
-                    </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Passed</p>
+                <p className="text-2xl font-bold text-green-600">{passedTests}</p>
+              </div>
+              <div className="text-3xl">✅</div>
+            </div>
+          </CardContent>
+        </Card>
 
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Failed</p>
-                            <p className="text-2xl font-bold text-red-600">{failedTests}</p>
-                          </div>
-                          <div className="text-3xl">❌</div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-      
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Failed</p>
+                <p className="text-2xl font-bold text-red-600">{failedTests}</p>
+              </div>
+              <div className="text-3xl">❌</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Test Results */}
       <Card>
@@ -228,62 +203,45 @@ const TestingDashboardPage: React.FC = () => {
           <CardTitle>Test Results</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Requirement Filter */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Filter by Requirement
-            </label>
-            <select
-              value={selectedRequirement}
-              onChange={(e) => setSelectedRequirement(e.target.value)}
-              className="w-full md:w-64 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="all">All Requirements</option>
-              {uniqueRequirements.map((req) => (
-                <option key={req} value={req}>{req}</option>
-              ))}
-            </select>
-          </div>
-
           <div className="mt-6">
-              <div className="space-y-4">
-                {filteredTests.length === 0 ? (
-                  <div className="text-center py-12">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                      No Tests Available
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Tests will appear here once you create them.
-                    </p>
-                  </div>
-                ) : (
-                  filteredTests.map((test) => (
-                    <div key={test.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <span className="text-lg">{getStatusIcon(test.status)}</span>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {test.name}
-                            </h3>
-                            <Badge className={getStatusColor(test.status)}>
-                              {test.status.toUpperCase()}
-                            </Badge>
-                            <Badge variant="outline" className="capitalize">
-                              {test.category}
-                            </Badge>
-                          </div>
+            <div className="space-y-4">
+              {testResults.length === 0 ? (
+                <div className="text-center py-12">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    No Tests Available
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Tests will appear here once you create them.
+                  </p>
+                </div>
+              ) : (
+                testResults.map((test) => (
+                  <div key={test.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="text-lg">{getStatusIcon(test.status)}</span>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                            {test.name}
+                          </h3>
+                          <Badge className={getStatusColor(test.status)}>
+                            {test.status.toUpperCase()}
+                          </Badge>
+                          <Badge variant="outline" className="capitalize">
+                            {test.category}
+                          </Badge>
                         </div>
                       </div>
-                      {test.errorMessage && (
-                        <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
-                          ❌ {test.errorMessage}
-                        </div>
-                      )}
                     </div>
-                  ))
-                )}
-              </div>
+                    {test.errorMessage && (
+                      <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
+                        ❌ {test.errorMessage}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

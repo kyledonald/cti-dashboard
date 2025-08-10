@@ -1,17 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 
-// Simple HTML tag removal function
+// HTML tag removal
 const removeHtmlTags = (str: string): string => {
   return str.replace(/<[^>]*>/g, '');
 };
 
-// Sanitize string inputs
 const sanitizeString = (value: any): string => {
   if (typeof value !== 'string') return '';
   return removeHtmlTags(value.trim());
 };
 
-// Sanitize array of strings
 const sanitizeStringArray = (value: any): string[] => {
   if (!Array.isArray(value)) return [];
   return value
@@ -20,7 +18,6 @@ const sanitizeStringArray = (value: any): string[] => {
     .filter(item => item.length > 0);
 };
 
-// Recursively sanitize object properties
 const sanitizeObject = (obj: any): any => {
   if (typeof obj !== 'object' || obj === null) return obj;
   
@@ -44,17 +41,15 @@ const sanitizeObject = (obj: any): any => {
 };
 
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
-  // Sanitize request body
+
   if (req.body && typeof req.body === 'object') {
     req.body = sanitizeObject(req.body);
   }
   
-  // Sanitize query parameters
   if (req.query && typeof req.query === 'object') {
     req.query = sanitizeObject(req.query);
   }
   
-  // Sanitize URL parameters
   if (req.params && typeof req.params === 'object') {
     req.params = sanitizeObject(req.params);
   }

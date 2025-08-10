@@ -36,7 +36,6 @@ export class UserController {
 
   async registerUser(req: AuthenticatedRequest, res: Response) {
     try {
-      // Extract Firebase token from Authorization header
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ 
@@ -54,7 +53,6 @@ export class UserController {
       }
       const idToken = tokenParts[1];
 
-      // Verify Firebase token
       const decodedToken = await admin.auth().verifyIdToken(idToken);
       
       // Check if user already exists
@@ -62,11 +60,9 @@ export class UserController {
       const existingUser = existingUsers.find(u => u.googleId === decodedToken.uid);
       
       if (existingUser) {
-        // User already exists, return them
         return res.status(200).json({ user: existingUser });
       }
 
-      // Create new user from Firebase token data
       const userData: CreateUserDTO = {
         googleId: decodedToken.uid,
         email: decodedToken.email!,
@@ -100,7 +96,6 @@ export class UserController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // Handle unassigned users - they should only see themselves
       if (req.user.role === 'unassigned') {
         const currentUser = await this.service.getUserById(req.user.userId);
         if (!currentUser) {
@@ -109,10 +104,8 @@ export class UserController {
         return res.status(200).json({ users: [currentUser] });
       }
 
-      // For assigned users, enforce organization isolation
       const userOrganizationId = req.user.organizationId;
       
-      // Only allow filtering by the user's own organization
       const users = await this.service.getAllUsers(userOrganizationId);
       res.status(200).json({ users: users });
     } catch (error: any) {
@@ -136,7 +129,6 @@ export class UserController {
         return res.status(404).json({ error: 'User not found.' });
       }
 
-      // Handle unassigned users - they can only see themselves
       if (req.user.role === 'unassigned') {
         if (user.userId !== req.user.userId) {
           return res.status(403).json({ 
@@ -147,7 +139,6 @@ export class UserController {
         return res.status(200).json({ user: user });
       }
 
-      // For assigned users, enforce organization isolation
       if (user.organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 
@@ -177,7 +168,6 @@ export class UserController {
         return res.status(404).json({ error: 'User not found.' });
       }
 
-      // Only admins can search for users by email (for adding to organization)
       if (req.user.role !== 'admin') {
         return res.status(403).json({
           error: 'Access denied',
@@ -185,7 +175,6 @@ export class UserController {
         });
       }
 
-      // Admins can only search for unassigned users (to add to their organization)
       if (user.organizationId && user.organizationId.trim() !== '') {
         return res.status(403).json({
           error: 'Access denied',
@@ -211,7 +200,6 @@ export class UserController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
   
-      // Authorization logic: Users can update themselves, admins can update anyone
       const isUpdatingSelf = req.user.userId === userId;
       const isAdmin = req.user.role === 'admin';
   
@@ -222,20 +210,15 @@ export class UserController {
         });
       }
   
-      // Define allowed fields based on permissions
       let allowedFields: (keyof UpdateUserDTO)[];
       if (isAdmin) {
-        // Admins can update all fields
         allowedFields = ['firstName', 'lastName', 'profilePictureUrl', 'role', 'organizationId', 'status'];
       } else if (isUpdatingSelf && req.user.role === 'unassigned') {
-        // Unassigned users can update their basic info AND join organizations (become admin/editor/viewer)
         allowedFields = ['firstName', 'lastName', 'profilePictureUrl', 'role', 'organizationId'];
       } else {
-        // Other users can only update their own basic info
         allowedFields = ['firstName', 'lastName', 'profilePictureUrl'];
       }
   
-      // Filter updateData to only allowed fields
       const filteredUpdateData: UpdateUserDTO = {};
       for (const field of allowedFields) {
         if (updateData[field] !== undefined) {
@@ -243,7 +226,6 @@ export class UserController {
         }
       }
   
-      // Check if any valid fields were provided
       if (Object.keys(filteredUpdateData).length === 0) {
         return res.status(400).json({ 
           error: 'No valid fields to update', 
@@ -291,7 +273,6 @@ export class UserController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
   
-      // Authorization logic: Users can delete themselves, admins can delete anyone
       const isDeletingSelf = req.user.userId === userId;
       const isAdmin = req.user.role === 'admin';
   
@@ -324,7 +305,6 @@ export class UserController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // Authorization logic: Users can only leave their own organization
       const isLeavingSelf = req.user.userId === userId;
       if (!isLeavingSelf) {
         return res.status(403).json({ 

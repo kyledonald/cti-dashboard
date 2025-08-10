@@ -159,7 +159,6 @@ export class IncidentService {
         return null;
       }
 
-      // Create new comment with current timestamp
       const newComment: ResolutionComment = {
         commentId: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         userId: commentData.userId,
@@ -168,13 +167,11 @@ export class IncidentService {
         timestamp: Timestamp.now(),
       };
 
-      // Add comment to the incident using arrayUnion
       await incidentRef.update({
         resolutionComments: FieldValue.arrayUnion(newComment),
         lastUpdatedAt: FieldValue.serverTimestamp(),
       });
 
-      // Return updated incident
       const updatedDoc = await incidentRef.get();
       return updatedDoc.data() as Incident;
     } catch (error) {
@@ -202,21 +199,19 @@ export class IncidentService {
         return null;
       }
 
-      // Find the comment to delete
       const commentToDelete = incident.resolutionComments.find(comment => comment.commentId === commentId);
       
       if (!commentToDelete) {
         return null;
       }
 
-      // Check permissions: users can delete their own comments, admins can delete any comment
+      // users can delete their own comments, admins can delete anyones comment
       const canDelete = commentToDelete.userId === userId || userRole === 'admin';
       
       if (!canDelete) {
         throw new Error('Unauthorized to delete this comment');
       }
 
-      // Remove the comment
       const updatedComments = incident.resolutionComments.filter(comment => comment.commentId !== commentId);
       
       await incidentRef.update({
@@ -224,7 +219,6 @@ export class IncidentService {
         lastUpdatedAt: FieldValue.serverTimestamp(),
       });
 
-      // Return updated incident
       const updatedDoc = await incidentRef.get();
       return updatedDoc.data() as Incident;
     } catch (error) {

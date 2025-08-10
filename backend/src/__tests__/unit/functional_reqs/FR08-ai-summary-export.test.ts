@@ -3,14 +3,11 @@ import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware } from '../../utils/mock-auth';
 import { mockAISummary, mockPDFBuffer } from '../../utils/test-data';
 
-// Create test app
 const app = createTestApp();
 
-// Mock authentication middleware
 const mockAuthMiddleware = createMockAuthMiddleware();
 app.use(mockAuthMiddleware);
 
-// Mock incident data
 const mockIncident = {
   id: 'incident-123',
   title: 'Apache Log4j Vulnerability Detected',
@@ -24,11 +21,9 @@ const mockIncident = {
   tags: ['vulnerability', 'critical', 'apache', 'log4j']
 };
 
-// Mock AI summary endpoint
 app.post('/incidents/:incidentId/ai-summary', (req: any, res) => {
   const { incidentId } = req.params;
   
-  // Check if incident exists and belongs to user's organization
   if (incidentId !== mockIncident.id) {
     return res.status(404).json({
       error: 'Incident not found',
@@ -43,7 +38,6 @@ app.post('/incidents/:incidentId/ai-summary', (req: any, res) => {
     });
   }
   
-  // Return AI-generated summary
   res.status(200).json({
     summary: mockAISummary.summary,
     recommendations: mockAISummary.recommendations,
@@ -53,11 +47,9 @@ app.post('/incidents/:incidentId/ai-summary', (req: any, res) => {
   });
 });
 
-// Mock PDF export endpoint
 app.post('/incidents/:incidentId/export-pdf', (req: any, res) => {
   const { incidentId } = req.params;
   
-  // Check if incident exists and belongs to user's organization
   if (incidentId !== mockIncident.id) {
     return res.status(404).json({
       error: 'Incident not found',
@@ -77,7 +69,6 @@ app.post('/incidents/:incidentId/export-pdf', (req: any, res) => {
   res.setHeader('Content-Disposition', `attachment; filename="vulnerability-summary-${incidentId}.pdf"`);
   res.setHeader('Content-Length', mockPDFBuffer.length);
   
-  // Return PDF buffer
   res.status(200).send(mockPDFBuffer);
 });
 
@@ -110,7 +101,6 @@ describe('AI Summary & PDF Export', () => {
     });
 
     it('should allow all authenticated users to generate AI summary', async () => {
-      // Test admin access
       const adminResponse = await request(app)
         .post('/incidents/incident-123/ai-summary')
         .set('Authorization', 'Bearer admin-token')
@@ -118,7 +108,6 @@ describe('AI Summary & PDF Export', () => {
       
       expect(adminResponse.body.summary).toBeDefined();
 
-      // Test editor access
       const editorResponse = await request(app)
         .post('/incidents/incident-123/ai-summary')
         .set('Authorization', 'Bearer editor-token')
@@ -126,7 +115,6 @@ describe('AI Summary & PDF Export', () => {
       
       expect(editorResponse.body.summary).toBeDefined();
 
-      // Test viewer access
       const viewerResponse = await request(app)
         .post('/incidents/incident-123/ai-summary')
         .set('Authorization', 'Bearer viewer-token')
@@ -136,7 +124,6 @@ describe('AI Summary & PDF Export', () => {
     });
 
     it('should allow all authenticated users to export PDF', async () => {
-      // Test admin access
       const adminResponse = await request(app)
         .post('/incidents/incident-123/export-pdf')
         .set('Authorization', 'Bearer admin-token')
@@ -144,7 +131,6 @@ describe('AI Summary & PDF Export', () => {
       
       expect(adminResponse.headers['content-type']).toBe('application/pdf');
 
-      // Test editor access
       const editorResponse = await request(app)
         .post('/incidents/incident-123/export-pdf')
         .set('Authorization', 'Bearer editor-token')
@@ -152,7 +138,6 @@ describe('AI Summary & PDF Export', () => {
       
       expect(editorResponse.headers['content-type']).toBe('application/pdf');
 
-      // Test viewer access
       const viewerResponse = await request(app)
         .post('/incidents/incident-123/export-pdf')
         .set('Authorization', 'Bearer viewer-token')

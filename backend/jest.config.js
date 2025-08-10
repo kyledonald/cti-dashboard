@@ -6,16 +6,6 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/index.ts',
-    '!src/__tests__/**/*.ts',
-    '!src/routes/**/*.ts',
-  ],
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html', 'json'],
-  // Remove coverageThreshold - we don't need it!
   setupFilesAfterEnv: [],
   testTimeout: 10000,
 };

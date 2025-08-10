@@ -11,27 +11,23 @@ export const organizationRouter = (db: Firestore) => {
     organizationService,
   );
 
-  // Create organization - Any authenticated user (including unassigned for onboarding)
+  // anyone can create an org, since new users get auto set to unassigned
   router.post('/', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     organizationController.createOrganization(req, res),
   );
   
-  // Get all organizations - Any authenticated user (including unassigned)
   router.get('/', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     organizationController.getAllOrganizations(req, res),
   );
   
-  // Get organization by ID - Any authenticated user (including unassigned)
   router.get('/:organizationId', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     organizationController.getOrganizationById(req, res),
   );
   
-  // Update organization - Admin only
   router.put('/:organizationId', requireAdmin, (req: AuthenticatedRequest, res) =>
     organizationController.updateOrganization(req, res),
   );
   
-  // Delete organization - Admin only (as mentioned by user)
   router.delete('/:organizationId', requireAdmin, (req: AuthenticatedRequest, res) =>
     organizationController.deleteOrganization(req, res),
   );

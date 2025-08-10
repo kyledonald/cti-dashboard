@@ -3,19 +3,15 @@ import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware } from '../../utils/mock-auth';
 import { mockUsers } from '../../utils/mock-auth';
 
-// Create test app
 const app = createTestApp();
 
-// Mock authentication middleware
 const mockAuthMiddleware = createMockAuthMiddleware();
 app.use(mockAuthMiddleware);
 
-// Mock notification scheduling endpoints
 app.post('/api/notifications/schedule', (req: any, res) => {
   const { title, message, priority, scheduledDate, scheduledTime: providedTime, userIds } = req.body;
   const user = req.user;
 
-  // Only admins can schedule notifications
   if (user.role !== 'admin') {
     return res.status(403).json({
       error: 'Access denied',
@@ -23,7 +19,6 @@ app.post('/api/notifications/schedule', (req: any, res) => {
     });
   }
 
-  // Validate required fields
   if (!title || !message || !priority || !scheduledDate || !userIds || userIds.length === 0) {
     return res.status(400).json({
       error: 'Missing required fields',
@@ -31,7 +26,6 @@ app.post('/api/notifications/schedule', (req: any, res) => {
     });
   }
 
-  // Validate priority
   if (!['low', 'medium', 'high'].includes(priority)) {
     return res.status(400).json({
       error: 'Invalid priority',
@@ -39,8 +33,7 @@ app.post('/api/notifications/schedule', (req: any, res) => {
     });
   }
 
-  // Validate date format and future date
-  const scheduledTime = providedTime || new Date().toTimeString().slice(0, 5); // Default to current time if not provided
+  const scheduledTime = providedTime || new Date().toTimeString().slice(0, 5);
   const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`);
   const now = new Date();
   
@@ -51,7 +44,6 @@ app.post('/api/notifications/schedule', (req: any, res) => {
     });
   }
 
-  // Allow dates that are at least 1 minute in the future for testing
   const oneMinuteFromNow = new Date(now.getTime() + 60000);
   if (scheduledDateTime <= oneMinuteFromNow) {
     return res.status(400).json({
@@ -60,7 +52,6 @@ app.post('/api/notifications/schedule', (req: any, res) => {
     });
   }
 
-  // Mock successful scheduling
   const scheduledNotification = {
     id: 'scheduled-notification-1',
     title,
@@ -85,7 +76,6 @@ app.post('/api/notifications/schedule', (req: any, res) => {
 app.get('/api/notifications/scheduled', (req: any, res) => {
   const user = req.user;
 
-  // Only admins can view scheduled notifications
   if (user.role !== 'admin') {
     return res.status(403).json({
       error: 'Access denied',
@@ -93,7 +83,6 @@ app.get('/api/notifications/scheduled', (req: any, res) => {
     });
   }
 
-  // Mock scheduled notifications data
   const scheduledNotifications = [
     {
       id: 'scheduled-1',
@@ -135,7 +124,6 @@ app.delete('/api/notifications/scheduled/:notificationId', (req: any, res) => {
   const { notificationId } = req.params;
   const user = req.user;
 
-  // Only admins can cancel scheduled notifications
   if (user.role !== 'admin') {
     return res.status(403).json({
       error: 'Access denied',
@@ -143,7 +131,6 @@ app.delete('/api/notifications/scheduled/:notificationId', (req: any, res) => {
     });
   }
 
-  // Mock successful cancellation
   res.json({
     message: 'Scheduled notification cancelled successfully',
     notificationId
@@ -153,7 +140,6 @@ app.delete('/api/notifications/scheduled/:notificationId', (req: any, res) => {
 app.get('/api/notifications/reminders', (req: any, res) => {
   const user = req.user;
 
-  // All authenticated users can view their reminders
   if (!user) {
     return res.status(401).json({
       error: 'Authentication required',
@@ -161,7 +147,6 @@ app.get('/api/notifications/reminders', (req: any, res) => {
     });
   }
 
-  // Mock reminders that are due
   const now = new Date();
   const reminders = [
     {
@@ -198,7 +183,6 @@ app.post('/api/notifications/reminders/:reminderId/acknowledge', (req: any, res)
   const { reminderId } = req.params;
   const user = req.user;
 
-  // All authenticated users can acknowledge their reminders
   if (!user) {
     return res.status(401).json({
       error: 'Authentication required',
@@ -206,7 +190,6 @@ app.post('/api/notifications/reminders/:reminderId/acknowledge', (req: any, res)
     });
   }
 
-  // Mock successful acknowledgment
   res.json({
     message: 'Reminder acknowledged successfully',
     reminderId,
@@ -298,7 +281,7 @@ describe('FR20-FR21: Notification Scheduling & Reminders', () => {
 
       test('should reject past scheduled times', async () => {
         const pastDate = new Date();
-        pastDate.setDate(pastDate.getDate() - 1); // Yesterday
+        pastDate.setDate(pastDate.getDate() - 1);
 
         const pastData = {
           title: 'Password Reminder',

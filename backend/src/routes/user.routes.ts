@@ -9,42 +9,34 @@ export const userRouter = (db: Firestore) => {
   const userService = new UserService(db);
   const userController = new UserController(userService);
 
-  // Public user registration endpoint (validates Firebase token but allows user creation)
   router.post('/register', (req: AuthenticatedRequest, res) =>
     userController.registerUser(req, res),
   );
   
-  // Create user - Admin only (for admin-created users)
   router.post('/', requireAdmin, (req: AuthenticatedRequest, res) =>
     userController.createUser(req, res),
   );
   
-  // Get all users - Any authenticated user (needed for dropdowns, assignments, etc.)
   router.get('/', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     userController.getAllUsers(req, res),
   );
   
-  // Get user by email - Admin only (for adding users to organization)
   router.get('/email/:email', requireAdmin, (req: AuthenticatedRequest, res) =>
     userController.getUserByEmail(req, res),
   );
   
-  // Get user by ID - Any authenticated user
   router.get('/:userId', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     userController.getUserById(req, res),
   );
   
-  // Update user - Users can update themselves, admins can update anyone (controller handles logic)
   router.put('/:userId', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     userController.updateUser(req, res),
   );
   
-  // Delete user - Users can delete themselves, admins can delete anyone (controller handles logic)
   router.delete('/:userId', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     userController.deleteUser(req, res),
   );
   
-  // Leave organization - Users can leave their own organization
   router.post('/:userId/leave-organization', requireAnyAuthenticated, (req: AuthenticatedRequest, res) =>
     userController.leaveOrganization(req, res),
   );

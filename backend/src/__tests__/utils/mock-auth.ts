@@ -97,7 +97,6 @@ export interface MockUser {
   
   export const createMockAuthMiddleware = (skipPaths: string[] = []) => {
     return (req: any, res: any, next: any) => {
-      // Skip auth for specified paths
       if (skipPaths.includes(req.path)) {
         return next();
       }
@@ -112,7 +111,6 @@ export interface MockUser {
       
       const token = authHeader.replace('Bearer ', '');
       
-      // Mock different users based on token
       if (token === 'admin-token') {
         req.user = mockUsers[0]; // admin user
       } else if (token === 'second-admin-token') {

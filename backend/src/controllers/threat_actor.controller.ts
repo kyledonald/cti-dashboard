@@ -43,10 +43,9 @@ export class ThreatActorController {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // Enforce organization isolation - users can only see threat actors from their organization
       const userOrganizationId = req.user.organizationId;
       
-      // Get all threat actors and filter by organization
+      // Get all threat actors and then filter by org
       const allActors = await this.service.getAllThreatActors();
       const filteredActors = allActors.filter(actor => actor.organizationId === userOrganizationId);
       
@@ -73,7 +72,7 @@ export class ThreatActorController {
         return res.status(404).json({ error: 'Threat actor not found.' });
       }
 
-      // Enforce organization isolation - users can only see threat actors from their organization
+      // users can only see threat actors that other people in their org create
       if (actor.organizationId !== req.user.organizationId) {
         return res.status(403).json({ 
           error: 'Access denied', 

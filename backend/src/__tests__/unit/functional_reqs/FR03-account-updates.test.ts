@@ -2,19 +2,15 @@ import request from 'supertest';
 import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware } from '../../utils/mock-auth';
 
-// Create test app
 const app = createTestApp();
 
-// Mock authentication middleware
 const mockAuthMiddleware = createMockAuthMiddleware();
 app.use(mockAuthMiddleware);
 
-// Mock user update endpoint
 app.put('/users/:userId', (req: any, res) => {
   const { userId } = req.params;
   const updateData = req.body;
 
-  // Test 1: No fields provided for the update
   if (!updateData || Object.keys(updateData).length === 0) {
     return res.status(400).json({
       error: 'No fields to update',
@@ -22,7 +18,6 @@ app.put('/users/:userId', (req: any, res) => {
     });
   }
 
-  // Test 2: Email already exists (simulated)
   if (updateData.email && updateData.email === 'existing@example.com') {
     return res.status(409).json({
       error: 'Email already exists',
@@ -30,7 +25,6 @@ app.put('/users/:userId', (req: any, res) => {
     });
   }
 
-  // Test 3: Same password check
   if (updateData.password && updateData.password === 'CurrentPass123!') {
     return res.status(400).json({
       error: 'Invalid password',
@@ -38,7 +32,6 @@ app.put('/users/:userId', (req: any, res) => {
     });
   }
 
-  // Test 4: Successful update
   res.status(200).json({
     message: 'User updated successfully',
     user: {

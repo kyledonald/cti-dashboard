@@ -35,7 +35,6 @@ app.post('/api/users/register', (req: any, res) => {
     return true;
   };
 
-  // Check email format first if email is provided (even if other fields are missing)
   if (email !== undefined && email !== null && !isValidEmail(email)) {
     return res.status(400).json({
       error: 'Invalid email format',
@@ -43,7 +42,6 @@ app.post('/api/users/register', (req: any, res) => {
     });
   }
 
-  // Handle null/undefined email specifically
   if (email === null || email === undefined) {
     return res.status(400).json({
       error: 'Invalid email format',

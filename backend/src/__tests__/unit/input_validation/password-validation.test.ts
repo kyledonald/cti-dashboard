@@ -2,18 +2,14 @@ import request from 'supertest';
 import { createTestApp } from '../../utils/test-setup';
 import { createMockAuthMiddleware } from '../../utils/mock-auth';
 
-// Create test app
 const app = createTestApp();
 
-// Mock authentication middleware
 const mockAuthMiddleware = createMockAuthMiddleware(['/api/users/password']);
 app.use(mockAuthMiddleware);
 
-// Mock password change endpoint with password validation
 app.put('/api/users/password', (req: any, res) => {
   const { currentPassword, newPassword } = req.body;
 
-  // Test password validation logic
   const isValidPassword = (password: string): boolean => {
     if (!password || typeof password !== 'string') return false;
     
@@ -27,7 +23,6 @@ app.put('/api/users/password', (req: any, res) => {
     return hasLowercase && hasUppercase && hasDigit && hasSpecialChar;
   };
 
-  // Check password format first if password is provided (even if other fields are missing)
   if (newPassword !== undefined && newPassword !== null && !isValidPassword(newPassword)) {
     return res.status(400).json({
       error: 'Invalid password format',
@@ -35,7 +30,6 @@ app.put('/api/users/password', (req: any, res) => {
     });
   }
 
-  // Handle null/undefined password specifically
   if (newPassword === null || newPassword === undefined) {
     return res.status(400).json({
       error: 'Invalid password format',

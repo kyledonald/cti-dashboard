@@ -50,13 +50,12 @@ export class OrganizationService {
       updatedAt: FieldValue.serverTimestamp(),
     };
 
-    // Use a batch write to ensure both operations succeed or fail together
+    // batch write to make sure both operations succeed or fail together
     const batch = this.db.batch();
     
-    // Create the organization
     batch.set(organizationRef, newOrganization);
     
-    // Update the user to be part of this organization as admin
+    // Update the user to be part of the org as admin
     const userRef = this.db.collection('users').doc(userId);
     batch.update(userRef, {
       organizationId: organizationId,
@@ -128,11 +127,11 @@ export class OrganizationService {
         return false;
       }
 
-      // Clean up users in this organization - set them to unassigned
+      // Clean up users in this org - set them to unassigned
       const usersCollection = this.db.collection('users');
       const usersSnapshot = await usersCollection.where('organizationId', '==', organizationId).get();
       
-      // Clean up incidents in this organization - delete them all
+      // Clean up incidents in this org - delete them all
       const incidentsCollection = this.db.collection('incidents');
       const incidentsSnapshot = await incidentsCollection.where('organizationId', '==', organizationId).get();
       
@@ -143,7 +142,7 @@ export class OrganizationService {
       
       const batch = this.db.batch();
       
-      // Update all users to remove organization assignment and set role to unassigned
+      // Update all users to remove their org assignment and set their role to unassigned
       usersSnapshot.forEach((userDoc) => {
         batch.update(userDoc.ref, {
           organizationId: '',
@@ -152,15 +151,13 @@ export class OrganizationService {
         });
       });
       
-      // Delete all incidents in this organization
+      // Delete all INCs
       incidentsSnapshot.forEach((incidentDoc) => {
         batch.delete(incidentDoc.ref);
       });
       
-      // Delete the organization
       batch.delete(organizationRef);
       
-      // Execute all operations as a batch
       await batch.commit();
       
       return true;
