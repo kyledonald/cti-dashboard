@@ -36,10 +36,11 @@ The backend code consists of:
 
 The React web app consists of:
 
-- X web pages (including the local /testing page)
-- X manually created/modified files
-- X automated end-to-end tests using Playwright (that run against our live Cloud functions)
-- ~X lines of created or modified code
+- 174 manually created/modified files
+- 13 web pages (including the local /testing page)
+- 9 comprehensive end-to-end tests using Playwright (that run against the live Cloud functions) and mimic typical user journeys
+- ~14791 lines of created or modified code
 
-In total the project contains approximately:
-- X created/modified files by the developer, across a total of ~X lines of created or modified code.
+In total the project comprises approximately:
+
+- 228 files created/modified by the developer, containing a total of ~21500 lines of code.
