@@ -58,7 +58,6 @@ export const useCommentManagement = ({
           }
         }
       }
-      
       setNewComment('');
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -98,11 +97,11 @@ export const useCommentManagement = ({
     try {
       let date: Date;
       
-      // Handle Firestore Timestamp object (has toDate method)
+      // Handle Firestore Timestamp object
       if (typeof timestamp === 'object' && 'toDate' in timestamp) {
         date = timestamp.toDate();
       }
-      // Handle serialized Firestore timestamp (has _seconds property)
+      // Handle serialised Firestore timestamp
       else if (typeof timestamp === 'object' && '_seconds' in timestamp) {
         date = new Date(timestamp._seconds * 1000 + (timestamp._nanoseconds || 0) / 1000000);
       }

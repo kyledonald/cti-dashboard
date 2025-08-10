@@ -14,7 +14,7 @@ interface ThreatActorFormData {
   lastSeen: string;
   motivation: string;
   sophistication: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
-  resourceLevel: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  resourceLevel: 'Unknown' | 'Individual' | 'Team' | 'Organization' | 'Government';
   primaryTargets: string[];
   isActive: boolean;
 }
@@ -154,8 +154,6 @@ export const ThreatActorForm: React.FC<ThreatActorFormProps> = ({
               >
                 <option value="Unknown">Unknown</option>
                 <option value="Individual">Individual</option>
-                <option value="Club">Club</option>
-                <option value="Contest">Contest</option>
                 <option value="Team">Team</option>
                 <option value="Organization">Organization</option>
                 <option value="Government">Government</option>

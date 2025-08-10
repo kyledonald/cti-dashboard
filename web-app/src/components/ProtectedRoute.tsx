@@ -37,22 +37,18 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" replace />;
   }
 
-  // Check super admin requirement
   if (requireSuperAdmin && !permissions.isSuperAdmin) {
     return fallback || <UnauthorizedAccess message="Super admin access required" />;
   }
 
-  // Check specific role requirement
   if (requireRole && user.role !== requireRole) {
     return fallback || <UnauthorizedAccess message={`${requireRole} role required`} />;
   }
 
-  // Check multiple roles requirement
   if (requireRoles && !requireRoles.includes(user.role as UserRole)) {
     return fallback || <UnauthorizedAccess message="Insufficient role permissions" />;
   }
 
-  // Check organization access requirement
   if (requireOrgAccess && !permissions.hasOrgAccess) {
     // If user is unassigned, redirect to welcome page
     if (user.role === 'unassigned') {
@@ -62,11 +58,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return fallback || <Navigate to="/organization-required" replace />;
   }
 
-  // All checks passed - render children
   return <>{children}</>;
 };
 
-// Convenience components for specific protection levels
 export const SuperAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ProtectedRoute requireSuperAdmin>{children}</ProtectedRoute>
 );
@@ -79,7 +73,7 @@ export const EditorRoute: React.FC<{ children: React.ReactNode }> = ({ children 
   <ProtectedRoute requireRole="editor">{children}</ProtectedRoute>
 );
 
-// Unauthorized access component
+// Unauthorised access component
 const UnauthorizedAccess: React.FC<{ message: string }> = ({ message }) => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
     <div className="text-center">
@@ -99,4 +93,3 @@ const UnauthorizedAccess: React.FC<{ message: string }> = ({ message }) => (
     </div>
   </div>
 );
-

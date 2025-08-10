@@ -59,7 +59,7 @@ export const EditIncidentModal: React.FC<EditIncidentModalProps> = ({
           <DialogTitle className="text-2xl font-semibold">Edit Incident</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          {/* Basic Information Section */}
+          {/* Basic Info */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
               Basic Information
@@ -121,7 +121,7 @@ export const EditIncidentModal: React.FC<EditIncidentModalProps> = ({
             </div>
           </div>
 
-          {/* Classification Section */}
+          {/* Classification */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
               Classification
@@ -189,7 +189,7 @@ export const EditIncidentModal: React.FC<EditIncidentModalProps> = ({
             </div>
           </div>
 
-          {/* Related Information Section */}
+          {/* Related Info */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
               Related Information
@@ -203,10 +203,9 @@ export const EditIncidentModal: React.FC<EditIncidentModalProps> = ({
                 value={cveInput}
                 onChange={(e) => {
                   setCveInput(e.target.value);
-                  setCveError(''); // Clear error when typing
+                  setCveError('');
                 }}
                               onBlur={() => {
-                // Parse and validate CVEs when user finishes typing
                 setCveError('');
                 const cveInputs = cveInput.split(',').map(cve => cve.trim()).filter(cve => cve.length > 0);
                 const validCves: string[] = [];
@@ -214,7 +213,6 @@ export const EditIncidentModal: React.FC<EditIncidentModalProps> = ({
                 
                 cveInputs.forEach(cve => {
                   // Validate CVE format: CVE-YYYY-NNNN or CVE-YYYY-NNNNN
-                  // Allow case-insensitive and handle extra spaces
                   const normalizedCve = cve.replace(/\s+/g, ''); // Remove all whitespace
                   const cvePattern = /^CVE-\d{4}-\d{4,5}$/i;
                   if (cvePattern.test(normalizedCve)) {

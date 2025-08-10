@@ -25,10 +25,9 @@ export const useUsersData = ({ user, setUsers, setLoading }: UseUsersDataProps) 
     try {
       const allUsers = await usersApi.getAll();
       const orgUsers = allUsers.filter((u: User) => u.organizationId === user.organizationId);
-      
       // Add join date to users
       const enhancedUsers: EnhancedUser[] = orgUsers.map(u => {
-        // Convert Firestore timestamp to JavaScript Date for join date
+        // Convert Firestore timestamp to JS Date for join date
         const createdAt = u.createdAt ? 
           (u.createdAt._seconds ? new Date(u.createdAt._seconds * 1000) : new Date(u.createdAt)) : 
           null;

@@ -2,11 +2,11 @@ import { useState } from 'react';
 import type { Organization, User } from '../../../api';
 
 export const useOrganizationState = () => {
-  // Organization states
+  // Org states
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Edit organization states
+  // Edit org states
   const [editingOrg, setEditingOrg] = useState(false);
   const [orgFormData, setOrgFormData] = useState({
     name: '',
@@ -33,7 +33,7 @@ export const useOrganizationState = () => {
   const [showRemoveUserConfirm, setShowRemoveUserConfirm] = useState(false);
   const [editUserSuccess, setEditUserSuccess] = useState('');
 
-  // Delete organization states
+  // Delete org states
   const [showDeleteOrgConfirm, setShowDeleteOrgConfirm] = useState(false);
   const [deleteOrgLoading, setDeleteOrgLoading] = useState(false);
 
@@ -52,7 +52,7 @@ export const useOrganizationState = () => {
   const [showScheduledNotifications, setShowScheduledNotifications] = useState(false);
 
   return {
-    // Organization states
+    // Org states
     organization,
     setOrganization,
     loading,
@@ -96,7 +96,7 @@ export const useOrganizationState = () => {
     editUserSuccess,
     setEditUserSuccess,
 
-    // Delete organization states
+    // Delete org states
     showDeleteOrgConfirm,
     setShowDeleteOrgConfirm,
     deleteOrgLoading,

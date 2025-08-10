@@ -20,7 +20,6 @@ export const useUsersState = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, roleFilter]);
@@ -38,8 +37,6 @@ export const useUsersState = () => {
     currentPage,
     setCurrentPage,
     itemsPerPage,
-    
-    // User context
     user,
   };
 }; 

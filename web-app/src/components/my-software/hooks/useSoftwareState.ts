@@ -9,7 +9,7 @@ export const useSoftwareState = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isInventoryCollapsed, setIsInventoryCollapsed] = useState(false);
 
-  // Load software from localStorage (organization-specific)
+  // Load software from localStorage (org-specific)
   useEffect(() => {
     if (!user?.organizationId) return;
     
@@ -17,12 +17,10 @@ export const useSoftwareState = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Handle both old format (array of objects) and new format (array of strings)
         if (Array.isArray(parsed)) {
           if (parsed.length > 0 && typeof parsed[0] === 'string') {
             setSoftwareList(parsed);
           } else {
-            // Convert old format to new format
             setSoftwareList(parsed.map(item => `${item.vendor} ${item.name}`.trim()));
           }
         }
@@ -49,11 +47,7 @@ export const useSoftwareState = () => {
     setShowAddForm,
     isInventoryCollapsed,
     setIsInventoryCollapsed,
-    
-    // Computed values
     filteredSoftware,
-    
-    // User context
     user,
   };
 }; 

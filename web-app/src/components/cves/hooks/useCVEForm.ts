@@ -27,7 +27,7 @@ export const useCVEForm = () => {
   const [incidentToClose, setIncidentToClose] = useState<Incident | null>(null);
   const [closingIncident, setClosingIncident] = useState(false);
 
-  // Save dismissed CVEs to localStorage (organization-specific)
+  // Save dismissed CVEs to localStorage (org-specific)
   const saveDismissedCVEs = useCallback((dismissed: Set<string>) => {
     if (!user?.organizationId) return;
     
@@ -35,14 +35,14 @@ export const useCVEForm = () => {
     localStorage.setItem(`dismissed-cves-${user.organizationId}`, JSON.stringify(Array.from(dismissed)));
   }, [user?.organizationId]);
 
-  // Save dismissed CVE data to localStorage (organization-specific)
+  // Save dismissed CVE data to localStorage (org-specific)
   const saveDismissedCVEData = useCallback((cveData: ShodanCVE[]) => {
     if (!user?.organizationId) return;
     
     localStorage.setItem(`dismissed-cve-data-${user.organizationId}`, JSON.stringify(cveData));
   }, [user?.organizationId]);
 
-  // Load dismissed CVE data from localStorage (organization-specific)
+  // Load dismissed CVE data from localStorage (org-specific)
   const loadDismissedCVEData = useCallback((): ShodanCVE[] => {
     if (!user?.organizationId) return [];
     
@@ -70,7 +70,7 @@ export const useCVEForm = () => {
         filteredData = data.filter(cve => cve.kev === true);
       }
       
-      // Sort by published date (newest first) to ensure we get the latest CVEs
+      // Sort by published date (newest first)
       filteredData.sort((a, b) => {
         const dateA = new Date(a.published).getTime();
         const dateB = new Date(b.published).getTime();
@@ -79,7 +79,7 @@ export const useCVEForm = () => {
       
       setCves(filteredData);
       setLastUpdated(new Date());
-      setCurrentPage(1); // Reset to first page when fetching new data
+      setCurrentPage(1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch CVEs');
     } finally {
@@ -87,7 +87,7 @@ export const useCVEForm = () => {
     }
   }, [minCvssScore, showKevOnly]);
 
-  // Fetch incidents to check for existing CVE incidents
+  // Fetch for CVE INCs
   const fetchIncidents = useCallback(async () => {
     if (!user?.organizationId) return;
     

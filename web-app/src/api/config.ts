@@ -9,7 +9,7 @@ const API_BASE = import.meta.env.DEV
 // Main API instance
 export const api = axios.create({
   baseURL: API_BASE,
-  timeout: 2500, // 2.5 seconds timeout - balanced for quick response
+  timeout: 2500, // 2.5 seconds timeout
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,7 +24,7 @@ export const aiApi = axios.create({
   },
 });
 
-// Retry logic for cold starts
+// Retry logic for serverless cold starts
 export const retryRequest = async (requestFn: () => Promise<any>, maxRetries = 2, delay = 750): Promise<any> => {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -52,7 +52,7 @@ api.interceptors.request.use(
         console.error('Error getting auth token:', error);
       }
     }
-    
+
     return config;
   },
   (error) => {

@@ -23,7 +23,6 @@ export const UsersPagination: React.FC<UsersPaginationProps> = ({
   const handlePreviousPage = () => {
     const newPage = Math.max(1, currentPage - 1);
     onPageChange(newPage);
-    // Use setTimeout to ensure state update completes before scrolling
     setTimeout(() => {
       onScrollToTop();
     }, 0);
@@ -32,7 +31,6 @@ export const UsersPagination: React.FC<UsersPaginationProps> = ({
   const handleNextPage = () => {
     const newPage = Math.min(totalPages, currentPage + 1);
     onPageChange(newPage);
-    // Use setTimeout to ensure state update completes before scrolling
     setTimeout(() => {
       onScrollToTop();
     }, 0);

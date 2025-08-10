@@ -94,16 +94,16 @@ export const useOrganizationActions = ({
   const handleSave = async () => {
     try {
       if (organization) {
-        // UPDATE existing organization
+        // UPDATE existing org
         await organizationsApi.update(organization.organizationId, orgFormData);
         setOrganization({ ...organization, ...orgFormData });
       } else {
-        // CREATE new organization
+        // CREATE new org
         const newOrgResponse = await organizationsApi.create(orgFormData);
         const newOrg = newOrgResponse.organization || newOrgResponse;
         setOrganization(newOrg);
         
-        // Assign current admin user to the new organization
+        // Assign current admin user to the new org
         if (user) {
           await usersApi.update(user.userId, { 
             organizationId: newOrg.organizationId 
@@ -137,13 +137,13 @@ export const useOrganizationActions = ({
       // Check if we're updating the current user
       const isUpdatingCurrentUser = user?.email === addUserEmail.trim();
       
-      // Assign user to organization with selected role
+      // Assign user to org with selected role
       await usersApi.update(targetUser.userId, {
         organizationId: organization.organizationId,
         role: addUserRole
       });
       
-      // Refresh the organization users list
+      // Refresh the org users list
       const updatedUsers = await usersApi.getAll();
       const updatedOrgUsers = updatedUsers.filter((u: User) => u.organizationId === organization.organizationId);
       setUsers(updatedOrgUsers);
@@ -180,12 +180,12 @@ export const useOrganizationActions = ({
   const handleUpdateUserRole = async () => {
     if (!editingUser || !organization || !user) return;
     
-    // Prevent admins from demoting themselves - organization must always have an admin
+    // Prevent admins from demoting themselves - org must always have an admin
     if (editingUser.userId === user.userId && editingUser.role === 'admin' && editUserRole !== 'admin') {
-      // Check if there are other admins in the organization
+      // Check if there are other admins in the org
       const otherAdmins = users.filter(u => u.role === 'admin' && u.userId !== user.userId);
       if (otherAdmins.length === 0) {
-        setEditUserError('Cannot demote yourself as you are the only admin. Either assign another admin first or delete the organization.');
+        setEditUserError('Cannot demote yourself as you are the only admin. Either assign another admin first or delete the organisation.');
         return;
       }
     }
@@ -204,7 +204,6 @@ export const useOrganizationActions = ({
       
       // If we updated the current user's role, refresh the page to update permissions
       if (isUpdatingCurrentUser) {
-        // Show a brief success message before refresh
         setEditUserError('');
         setEditUserSuccess('Role updated successfully! Refreshing page...');
         setTimeout(() => {
@@ -213,12 +212,10 @@ export const useOrganizationActions = ({
         return;
       }
       
-      // For other users, just refresh the list
       const updatedUsers = await usersApi.getAll();
       const updatedOrgUsers = updatedUsers.filter((u: User) => u.organizationId === organization.organizationId);
       setUsers(updatedOrgUsers);
       
-      // Close modal
       setShowEditUserModal(false);
       setEditingUser(null);
       
@@ -226,7 +223,6 @@ export const useOrganizationActions = ({
       console.error('Error updating user role:', error);
       setEditUserError('Failed to update user role. Please try again.');
     } finally {
-      // Only set loading to false if we're not refreshing the page
       if (!isUpdatingCurrentUser) {
         setEditUserLoading(false);
       }
@@ -238,7 +234,7 @@ export const useOrganizationActions = ({
     
     // Prevent admins from removing themselves
     if (editingUser.userId === user.userId) {
-      setEditUserError('You cannot remove yourself from the organization.');
+      setEditUserError('You cannot remove yourself from the organisation.');
       return;
     }
     
@@ -252,18 +248,15 @@ export const useOrganizationActions = ({
     setEditUserError('');
     
     try {
-      // Remove user from organization
       await usersApi.update(editingUser.userId, {
         organizationId: '',
         role: 'unassigned'
       });
       
-      // Refresh the organization users list
       const updatedUsers = await usersApi.getAll();
       const updatedOrgUsers = updatedUsers.filter((u: User) => u.organizationId === organization.organizationId);
       setUsers(updatedOrgUsers);
       
-      // Close modals
       setShowRemoveUserConfirm(false);
       setShowEditUserModal(false);
       setEditingUser(null);
@@ -280,19 +273,11 @@ export const useOrganizationActions = ({
     if (!organization) return;
     
     try {
-      // Delete the organization
       await organizationsApi.delete(organization.organizationId);
-      
-      // Clear local state
       setOrganization(null);
       setUsers([]);
-      
-      // Close confirmation dialog
       setShowDeleteOrgConfirm(false);
-      
-      // Refresh the page to update user context
       window.location.reload();
-      
     } catch (error) {
       console.error('Error deleting organization:', error);
       // You might want to show an error message here

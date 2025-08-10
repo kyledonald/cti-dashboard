@@ -27,12 +27,10 @@ build/
 
 .firebase/
 
-# Backend
 backend/node_modules/
 backend/dist/
 backend/.gcloudignore
 
-# Testing
 playwright-report/
 test-results/
 coverage/

@@ -16,7 +16,7 @@ export const useOrganizationData = ({
   setOrgFormData,
   setLoading,
 }: UseOrganizationDataProps) => {
-  // Load organization data
+  // Load org data
   useEffect(() => {
     const loadOrganizationData = async () => {
       if (!user?.organizationId) {
@@ -25,7 +25,7 @@ export const useOrganizationData = ({
       }
 
       try {
-        // Load organization details
+        // Load org details
         const orgResponse = await organizationsApi.getById(user.organizationId);
         const orgData = orgResponse.organization || orgResponse;
         setOrganization(orgData);
@@ -36,7 +36,7 @@ export const useOrganizationData = ({
           nationality: orgData.nationality || '',
         });
 
-        // Load organization users
+        // Load org users
         const allUsers = await usersApi.getAll();
         const orgUsers = allUsers.filter((u: User) => u.organizationId === user.organizationId);
         setUsers(orgUsers);

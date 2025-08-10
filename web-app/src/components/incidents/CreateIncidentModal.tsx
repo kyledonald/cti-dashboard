@@ -146,10 +146,9 @@ export const CreateIncidentModal: React.FC<CreateIncidentModalProps> = ({
               value={cveInput}
               onChange={(e) => {
                 setCveInput(e.target.value);
-                setCveError(''); // Clear error when typing
+                setCveError(''); 
               }}
               onBlur={() => {
-                // Parse and validate CVEs when user finishes typing
                 setCveError('');
                 const cveInputs = cveInput.split(',').map(cve => cve.trim()).filter(cve => cve.length > 0);
                 const validCves: string[] = [];
@@ -157,8 +156,7 @@ export const CreateIncidentModal: React.FC<CreateIncidentModalProps> = ({
                 
                 cveInputs.forEach(cve => {
                   // Validate CVE format: CVE-YYYY-NNNN or CVE-YYYY-NNNNN
-                  // Allow case-insensitive and handle extra spaces
-                  const normalizedCve = cve.replace(/\s+/g, ''); // Remove all whitespace
+                  const normalizedCve = cve.replace(/\s+/g, '');
                   const cvePattern = /^CVE-\d{4}-\d{4,5}$/i;
                   if (cvePattern.test(normalizedCve)) {
                     validCves.push(normalizedCve.toUpperCase());

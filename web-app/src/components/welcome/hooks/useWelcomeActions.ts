@@ -38,7 +38,7 @@ export const useWelcomeActions = ({
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      // The auth context will handle redirecting to login
+      // auth context will handle redirecting to login
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -54,7 +54,7 @@ export const useWelcomeActions = ({
     setCreateOrgError(null);
 
     try {
-      // First, ensure user exists in backend by attempting to fetch user data
+      // ensure user exists in backend by attempting to fetch their data
       try {
         await usersApi.getById(user.userId);
       } catch (userError: any) {
@@ -85,18 +85,16 @@ export const useWelcomeActions = ({
             organizationId: newOrg.organizationId,
             role: 'admin'
           });
-          break; // Success, exit retry loop
+          break;
         } catch (updateError: any) {
           retryCount++;
           if (retryCount === maxRetries) {
-            throw updateError; // Re-throw if all retries failed
+            throw updateError;
           }
-          // Wait 1 second before retrying
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
 
-      // Redirect to dashboard
       navigate('/dashboard');
       window.location.reload(); // Refresh to update user context
     } catch (error: any) {
@@ -120,16 +118,10 @@ export const useWelcomeActions = ({
     setDeleteError(null);
 
     try {
-      // Re-authenticate user for Google sign-in users (no password needed)
       if (firebaseUser.providerData[0]?.providerId === 'google.com') {
-        // For Google users, we can't re-authenticate with password
-        // Delete from backend first
         await usersApi.delete(user.userId);
-        
-        // Delete Firebase user
         await deleteUser(firebaseUser);
       } else {
-        // For email/password users, re-authenticate first
         if (!deletePassword) {
           setDeleteError('Password is required to delete your account');
           setDeletingAccount(false);
@@ -142,7 +134,7 @@ export const useWelcomeActions = ({
         // Delete from backend first
         await usersApi.delete(user.userId);
 
-        // Delete Firebase user
+        // then delete Firebase user
         await deleteUser(firebaseUser);
       }
 

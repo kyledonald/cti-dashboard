@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-
 import { CVEPageHeader } from '../components/cves/CVEPageHeader';
 import { CVESearchBar } from '../components/cves/CVESearchBar';
 import { CVETabNavigation } from '../components/cves/CVETabNavigation';
@@ -64,7 +63,7 @@ const CVEsPage: React.FC = () => {
     fetchIncidents,
   } = useCVEForm();
 
-  // Load dismissed CVEs from localStorage (organization-specific)
+  // Load dismissed CVEs from localStorage (org-specific)
   useEffect(() => {
     if (!user?.organizationId) return;
     

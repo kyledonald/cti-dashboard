@@ -101,8 +101,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
       });
 
-  
-
       if (!response.ok) {
         throw new Error(`Registration failed: ${response.status}`);
       }
@@ -148,15 +146,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (firebaseUser) {
         try {
-
           const user = await createOrUpdateUser(firebaseUser, pendingUserData || undefined);
-          
           setUser(user);
-          // Clear pending data after successful creation
           setPendingUserData(null);
         } catch (error) {
           console.error('Error handling user auth:', error);
-          // Create temporary user to maintain auth flow
           let firstName: string;
           let lastName: string;
           
@@ -199,7 +193,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      // User will be handled by onAuthStateChanged
     } catch (error) {
       console.error('Error signing in with Google:', error);
       const humanError = new Error(getHumanReadableError(error));
@@ -210,7 +203,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithEmail = async (email: string, password: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // User will be handled by onAuthStateChanged
     } catch (error) {
       console.error('Error signing in with email:', error);
       const humanError = new Error(getHumanReadableError(error));
@@ -221,21 +213,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
       
-      // Store the names for use in onAuthStateChanged
       setPendingUserData({ firstName, lastName });
       
       const result = await createUserWithEmailAndPassword(auth, email, password);
       
-      // Update the Firebase user profile with display name
       await updateProfile(result.user, {
         displayName: `${firstName} ${lastName}`
       });
       
-      
-      // User creation in backend will be handled by onAuthStateChanged
     } catch (error) {
       console.error('Error signing up with email:', error);
-      // Clear pending data on error
       setPendingUserData(null);
       const humanError = new Error(getHumanReadableError(error));
       throw humanError;

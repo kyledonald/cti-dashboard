@@ -8,7 +8,6 @@ interface UseNotificationServiceProps {
 export const useNotificationService = ({ user }: UseNotificationServiceProps) => {
   const sendAssignmentNotification = useCallback((assignedUser: User, incident: { incidentId: string; title: string }, isNewAssignment: boolean = true) => {
     if (!user || !assignedUser || assignedUser.userId === user.userId) {
-      // Don't send notification if assigning to yourself
       return;
     }
 

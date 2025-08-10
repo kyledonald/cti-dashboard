@@ -27,7 +27,7 @@ export const useDashboardMetrics = (orgIncidents: Incident[]) => {
     return { labels: months, data: counts };
   }, [orgIncidents]);
 
-  // High priority incidents (High/Critical, Open/Triaged/In Progress)
+  // High priority INCs (High/Critical, Open/Triaged/In Progress)
   const highPriorityIncidents = useMemo(() => {
     return orgIncidents
       .filter(i => 

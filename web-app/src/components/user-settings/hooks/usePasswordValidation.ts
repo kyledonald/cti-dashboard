@@ -1,7 +1,5 @@
 export const usePasswordValidation = () => {
-  // Password complexity validation
   const validatePasswordComplexity = (password: string): { isValid: boolean; message: string } => {
-    // Handle null/undefined/empty input
     if (!password || typeof password !== 'string') {
       return { isValid: false, message: 'Password is required.' };
     }
@@ -11,12 +9,10 @@ export const usePasswordValidation = () => {
       return { isValid: false, message: 'Password cannot be empty or contain only whitespace.' };
     }
     
-    // Check minimum length
     if (password.length < 8) {
       return { isValid: false, message: 'Password must be at least 8 characters long.' };
     }
     
-    // Check maximum length (prevent extremely long passwords)
     if (password.length > 128) {
       return { isValid: false, message: 'Password must be no more than 128 characters long.' };
     }

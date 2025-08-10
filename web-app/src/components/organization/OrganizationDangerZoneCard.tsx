@@ -35,7 +35,7 @@ export const OrganizationDangerZoneCard: React.FC<OrganizationDangerZoneCardProp
               variant="outline" 
               className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/20 dark:hover:text-red-300"
             >
-              Delete Organization
+              Delete Organisation
             </Button>
           </div>
         </div>

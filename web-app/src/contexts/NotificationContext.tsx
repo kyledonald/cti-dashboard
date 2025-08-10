@@ -12,7 +12,7 @@ export interface Notification {
   actionText?: string;
   incidentId?: string; // For incident-specific notifications
   priority: 'low' | 'medium' | 'high';
-  organizationId?: string; // For organization-scoped notifications
+  organizationId?: string; // For org-scoped notifications
   sentBy?: string; // User ID of who sent the notification
 }
 
@@ -77,7 +77,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
       }
 
-      // Load organization notifications if user is in an organization
+      // Load org notifications
       let orgNotifications: Notification[] = [];
       if (user.organizationId) {
         const orgSaved = localStorage.getItem(`org-notifications-${user.organizationId}`);
@@ -100,7 +100,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       setNotifications(allNotifications);
 
-      // Load scheduled notifications if user is in an organization
+      // Load scheduled notifications if user is in an org
       if (user.organizationId) {
         const scheduledSaved = localStorage.getItem(`scheduled-notifications-${user.organizationId}`);
         if (scheduledSaved) {
@@ -122,7 +122,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Save notifications to localStorage whenever they change
   useEffect(() => {
     if (user && notifications.length > 0) {
-      // Separate personal and organization notifications
+      // Separate personal and org-specific notifications
       const personalNotifications = notifications.filter(n => !n.organizationId);
       const orgNotifications = notifications.filter(n => n.organizationId === user.organizationId);
       
@@ -131,7 +131,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         localStorage.setItem(`notifications-${user.userId}`, JSON.stringify(personalNotifications));
       }
       
-      // Save organization notifications (if user is in an org and there are org notifications)
+      // Save org notis
       if (user.organizationId && orgNotifications.length > 0) {
         localStorage.setItem(`org-notifications-${user.organizationId}`, JSON.stringify(orgNotifications));
       }
@@ -139,8 +139,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [notifications, user]);
 
 
-
-  // Check for scheduled notifications that are ready to be sent
+  // Check for scheduled notifications
   useEffect(() => {
     if (!user?.organizationId || scheduledNotifications.length === 0) return;
 
@@ -149,7 +148,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const readyToSend = scheduledNotifications.filter(sn => sn.scheduledFor <= now);
       
       if (readyToSend.length > 0) {
-        // Send the ready notifications
         readyToSend.forEach(sn => {
           // Create notification for each target user
           const newNotification: Notification = {
@@ -166,13 +164,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             actionText: sn.actionText
           };
 
-          // Add to organization notifications
+          // Add to org notifications
           const orgNotifications = JSON.parse(localStorage.getItem(`org-notifications-${sn.organizationId}`) || '[]');
           orgNotifications.unshift(newNotification);
           localStorage.setItem(`org-notifications-${sn.organizationId}`, JSON.stringify(orgNotifications));
         });
 
-        // Remove sent notifications from scheduled list
+        // Remove sent noti from scheduled list
         const remainingScheduled = scheduledNotifications.filter(sn => sn.scheduledFor > now);
         setScheduledNotifications(remainingScheduled);
         localStorage.setItem(`scheduled-notifications-${user.organizationId}`, JSON.stringify(remainingScheduled));
@@ -187,7 +185,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     };
 
-    // Check immediately and then every minute
     checkScheduledNotifications();
     const interval = setInterval(checkScheduledNotifications, 60000); // Check every minute
     
@@ -217,7 +214,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       sentBy: user.userId
     };
 
-    // Store organization notification for all users in the organization
     const orgNotifications = JSON.parse(localStorage.getItem(`org-notifications-${user.organizationId}`) || '[]');
     orgNotifications.unshift(newNotification); // Add to beginning for newest first
     localStorage.setItem(`org-notifications-${user.organizationId}`, JSON.stringify(orgNotifications));
@@ -238,7 +234,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Update localStorage for personal notifications
         localStorage.setItem(`notifications-${user.userId}`, JSON.stringify(personalNotifications));
         
-        // Update localStorage for organization notifications
+        // Update localStorage for org notifications
         if (user.organizationId) {
           localStorage.setItem(`org-notifications-${user.organizationId}`, JSON.stringify(orgNotifications));
         }
@@ -260,7 +256,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Update localStorage for personal notifications
         localStorage.setItem(`notifications-${user.userId}`, JSON.stringify(personalNotifications));
         
-        // Update localStorage for organization notifications
+        // Update localStorage for org notifications
         if (user.organizationId) {
           localStorage.setItem(`org-notifications-${user.organizationId}`, JSON.stringify(orgNotifications));
         }
@@ -282,7 +278,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Update localStorage for personal notifications
         localStorage.setItem(`notifications-${user.userId}`, JSON.stringify(personalNotifications));
         
-        // Update localStorage for organization notifications
+        // Update localStorage for org notifications
         if (user.organizationId) {
           localStorage.setItem(`org-notifications-${user.organizationId}`, JSON.stringify(orgNotifications));
         }
@@ -315,7 +311,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const updatedScheduled = [...scheduledNotifications, newScheduledNotification];
     setScheduledNotifications(updatedScheduled);
     
-    // Save to localStorage
     localStorage.setItem(`scheduled-notifications-${user.organizationId}`, JSON.stringify(updatedScheduled));
   };
 
@@ -323,7 +318,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const updatedScheduled = scheduledNotifications.filter(n => n.id !== id);
     setScheduledNotifications(updatedScheduled);
     
-    // Update localStorage
     if (user?.organizationId) {
       localStorage.setItem(`scheduled-notifications-${user.organizationId}`, JSON.stringify(updatedScheduled));
     }

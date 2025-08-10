@@ -1,7 +1,5 @@
-// Export all types
 export * from './types';
 
-// Export all API endpoints
 export { organizationsApi } from './endpoints/organizations';
 export { usersApi } from './endpoints/users';
 export { incidentsApi } from './endpoints/incidents';
@@ -9,7 +7,6 @@ export { threatActorsApi } from './endpoints/threat-actors';
 export { cvesApi } from './endpoints/cves';
 export { generateAISummary } from './endpoints/ai';
 
-// Legacy functions for backward compatibility
 import { organizationsApi } from './endpoints/organizations';
 import { usersApi } from './endpoints/users';
 import { incidentsApi } from './endpoints/incidents';

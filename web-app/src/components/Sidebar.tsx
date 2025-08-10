@@ -67,12 +67,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   ];
 
   const shouldShowNavItem = (item: NavItem): boolean => {
-    // Show all items for viewers/editors (even without org) but they'll be disabled
     if (user?.role === 'viewer' || user?.role === 'editor') {
       return true;
     }
     
-    // For other roles, check permissions normally
     if (item.requirePermission && !permissions[item.requirePermission]) {
       return false;
     }
@@ -80,16 +78,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   };
 
   const isNavItemDisabled = (item: NavItem): boolean => {
-    // For viewers/editors without org access, disable everything including dashboard
     if ((user?.role === 'viewer' || user?.role === 'editor') && !permissions.hasOrgAccess) {
       return true;
     }
-    
-    // Check if user has the required permission
     if (item.requirePermission && !permissions[item.requirePermission]) {
       return true;
     }
-    
     return false;
   };
 

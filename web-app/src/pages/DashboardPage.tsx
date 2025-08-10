@@ -113,7 +113,7 @@ const DashboardPage: React.FC = () => {
         </DashboardChartCard>
       </div>
 
-      {/* Quick Links - Following sidebar order */}
+      {/* Quick Links - same order as sidebar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8">
         <DashboardQuickLinkCard
           to="/incidents"
@@ -153,7 +153,7 @@ const DashboardPage: React.FC = () => {
         />
       </div>
 
-      {/* High Priority Incidents */}
+      {/* High Priority INCs */}
       <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mt-8">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">High Priority Incidents</h3>

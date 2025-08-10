@@ -3,9 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { incidentsApi, usersApi, threatActorsApi, type Incident, type CreateIncidentDTO, type UpdateIncidentDTO, type User, type ThreatActor } from '../api';
 import { Card, CardContent } from '../components/ui/card';
-
 import { ConfirmDialog } from '../components/ConfirmDialog';
-
 import { IncidentSwimlane } from '../components/incidents/IncidentSwimlane';
 import { IncidentPageHeader } from '../components/incidents/IncidentPageHeader';
 import { IncidentErrorMessage } from '../components/incidents/IncidentErrorMessage';
@@ -98,7 +96,6 @@ const IncidentsPage: React.FC = () => {
     aiSummary
   });
 
-  // Define swimlane statuses
   const swimlaneStatuses: Array<'Open' | 'Triaged' | 'In Progress' | 'Resolved' | 'Closed'> = [
     'Open', 'Triaged', 'In Progress', 'Resolved', 'Closed'
   ];
@@ -127,8 +124,6 @@ const IncidentsPage: React.FC = () => {
        const orgUsers = usersData.filter((u: User) => u.organizationId === user?.organizationId);
         setUsers(orgUsers);
 
-       // Filter threat actors by organization (when organizationId is available)
-       // If organizationId is not set on threat actors, show all (for backwards compatibility)
        const orgThreatActors = threatActorsData.filter((ta: ThreatActor) => 
          !ta.organizationId || ta.organizationId === user?.organizationId
        );
@@ -150,7 +145,6 @@ const IncidentsPage: React.FC = () => {
     loadData();
   }, [user?.organizationId]);
 
-  // Check for CVE data from navigation and auto-open create modal
   useEffect(() => {
     const cveData = sessionStorage.getItem('createIncidentFromCVE');
     if (cveData) {
@@ -170,10 +164,8 @@ const IncidentsPage: React.FC = () => {
           resolutionNotes: ''
         });
         
-        // Set CVE input for display
         setCveInput(parsedData.cveId);
         
-        // Open the create modal
         setShowCreateModal(true);
         
         // Clear the session storage
@@ -185,7 +177,6 @@ const IncidentsPage: React.FC = () => {
     }
   }, [user?.organizationId]);
 
-  // Auto-open incident modal if ?view=INCIDENT_ID or ?incidentId=INCIDENT_ID is present in the URL
   useEffect(() => {
     if (!incidents.length) return;
     const params = new URLSearchParams(location.search);
@@ -194,14 +185,12 @@ const IncidentsPage: React.FC = () => {
       const incident = incidents.find(i => i.incidentId === viewId);
       if (incident) {
         openViewModal(incident);
-        // Clear the URL parameter to prevent reopening on refresh
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('view');
         newUrl.searchParams.delete('incidentId');
         window.history.replaceState({}, '', newUrl.toString());
       }
     }
-    // Only run when incidents or location.search changes
   }, [incidents, location.search]);
 
   const resetForm = () => {
@@ -286,7 +275,6 @@ const IncidentsPage: React.FC = () => {
        const incidentsData = await incidentsApi.getAll();
        const orgIncidents = incidentsData.filter((inc: Incident) => inc.organizationId === user?.organizationId);
        setIncidents(orgIncidents);
-
        setShowCreateModal(false);
        resetForm();
     } catch (error) {
@@ -326,20 +314,17 @@ const IncidentsPage: React.FC = () => {
 
       await incidentsApi.update(editingIncident.incidentId, updateData);
 
-      // Send notification if assignment changed and there's a new assignee
       if (previousAssignedUserId !== newAssignedUserId && assignedUser) {
-        const isNewAssignment = !previousAssignedUserId; // true if previously unassigned
+        const isNewAssignment = !previousAssignedUserId;
         sendAssignmentNotification(assignedUser, {
           incidentId: editingIncident.incidentId,
           title: formData.title.trim()
         }, isNewAssignment);
       }
 
-       // Reload incidents
        const incidentsData = await incidentsApi.getAll();
        const orgIncidents = incidentsData.filter((inc: Incident) => inc.organizationId === user?.organizationId);
        setIncidents(orgIncidents);
-
        setShowEditModal(false);
        setEditingIncident(null);
        resetForm();
@@ -356,10 +341,7 @@ const IncidentsPage: React.FC = () => {
 
     try {
       await incidentsApi.delete(incidentToDelete.incidentId);
-      
-      // Remove from local state
       setIncidents(incidents.filter(inc => inc.incidentId !== incidentToDelete.incidentId));
-      
       setShowDeleteConfirm(false);
       setIncidentToDelete(null);
     } catch (error) {
@@ -368,7 +350,6 @@ const IncidentsPage: React.FC = () => {
     }
   };
 
-  // Handle "Assign to Me" in modals
   const handleAssignToMeInModal = () => {
     if (!user) return;
     
@@ -378,7 +359,6 @@ const IncidentsPage: React.FC = () => {
     });
   };
 
-  // Modal handlers
   const openCreateModal = () => {
     resetForm();
     setShowCreateModal(true);
@@ -405,13 +385,13 @@ const IncidentsPage: React.FC = () => {
     setCveInput((incident.cveIds || []).join(', '));
     setCveError('');
     setError('');
-    setShowViewModal(false); // Close view modal
+    setShowViewModal(false);
     setShowEditModal(true);
   };
 
   const openDeleteConfirm = (incident: Incident) => {
     setIncidentToDelete(incident);
-    setShowViewModal(false); // Close view modal
+    setShowViewModal(false);
     setShowDeleteConfirm(true);
   };
 
@@ -428,7 +408,6 @@ const IncidentsPage: React.FC = () => {
     }
   };
 
-  // Permission check
   if (!permissions.canViewIncidents) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -585,7 +564,7 @@ const IncidentsPage: React.FC = () => {
         }}
       />
 
-             {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
        <ConfirmDialog
          open={showDeleteConfirm}
          onOpenChange={(open) => {

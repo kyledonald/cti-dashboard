@@ -4,10 +4,9 @@ import { useMemo } from 'react';
 export type UserRole = 'admin' | 'editor' | 'viewer' | 'unassigned';
 
 export interface PermissionSet {
-  // Organization-level permissions
-  canManageOrgUsers: boolean; // Admin: add/remove users, change roles
-  canViewOrgUsers: boolean;   // All assigned: view org directory
-  canEditOrgSettings: boolean; // Admin: change org name, settings
+  canManageOrgUsers: boolean;
+  canViewOrgUsers: boolean;
+  canEditOrgSettings: boolean;
   canViewOrgData: boolean;
   
   // Data permissions (org-scoped)
@@ -20,8 +19,8 @@ export interface PermissionSet {
   canManageThreatActors: boolean;
   canViewCVEs: boolean;
   canManageCVEs: boolean;
-  canViewMySoftware: boolean; // All assigned users can view/manage their software inventory
-  canManageSoftwareInventory: boolean; // Admin and editor can manage software inventory
+  canViewMySoftware: boolean;
+  canManageSoftwareInventory: boolean;
   
   // User state checks
   isAssigned: boolean;
@@ -35,7 +34,6 @@ export const usePermissions = (): PermissionSet => {
 
   return useMemo(() => {
     if (!user) {
-      // No user - no permissions
       return {
         canManageOrgUsers: false,
         canViewOrgUsers: false,
@@ -49,7 +47,7 @@ export const usePermissions = (): PermissionSet => {
         canManageThreatActors: false,
         canViewCVEs: false,
         canManageCVEs: false,
-        canViewMySoftware: true, // Allow viewing My Software even without user
+        canViewMySoftware: true,
         canManageSoftwareInventory: false,
         isAssigned: false,
         isOrgAdmin: false,
@@ -63,40 +61,39 @@ export const usePermissions = (): PermissionSet => {
     const isViewer = user.role === 'viewer';
     const isUnassigned = user.role === 'unassigned';
     const isAssigned = !!user.organizationId && !isUnassigned;
-    // Admins can access everything (with or without org), others need org assignment
     const isOrgAdmin = isAdmin; // Admins are always org admins
     const hasOrgAccess = isAdmin || (isAssigned && (isEditor || isViewer));
 
     return {
-      // Organization-level permissions
+      // Orglevel permissions
       canManageOrgUsers: isOrgAdmin, // Only org admins (admin role + assigned)
       canViewOrgUsers: isAssigned, // All assigned users can view org directory
       canEditOrgSettings: isOrgAdmin, // Only org admins (admin role + assigned)
       canViewOrgData: hasOrgAccess,
       
       // Data permissions (org-scoped)
-      canCreateIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can create
-      canEditIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can edit
-      canDeleteIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can delete
-      canViewIncidents: hasOrgAccess, // All assigned can view
+      canCreateIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can create INCs
+      canEditIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can edit INCs
+      canDeleteIncidents: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can delete INCs
+      canViewIncidents: hasOrgAccess, // All assigned can view INCs
       
-      canViewThreatActors: hasOrgAccess, // All assigned can view
-      canManageThreatActors: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can manage
-      canViewCVEs: hasOrgAccess, // All assigned can view
-      canManageCVEs: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can manage
-      canViewMySoftware: true, // All roles can view My Software
+      canViewThreatActors: hasOrgAccess, // All assigned can view TAs
+      canManageThreatActors: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can manage TAs
+      canViewCVEs: hasOrgAccess, // All assigned can view CVEs
+      canManageCVEs: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can manage CVEs
+      canViewMySoftware: true, // All roles can view 'My Software'
       canManageSoftwareInventory: hasOrgAccess && (isAdmin || isEditor), // Admin and editor can manage software inventory
       
       // User state checks
       isAssigned,
       isOrgAdmin,
-      isSuperAdmin: isAdmin, // Admin is the highest role in our system
+      isSuperAdmin: isAdmin,
       hasOrgAccess,
     };
   }, [user]);
 };
 
-// Convenience hook for role checking
+// hook for role checking
 export const useRole = () => {
   const { user } = useAuth();
   

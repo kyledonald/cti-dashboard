@@ -6,7 +6,7 @@ interface UseAISummaryProps {
   users: User[];
   threatActors: ThreatActor[];
   setError: (error: string) => void;
-  onError?: () => void; // Optional callback for when an error occurs
+  onError?: () => void;
 }
 
 export const useAISummary = ({
@@ -33,7 +33,6 @@ export const useAISummary = ({
     } catch (error: any) {
       console.error('Error generating AI summary:', error);
       setError('Error: ' + error.message);
-      // Call the error callback if provided (e.g., to close the modal)
       if (onError) {
         onError();
       }

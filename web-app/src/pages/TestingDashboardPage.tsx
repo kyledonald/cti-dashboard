@@ -16,72 +16,6 @@ interface TestResult {
 const TestingDashboardPage: React.FC = () => {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
 
-  const realTestResults: TestResult[] = [
-    {
-      id: 'test-1',
-      name: 'Reject registration with no username/password',
-      description: 'Should return 400 if email or password is missing',
-      category: 'unit',
-      status: 'pass',
-      executionTime: 0.1,
-      lastRun: '2023-10-27T10:00:00Z',
-    },
-    {
-      id: 'test-2',
-      name: 'Reject registration with missing fields',
-      description: 'Should return 400 if first or last name is missing',
-      category: 'unit',
-      status: 'pass',
-      executionTime: 0.05,
-      lastRun: '2023-10-27T10:05:00Z',
-    },
-    {
-      id: 'test-3',
-      name: 'Reject registration with insufficiently complex password',
-      description: 'Should return 400 if password does not meet complexity requirements',
-      category: 'unit',
-      status: 'pass',
-      executionTime: 0.08,
-      lastRun: '2023-10-27T10:10:00Z',
-    },
-    {
-      id: 'test-4',
-      name: 'Accept registration with valid credentials',
-      description: 'Should return 201 and user object for valid registration',
-      category: 'unit',
-      status: 'pass',
-      executionTime: 0.12,
-      lastRun: '2023-10-27T10:15:00Z',
-    },
-    {
-      id: 'test-5',
-      name: 'Reject registration with XSS attempt',
-      description: 'Should return 400 if input contains XSS attempt',
-      category: 'unit',
-      status: 'pass',
-      executionTime: 0.07,
-      lastRun: '2023-10-27T10:20:00Z',
-    },
-    {
-      id: 'test-6',
-      name: 'Reject dashboard access without authentication',
-      description: 'Should return 401 if no auth token is provided',
-      category: 'unit',
-      status: 'pass',
-      executionTime: 0.06,
-      lastRun: '2023-10-27T10:25:00Z',
-    },
-    {
-      id: 'test-7',
-      name: 'Allow dashboard access with valid authentication',
-      description: 'Should return 200 and user object if auth token is valid',
-      category: 'unit',
-      status: 'pass',
-      executionTime: 0.10,
-      lastRun: '2023-10-27T10:30:00Z',
-    },
-  ];
-
   useEffect(() => {
     const fetchTestResults = async () => {
       try {
@@ -92,16 +26,15 @@ const TestingDashboardPage: React.FC = () => {
             const data = await response.json();
             setTestResults(data.testResults || []);
           } else {
-            // Fallback to static data if JSON file doesn't exist
-            setTestResults(realTestResults);
+            // show empty state if JSON file doesn't exist
+            setTestResults([]);
           }
         } else {
-          // In production, show no tests (as intended)
           setTestResults([]);
         }
       } catch (error) {
-        console.warn('Could not fetch test results, using static data:', error);
-        setTestResults(realTestResults);
+        console.warn('Could not fetch test results:', error);
+        setTestResults([]);
       }
     };
 

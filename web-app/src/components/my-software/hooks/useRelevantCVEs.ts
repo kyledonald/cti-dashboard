@@ -10,13 +10,12 @@ export const useRelevantCVEs = ({ softwareList, user }: UseRelevantCVEsProps) =>
   const [matchingCVEs, setMatchingCVEs] = useState<ShodanCVE[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Find CVEs relevant to organization software
   const findRelevantCVEs = async () => {
     if (softwareList.length === 0) return;
     
     setLoading(true);
     try {
-      const data = await cvesApi.getShodanLatest(8.0, 200); // Get more CVEs to find matches
+      const data = await cvesApi.getShodanLatest(8.0, 200);
       
       const relevant = data.filter(cve => {
         const summary = cve.summary.toLowerCase();

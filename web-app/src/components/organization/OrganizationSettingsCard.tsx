@@ -41,7 +41,7 @@ export const OrganizationSettingsCard: React.FC<OrganizationSettingsCardProps> =
         {!organization && (
           <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <p className="text-blue-800 dark:text-blue-200 text-sm">
-              <strong>Welcome!</strong> As an admin, you need to create your organization first. 
+              <strong>Welcome!</strong> As an admin, you need to create your organisation first. 
               Fill in the details below to get started.
             </p>
           </div>

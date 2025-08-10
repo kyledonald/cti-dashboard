@@ -18,7 +18,7 @@ test.describe('User Login Journey', () => {
     await page.getByRole('textbox', { name: 'Email' }).fill(PLAYWRIGHT_ADMIN_EMAIL);
     await page.getByRole('textbox', { name: 'Password' }).fill(PLAYWRIGHT_ADMIN_PASSWORD);
     await page.getByRole('button', { name: 'Sign In', exact: true }).click();
-    await page.locator('div').filter({ hasText: 'DashboardYour organization\'s' }).nth(2).click();
+    await page.locator('div').filter({ hasText: 'DashboardYour organisation\'s' }).nth(2).click();
 
     console.log('✅ User Login Journey Test Completed Successfully!');
   });

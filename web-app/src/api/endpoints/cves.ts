@@ -7,7 +7,7 @@ export const cvesApi = {
   
   getById: (id: string) => retryRequest(() => api.get(`/cves/${id}`)).then(res => res.data),
   
-  // Get latest CVEs from backend (no CORS issues)
+  // Get latest CVEs from backend
   getShodanLatest: async (minCvssScore = 8.0, limit = 200): Promise<ShodanCVE[]> => {
     try {
       const response = await api.get(`/cves/shodan/latest?limit=${limit}&minCvssScore=${minCvssScore}`);

@@ -85,7 +85,7 @@ export const OrganizationEditUserModal: React.FC<OrganizationEditUserModalProps>
             </select>
             {editingUser && currentUser && editingUser.userId === currentUser.userId && editingUser.role === 'admin' && editUserRole !== 'admin' && (
               <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
-                ⚠️ Warning: Organizations must always have at least one admin.
+                ⚠️ Warning: Organisations must always have at least one admin.
               </p>
             )}
           </div>

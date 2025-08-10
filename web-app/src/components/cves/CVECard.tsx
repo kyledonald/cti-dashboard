@@ -89,7 +89,7 @@ export const CVECard: React.FC<CVECardProps> = ({
         </div>
       )}
 
-      {/* Quick Actions - Bottom Right - Only show for users with CVE management permissions */}
+      {/* Quick Actions - Bottom Right - Only shows for admins&editoes */}
       {permissions.canManageCVEs && (
         <div className="flex justify-end">
           <div className="flex gap-2">

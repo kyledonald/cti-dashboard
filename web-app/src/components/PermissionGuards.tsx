@@ -16,7 +16,6 @@ interface IfRolesProps {
 interface IfPermissionProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
-  // Permission checks
   canManageOrgUsers?: boolean;
   canViewOrgUsers?: boolean;
   canEditOrgSettings?: boolean;
@@ -29,7 +28,6 @@ interface IfPermissionProps {
   canManageThreatActors?: boolean;
   canViewCVEs?: boolean;
   canManageCVEs?: boolean;
-  // State checks
   requireAssigned?: boolean;
   requireOrgAccess?: boolean;
 }
@@ -88,7 +86,6 @@ export const IfPermission: React.FC<IfPermissionProps> = ({
   return hasPermission ? <>{children}</> : <>{fallback}</>;
 };
 
-// Convenience components for common use cases
 export const IfOrgSettings: React.FC<{ children: React.ReactNode; fallback?: React.ReactNode }> = ({ children, fallback }) => (
   <IfPermission canEditOrgSettings={true} fallback={fallback}>{children}</IfPermission>
 );

@@ -5,8 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 
 export const useDashboardData = () => {
   const { user } = useAuth();
-
-  // Data fetching
   const { data: incidents = [], isLoading: incidentsLoading } = useQuery({
     queryKey: ['incidents'],
     queryFn: incidentsApi.getAll,
@@ -48,7 +46,6 @@ export const useDashboardData = () => {
     }
   }, [user?.organizationId]);
 
-  // Calculate at-risk software
   useEffect(() => {
     if (!softwareList.length || !cves.length) {
       setAtRiskSoftwareCount(0);

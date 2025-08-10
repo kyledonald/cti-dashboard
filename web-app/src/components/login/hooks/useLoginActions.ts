@@ -63,6 +63,7 @@ export const useLoginActions = ({
   setConfirmPassword,
   setFirstName,
   setLastName,
+
 }: UseLoginActionsProps) => {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);

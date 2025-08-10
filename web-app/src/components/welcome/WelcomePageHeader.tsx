@@ -13,7 +13,7 @@ export const WelcomePageHeader: React.FC<WelcomePageHeaderProps> = ({
 }) => {
   return (
     <div className="relative mb-12">
-      {/* Sign Out Button - Absolute positioned top right */}
+      {/* Sign Out Button */}
       <div className="absolute top-0 right-0 flex items-center space-x-4">
         <div className="text-right">
           <p className="text-sm text-gray-600 dark:text-gray-400">Signed in as</p>

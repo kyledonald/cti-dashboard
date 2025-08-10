@@ -55,7 +55,7 @@ export const useUserSettingsActions = ({
       await refreshUser();
       
       showMessage('success', 'Profile updated successfully!');
-      return true; // Indicate success for state management
+      return true;
     } catch (error: any) {
       console.error('Error updating profile:', error);
       showMessage('error', error.message || 'Failed to update profile');
@@ -91,7 +91,7 @@ export const useUserSettingsActions = ({
       await updatePassword(firebaseUser, newPassword);
 
       showMessage('success', 'Password changed successfully!');
-      return true; // Indicate success for state management
+      return true;
     } catch (error: any) {
       console.error('Error changing password:', error);
       if (error.code === 'auth/wrong-password') {
@@ -111,7 +111,7 @@ export const useUserSettingsActions = ({
 
     setLoading(true);
     try {
-      // Check if user is an admin and if there are other users in the organization
+      // Check if user is an admin and if there are other users in the org first
       if (user.role === 'admin' && user.organizationId) {
         const allUsers = await usersApi.getAll();
         const orgUsers = allUsers.filter((u: any) => u.organizationId === user.organizationId);

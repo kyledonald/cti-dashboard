@@ -2,9 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { type ThreatActor } from '../api';
-
 import { ConfirmDialog } from '../components/ConfirmDialog';
-
 import { ThreatActorPageHeader } from '../components/threat-actors/ThreatActorPageHeader';
 import { ThreatActorStatistics } from '../components/threat-actors/ThreatActorStatistics';
 import { ThreatActorSearch } from '../components/threat-actors/ThreatActorSearch';
@@ -114,8 +112,6 @@ const ThreatActorsPage: React.FC = () => {
       case 'Government': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300';
       case 'Organization': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
       case 'Team': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-300';
-      case 'Club': return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/20 dark:text-cyan-300';
-      case 'Contest': return 'bg-teal-100 text-teal-800 dark:bg-teal-900/20 dark:text-teal-300';
       case 'Individual': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
     }
@@ -139,8 +135,6 @@ const ThreatActorsPage: React.FC = () => {
       case 'Government': score += 5; break;
       case 'Organization': score += 4; break;
       case 'Team': score += 3; break;
-      case 'Club': score += 2; break;
-      case 'Contest': score += 2; break;
       case 'Individual': score += 1; break;
       default: score += 1;
     }
@@ -148,7 +142,6 @@ const ThreatActorsPage: React.FC = () => {
     // Activity bonus
     if (actor.isActive) score += 2;
     
-    // Recent activity bonus (within last year)
     if (actor.lastSeen) {
       const lastSeenDate = new Date(actor.lastSeen);
       const oneYearAgo = new Date();
@@ -156,7 +149,6 @@ const ThreatActorsPage: React.FC = () => {
       if (lastSeenDate > oneYearAgo) score += 2;
     }
     
-    // Industry/Country targeting bonus (case-insensitive)
     if (organization && actor.primaryTargets?.length) {
       const orgIndustry = organization.industry?.toLowerCase();
       const orgCountry = organization.nationality?.toLowerCase();
@@ -187,7 +179,6 @@ const ThreatActorsPage: React.FC = () => {
     return 'Low';
   };
 
-  // Permission check
   if (!permissions.canViewThreatActors) {
     return <ThreatActorAccessDeniedState />;
   }

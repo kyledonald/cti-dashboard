@@ -34,8 +34,6 @@ export const ThreatActorCard: React.FC<ThreatActorCardProps> = ({
 }) => {
   const riskScore = calculateRiskScore(actor);
   
-
-
   return (
     <Card className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200 border-2 hover:border-blue-300 dark:hover:border-blue-600 flex flex-col h-full">
       {/* Country Flag Corner */}

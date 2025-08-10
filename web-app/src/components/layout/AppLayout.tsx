@@ -43,7 +43,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             <Route path="/dashboard" element={<OrgRoute><DashboardPage /></OrgRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
             
-            {/* Organization-Scoped Routes */}
+            {/* Org-Scoped Routes */}
             <Route path="/users" element={<OrgRoute><UsersPage /></OrgRoute>} />
             <Route path="/organization" element={<ProtectedRoute requireRoles={['admin']}><OrganizationPage /></ProtectedRoute>} />
             <Route path="/incidents" element={<OrgRoute><IncidentsPage /></OrgRoute>} />
@@ -53,12 +53,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             {/* User Settings */}
             <Route path="/settings" element={<ProtectedRoute><UserSettingsPage /></ProtectedRoute>} />
             
-            {/* Testing Dashboard - Development Only */}
+            {/* Testing Dashboard - Dev Only */}
             {import.meta.env.DEV && (
               <Route path="/testing" element={<TestingDashboardPage />} />
             )}
             
-            {/* Special Pages */}
+            {/* Other Pages */}
             <Route path="/organization-required" element={<OrganizationRequiredPage />} />
             
             <Route path="/my-software" element={<OrgRoute><MySoftwarePage /></OrgRoute>} />

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-
 import { UserSettingsHeader } from '../components/user-settings/UserSettingsHeader';
 import { UserSettingsMessage } from '../components/user-settings/UserSettingsMessage';
 import { UserProfileSection } from '../components/user-settings/UserProfileSection';
@@ -50,7 +49,6 @@ const UserSettingsPage: React.FC = () => {
     validatePasswordComplexity,
   });
 
-  // Wrapper functions to handle state management
   const handleUpdateProfileWrapper = async (e: React.FormEvent) => {
     const success = await handleUpdateProfile(e, firstName, lastName);
     if (success) {

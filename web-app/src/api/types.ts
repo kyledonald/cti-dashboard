@@ -128,13 +128,12 @@ export interface ThreatActor {
   motivation?: string;
   capabilities?: string[];
   aliases?: string[];
-  organizationId?: string; // Added for organization-specific threat actors
-  // Enhanced fields for modern threat intelligence
+  organizationId?: string; // Added for org-specific threat actors
   country?: string;
   firstSeen?: string;
   lastSeen?: string;
   sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
-  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Team' | 'Organization' | 'Government';
   primaryTargets?: string[];
   attackPatterns?: string[];
   tools?: string[];
@@ -151,13 +150,12 @@ export interface CreateThreatActorDTO {
   motivation?: string;
   capabilities?: string[];
   aliases?: string[];
-  organizationId?: string; // Added for organization-specific threat actors
-  // Enhanced fields for modern threat intelligence
+  organizationId?: string; // Added for org-specific threat actors
   country?: string;
   firstSeen?: string;
   lastSeen?: string;
   sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
-  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Team' | 'Organization' | 'Government';
   primaryTargets?: string[];
   attackPatterns?: string[];
   tools?: string[];
@@ -172,12 +170,11 @@ export interface UpdateThreatActorDTO {
   motivation?: string;
   capabilities?: string[];
   aliases?: string[];
-  // Enhanced fields for modern threat intelligence
   country?: string;
   firstSeen?: string;
   lastSeen?: string;
   sophistication?: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
-  resourceLevel?: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  resourceLevel?: 'Unknown' | 'Individual' | 'Team' | 'Organization' | 'Government';
   primaryTargets?: string[];
   attackPatterns?: string[];
   tools?: string[];
@@ -208,6 +205,5 @@ export interface ShodanCVE {
   published: string;
   modified: string;
   references: string[];
-  // Extract vendor info from summary when possible
   extractedVendors?: string[];
 } 

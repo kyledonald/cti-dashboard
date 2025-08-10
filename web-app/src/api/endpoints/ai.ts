@@ -8,19 +8,16 @@ export const generateAISummary = async (incident: Incident, users: User[], threa
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-
-      
       const response = await aiApi.post('/cves/ai-summary', {
         incident,
         users,
         threatActors
       });
       
-      
       return response.data.summary;
-      
+
     } catch (error: any) {
-      console.error(`❌ AI Summary attempt ${attempt + 1} failed:`, error.response?.status, error.message);
+      console.error(`AI Summary attempt ${attempt + 1} failed:`, error.response?.status, error.message);
       
       // If it's a 503 error and we haven't exhausted retries, wait and retry
       if (error.response?.status === 503 && attempt < maxRetries) {

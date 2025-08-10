@@ -83,7 +83,7 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
             <span>Account Settings</span>
           </Link>
           
-          {/* Leave Organization - Only show for non-admin users with an organization */}
+          {/* Leave Organization - Only show for non-admin users with an org */}
           {user.role !== 'admin' && user.role !== 'unassigned' && user.organizationId && (
             <button
               onClick={onLeaveOrganization}

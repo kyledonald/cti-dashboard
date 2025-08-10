@@ -16,7 +16,7 @@ function App() {
 
   return (
     <Router>
-      {/* Development Indicator - Only shown in dev mode */}
+      {/* Environment Indicator - Only shown in dev */}
       <DevIndicator />
       
       {!user ? (

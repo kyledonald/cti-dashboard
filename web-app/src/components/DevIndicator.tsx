@@ -1,7 +1,7 @@
 import React from 'react';
 
 const DevIndicator: React.FC = () => {
-  // Only show in development mode
+  // Only show in dev
   if (!import.meta.env.DEV) {
     return null;
   }

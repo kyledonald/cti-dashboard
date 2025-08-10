@@ -10,7 +10,7 @@ interface ThreatActorFormData {
   lastSeen: string;
   motivation: string;
   sophistication: 'Unknown' | 'Minimal' | 'Intermediate' | 'Advanced' | 'Expert';
-  resourceLevel: 'Unknown' | 'Individual' | 'Club' | 'Contest' | 'Team' | 'Organization' | 'Government';
+  resourceLevel: 'Unknown' | 'Individual' | 'Team' | 'Organization' | 'Government';
   primaryTargets: string[];
   isActive: boolean;
 }

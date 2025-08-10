@@ -33,13 +33,11 @@ export const useCVEActions = ({
 }: UseCVEActionsProps) => {
   const navigate = useNavigate();
 
-  // Perform the actual CVE dismissal
   const performDismissCVE = useCallback((cveId: string) => {
     if (!user?.organizationId) return;
     
     const cveToStore = cves.find(cve => cve.cve === cveId);
     if (cveToStore) {
-      // Save the full CVE data
       const existingDismissedData = loadDismissedCVEData();
       const updatedDismissedData = [...existingDismissedData.filter(cve => cve.cve !== cveId), cveToStore];
       saveDismissedCVEData(updatedDismissedData);
@@ -50,11 +48,10 @@ export const useCVEActions = ({
     saveDismissedCVEs(newDismissed);
   }, [user?.organizationId, cves, dismissedCVEs, saveDismissedCVEs, saveDismissedCVEData, loadDismissedCVEData]);
 
-  // Dismiss a CVE
   const dismissCVE = useCallback((cveId: string) => {
     if (!user?.organizationId) return;
     
-    // Check if there's an existing incident for this CVE
+    // Check if there's an existing INC for this CVE
     const existingIncident = incidents.find(incident => 
       incident.cveIds && incident.cveIds.includes(cveId)
     );
@@ -65,7 +62,7 @@ export const useCVEActions = ({
       setCveToClose(cveId);
       setIncidentToClose(existingIncident);
     } else {
-      // No existing incident, proceed with normal dismissal
+      // No existing incident, so can NAR it
       performDismissCVE(cveId);
     }
   }, [user?.organizationId, incidents, setShowCloseIncidentConfirm, setCveToClose, setIncidentToClose, performDismissCVE]);
@@ -77,8 +74,6 @@ export const useCVEActions = ({
     const newDismissed = new Set(dismissedCVEs);
     newDismissed.delete(cveId);
     saveDismissedCVEs(newDismissed);
-    
-    // Remove from dismissed data
     const existingDismissedData = loadDismissedCVEData();
     const updatedDismissedData = existingDismissedData.filter(cve => cve.cve !== cveId);
     saveDismissedCVEData(updatedDismissedData);
@@ -110,7 +105,6 @@ export const useCVEActions = ({
       
     } catch (error) {
       console.error('Error closing incident:', error);
-      // Still dismiss the CVE even if incident update fails
       performDismissCVE(cveToClose);
       setShowCloseIncidentConfirm(false);
       setCveToClose('');
@@ -119,10 +113,8 @@ export const useCVEActions = ({
       setClosingIncident(false);
     }
   }, [setClosingIncident, performDismissCVE, fetchIncidents, setShowCloseIncidentConfirm, setCveToClose, setIncidentToClose]);
-
-  // Handle dismissing CVE without closing incident
+  
   const handleDismissWithoutClosing = useCallback(() => {
-    // Just close the dialog without dismissing the CVE
     // The CVE should remain active since the user chose to keep the incident open
     setShowCloseIncidentConfirm(false);
     setCveToClose('');
@@ -147,8 +139,6 @@ export const useCVEActions = ({
     };
     
     sessionStorage.setItem('createIncidentFromCVE', JSON.stringify(incidentData));
-    
-    // Navigate to incidents page
     navigate('/incidents');
   }, [navigate]);
 

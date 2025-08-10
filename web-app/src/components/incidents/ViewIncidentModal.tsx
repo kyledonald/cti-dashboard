@@ -172,7 +172,7 @@ export const ViewIncidentModal: React.FC<ViewIncidentModalProps> = ({
             </div>
           )}
 
-          {/* Collaborative Comments Section */}
+          {/* Comments Section */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <label className="block text-lg font-medium text-gray-900 dark:text-gray-100">

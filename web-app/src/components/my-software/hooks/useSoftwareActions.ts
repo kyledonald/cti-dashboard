@@ -15,7 +15,7 @@ export const useSoftwareActions = ({
   setNewSoftware,
   setShowAddForm,
 }: UseSoftwareActionsProps) => {
-  // Save software to localStorage (organization-specific)
+  // Save software to localStorage (org-specific)
   const saveSoftware = (software: string[]) => {
     if (!user?.organizationId) return;
     

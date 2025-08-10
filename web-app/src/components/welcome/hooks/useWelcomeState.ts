@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export const useWelcomeState = () => {
-  // Create Organization State
+  // Create Org State
   const [createOrgData, setCreateOrgData] = useState({
     name: '',
     industry: '',
@@ -18,7 +18,7 @@ export const useWelcomeState = () => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   return {
-    // Create Organization State
+    // Create Org State
     createOrgData,
     setCreateOrgData,
     creatingOrg,

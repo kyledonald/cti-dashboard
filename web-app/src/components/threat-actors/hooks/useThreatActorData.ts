@@ -9,7 +9,7 @@ export const useThreatActorData = (user: any) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Load threat actors and organization data
+  // Load threat actors and org data
   useEffect(() => {
     const loadData = async () => {
       if (!user?.organizationId) {
@@ -18,13 +18,13 @@ export const useThreatActorData = (user: any) => {
       }
 
       try {
-        // Load threat actors and organization data in parallel
+        // Load threat actors and org data in parallel
         const [threatActorsData, organizationData] = await Promise.all([
           threatActorsApi.getAll(),
           organizationsApi.getById(user.organizationId)
         ]);
 
-        // Filter threat actors by organization
+        // Filter threat actors by org
         const orgThreatActors = threatActorsData.filter((ta: ThreatActor) => 
           ta.organizationId === user?.organizationId
         );
@@ -33,7 +33,6 @@ export const useThreatActorData = (user: any) => {
         setOrganization(organizationData);
       } catch (error) {
         console.error('Error loading data:', error);
-        // Note: Error handling is done by the parent component
       } finally {
         setLoading(false);
       }
@@ -56,12 +55,12 @@ export const useThreatActorData = (user: any) => {
     currentPage * itemsPerPage
   );
 
-  // Statistics calculation
+  // Statistics calc
   const statistics = {
     total: threatActors.length,
     active: threatActors.filter(actor => actor.isActive).length,
     highRisk: threatActors.filter(actor => {
-      // Simple risk calculation based on sophistication
+      // Simple risk calc based on sophistication
       const riskScore = actor.sophistication === 'Expert' ? 5 :
                        actor.sophistication === 'Advanced' ? 4 :
                        actor.sophistication === 'Intermediate' ? 3 :
@@ -71,25 +70,18 @@ export const useThreatActorData = (user: any) => {
   };
 
   return {
-    // Data
     threatActors,
     organization,
     loading,
-    
-    // Search and pagination
     searchTerm,
     setSearchTerm,
     currentPage,
     setCurrentPage,
     itemsPerPage,
-    
-    // Computed values
     filteredActors,
     paginatedActors,
     totalPages,
     statistics,
-    
-    // Actions
     setThreatActors
   };
 }; 

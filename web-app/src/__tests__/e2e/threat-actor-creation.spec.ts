@@ -18,14 +18,13 @@ test.describe('Threat Actor Management', () => {
     await page.getByRole('textbox', { name: 'Email' }).fill(ADMIN_EMAIL);
     await page.getByRole('textbox', { name: 'Password' }).fill(ADMIN_PASSWORD);
     await page.getByRole('button', { name: 'Sign In', exact: true }).click();
-
     await page.getByRole('link', { name: 'Threat Actors See known' }).click();
     await page.locator('div').filter({ hasText: /^Total Actors0$/ }).nth(1).click();
     await page.getByRole('button', { name: 'Add Threat Actor' }).click();
     await page.getByRole('textbox', { name: 'APT28, Lazarus Group, etc.' }).fill('Test Threat Actor');
     await page.getByRole('textbox', { name: 'Country of origin' }).fill('Russia');
     await page.getByRole('textbox', { name: 'Detailed description of the' }).fill('This is a test threat actor originating from Russia.');
-    await page.locator('div').filter({ hasText: /^Resource LevelUnknownIndividualClubContestTeamOrganizationGovernment$/ }).getByRole('combobox').selectOption('Government');
+    await page.locator('div').filter({ hasText: /^Resource LevelUnknownIndividualTeamOrganizationGovernment$/ }).getByRole('combobox').selectOption('Government');
     await page.locator('div').filter({ hasText: /^First Seen$/ }).getByRole('textbox').fill('2019-01-01');
     await page.locator('div').filter({ hasText: /^Last Seen$/ }).getByRole('textbox').fill('2025-08-06');
     await page.getByRole('textbox', { name: 'Financial, Espionage,' }).fill('Hacktivism');

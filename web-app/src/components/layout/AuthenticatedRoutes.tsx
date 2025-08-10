@@ -17,10 +17,10 @@ export const AuthenticatedRoutes: React.FC<AuthenticatedRoutesProps> = ({
   hasOrganization,
 }) => {
   if (hasOrganization) {
-    // Users with organizations - NO ACCESS to welcome page
+    // Users with org - NO ACCESS to welcome page
     return (
       <Routes>
-        {/* Redirect ANY user with an organization away from welcome page */}
+        {/* Redirect ANY user with an org away from welcome page */}
         <Route path="/welcome" element={<Navigate to="/dashboard" replace />} />
         
         {/* Main App Routes - With sidebar/header */}
@@ -34,7 +34,7 @@ export const AuthenticatedRoutes: React.FC<AuthenticatedRoutesProps> = ({
       </Routes>
     );
   } else {
-    // Users WITHOUT organizations - Only these can access welcome page
+    // Users WITHOUT org - Only these can access welcome page
     return (
       <Routes>
         <Route path="/welcome" element={<WelcomePage />} />

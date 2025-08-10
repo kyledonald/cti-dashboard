@@ -15,7 +15,7 @@ interface UseUsersFiltersProps {
 }
 
 export const useUsersFilters = ({ users, searchTerm, roleFilter }: UseUsersFiltersProps) => {
-  // Filter users based on search and filters
+  // Filter users based on both search and filters
   const filteredUsers = users.filter(u => {
     const matchesSearch = 
       u.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||

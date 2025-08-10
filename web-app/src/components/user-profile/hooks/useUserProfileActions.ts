@@ -32,11 +32,7 @@ export const useUserProfileActions = ({
     setLeavingOrg(true);
     
     try {
-  
-      
       await usersApi.leaveOrganization(user.userId);
-      
-      
       // Redirect to refresh the app state
       window.location.reload();
     } catch (error: any) {
