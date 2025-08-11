@@ -2,1200 +2,1200 @@
   "testResults": [
     {
       "id": "test-1",
-      "name": "should retrieve all CVEs with CVSS score 8 or above",
-      "description": "should retrieve all CVEs with CVSS score 8 or above",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.04,
-      "lastRun": "2025-08-10T16:53:44.673Z"
-    },
-    {
-      "id": "test-2",
-      "name": "should retrieve all CVEs when no CVSS filter is applied",
-      "description": "should retrieve all CVEs when no CVSS filter is applied",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.006,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-3",
-      "name": "should return empty array when CVSS filter excludes all CVEs",
-      "description": "should return empty array when CVSS filter excludes all CVEs",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-4",
-      "name": "should handle invalid CVSS filter gracefully",
-      "description": "should handle invalid CVSS filter gracefully",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.012,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-5",
-      "name": "should return detailed CVE information including CVSS score, affected software, and publication date",
-      "description": "should return detailed CVE information including CVSS score, affected software, and publication date",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-6",
-      "name": "should return 404 for non-existent CVE",
-      "description": "should return 404 for non-existent CVE",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-7",
-      "name": "should allow all authenticated users to view CVE details",
-      "description": "should allow all authenticated users to view CVE details",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.006,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-8",
-      "name": "should accept valid password",
-      "description": "should accept valid password",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.07,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-9",
-      "name": "should accept minimum length",
-      "description": "should accept minimum length",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-10",
-      "name": "should reject invalid format",
-      "description": "should reject invalid format",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-11",
-      "name": "should require number",
-      "description": "should require number",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-12",
-      "name": "should require special char",
-      "description": "should require special char",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-13",
-      "name": "should reject empty password",
-      "description": "should reject empty password",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-14",
-      "name": "should reject non string password",
-      "description": "should reject non string password",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-15",
-      "name": "should reject role assignment by non-admin users",
-      "description": "should reject role assignment by non-admin users",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.053,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-16",
-      "name": "should reject role assignment with invalid role",
-      "description": "should reject role assignment with invalid role",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-17",
-      "name": "should reject role assignment for non-existent user",
-      "description": "should reject role assignment for non-existent user",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-18",
-      "name": "should reject role assignment for user in different organization",
-      "description": "should reject role assignment for user in different organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-19",
-      "name": "should reject admin trying to change their own role when they are the only admin",
-      "description": "should reject admin trying to change their own role when they are the only admin",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.006,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-20",
-      "name": "should allow admin to change their own role when there are other admins",
-      "description": "should allow admin to change their own role when there are other admins",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-21",
-      "name": "should allow admin to assign valid role to user in same organization",
-      "description": "should allow admin to assign valid role to user in same organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-22",
-      "name": "should allow admin to view all users in their organization",
-      "description": "should allow admin to view all users in their organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-23",
-      "name": "should allow admin to view specific user in their organization",
-      "description": "should allow admin to view specific user in their organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-24",
-      "name": "should reject admin viewing user from different organization",
-      "description": "should reject admin viewing user from different organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-25",
-      "name": "should show updated role after role assignment",
-      "description": "should show updated role after role assignment",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.005,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-26",
-      "name": "should generate AI summary for incident",
-      "description": "should generate AI summary for incident",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.044,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-27",
-      "name": "should export AI summary as PDF",
-      "description": "should export AI summary as PDF",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-28",
-      "name": "should allow all authenticated users to generate AI summary",
-      "description": "should allow all authenticated users to generate AI summary",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.008,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-29",
-      "name": "should allow all authenticated users to export PDF",
-      "description": "should allow all authenticated users to export PDF",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.005,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-30",
-      "name": "should return 404 for non-existent incident",
-      "description": "should return 404 for non-existent incident",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-31",
-      "name": "should return 404 for non-existent incident PDF export",
-      "description": "should return 404 for non-existent incident PDF export",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-32",
       "name": "should accept 4 or maximum 5 digit number",
       "description": "should accept 4 or maximum 5 digit number",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.041,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.022,
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-33",
+      "id": "test-2",
       "name": "should ensure it follows the right format of CVE-year-numbers",
       "description": "should ensure it follows the right format of CVE-year-numbers",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-34",
+      "id": "test-3",
       "name": "should accept case insensitive prefix",
       "description": "should accept case insensitive prefix",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.017,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.004,
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-35",
+      "id": "test-4",
       "name": "should reject invalid CVE IDs",
       "description": "should reject invalid CVE IDs",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.006,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-36",
+      "id": "test-5",
       "name": "should reject invalid year",
       "description": "should reject invalid year",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-37",
+      "id": "test-6",
       "name": "should reject empty or whitespace CVE",
       "description": "should reject empty or whitespace CVE",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-38",
+      "id": "test-7",
       "name": "should reject invalid prefix",
       "description": "should reject invalid prefix",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-39",
-      "name": "should remove html tags",
-      "description": "should remove html tags",
+      "id": "test-8",
+      "name": "should retrieve all CVEs with CVSS score 8 or above",
+      "description": "should retrieve all CVEs with CVSS score 8 or above",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.031,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.028,
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-40",
-      "name": "should remove html tags with attributes",
-      "description": "should remove html tags with attributes",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-41",
-      "name": "should remove self closing html tags",
-      "description": "should remove self closing html tags",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-42",
-      "name": "should prevent XSS",
-      "description": "should prevent XSS",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-43",
-      "name": "should prevent event handler injection",
-      "description": "should prevent event handler injection",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.007,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-44",
-      "name": "should prevent iframe injection",
-      "description": "should prevent iframe injection",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.015,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-45",
-      "name": "should handle empty strings",
-      "description": "should handle empty strings",
+      "id": "test-9",
+      "name": "should retrieve all CVEs when no CVSS filter is applied",
+      "description": "should retrieve all CVEs when no CVSS filter is applied",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-46",
-      "name": "should calculate correct incident status counts",
-      "description": "should calculate correct incident status counts",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.022,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-47",
-      "name": "should calculate correct incident priority counts",
-      "description": "should calculate correct incident priority counts",
+      "id": "test-10",
+      "name": "should return empty array when CVSS filter excludes all CVEs",
+      "description": "should return empty array when CVSS filter excludes all CVEs",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-48",
-      "name": "should identify high priority incidents correctly",
-      "description": "should identify high priority incidents correctly",
+      "id": "test-11",
+      "name": "should handle invalid CVSS filter gracefully",
+      "description": "should handle invalid CVSS filter gracefully",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.287Z"
     },
     {
-      "id": "test-49",
-      "name": "should calculate KEV count correctly",
-      "description": "should calculate KEV count correctly",
+      "id": "test-12",
+      "name": "should return detailed CVE information including CVSS score, affected software, and publication date",
+      "description": "should return detailed CVE information including CVSS score, affected software, and publication date",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.005,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-50",
-      "name": "should identify high-risk threat actors correctly",
-      "description": "should identify high-risk threat actors correctly",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-51",
-      "name": "should generate correct pie chart data for incident status",
-      "description": "should generate correct pie chart data for incident status",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-52",
-      "name": "should generate correct bar chart data for incident priority",
-      "description": "should generate correct bar chart data for incident priority",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-53",
-      "name": "should only return data from user's organization",
-      "description": "should only return data from user's organization",
+      "id": "test-13",
+      "name": "should return 404 for non-existent CVE",
+      "description": "should return 404 for non-existent CVE",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-54",
-      "name": "should require authentication to access dashboard metrics",
-      "description": "should require authentication to access dashboard metrics",
+      "id": "test-14",
+      "name": "should allow all authenticated users to view CVE details",
+      "description": "should allow all authenticated users to view CVE details",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.006,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-55",
-      "name": "should require authentication to access chart data",
-      "description": "should require authentication to access chart data",
+      "id": "test-15",
+      "name": "should generate AI summary for incident",
+      "description": "should generate AI summary for incident",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.025,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-16",
+      "name": "should export AI summary as PDF",
+      "description": "should export AI summary as PDF",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-56",
-      "name": "should display resolution status chart for critical CVEs",
-      "description": "should display resolution status chart for critical CVEs",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-57",
-      "name": "should require authentication to access critical CVE resolution chart",
-      "description": "should require authentication to access critical CVE resolution chart",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-58",
-      "name": "should search CVEs by software name in summary",
-      "description": "should search CVEs by software name in summary",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.012,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-59",
-      "name": "should return empty results for non-existent software",
-      "description": "should return empty results for non-existent software",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-60",
-      "name": "should limit search results",
-      "description": "should limit search results",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-61",
-      "name": "should perform case-insensitive search",
-      "description": "should perform case-insensitive search",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-62",
-      "name": "should require software parameter",
-      "description": "should require software parameter",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-63",
-      "name": "should handle empty software parameter",
-      "description": "should handle empty software parameter",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-64",
-      "name": "should filter CVEs by minimum severity score",
-      "description": "should filter CVEs by minimum severity score",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-65",
-      "name": "should filter CVEs by maximum severity score",
-      "description": "should filter CVEs by maximum severity score",
+      "id": "test-17",
+      "name": "should allow all authenticated users to generate AI summary",
+      "description": "should allow all authenticated users to generate AI summary",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.005,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-66",
-      "name": "should filter CVEs by severity range",
-      "description": "should filter CVEs by severity range",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-67",
-      "name": "should sort CVEs by severity from highest to lowest by default",
-      "description": "should sort CVEs by severity from highest to lowest by default",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-68",
-      "name": "should sort CVEs by severity from lowest to highest when specified",
-      "description": "should sort CVEs by severity from lowest to highest when specified",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.006,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-69",
-      "name": "should combine search, filtering, and sorting correctly",
-      "description": "should combine search, filtering, and sorting correctly",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-70",
-      "name": "should handle invalid severity values gracefully",
-      "description": "should handle invalid severity values gracefully",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-71",
-      "name": "should allow admins to schedule security reminders",
-      "description": "should allow admins to schedule security reminders",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.021,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-72",
-      "name": "should prevent non-admins from scheduling notifications",
-      "description": "should prevent non-admins from scheduling notifications",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-73",
-      "name": "should require all mandatory fields for scheduling",
-      "description": "should require all mandatory fields for scheduling",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-74",
-      "name": "should validate priority values",
-      "description": "should validate priority values",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-75",
-      "name": "should reject past scheduled times",
-      "description": "should reject past scheduled times",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-76",
-      "name": "should allow admins to view scheduled notifications",
-      "description": "should allow admins to view scheduled notifications",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-77",
-      "name": "should prevent non-admins from viewing scheduled notifications",
-      "description": "should prevent non-admins from viewing scheduled notifications",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-78",
-      "name": "should allow admins to cancel scheduled notifications",
-      "description": "should allow admins to cancel scheduled notifications",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-79",
-      "name": "should prevent non-admins from cancelling scheduled notifications",
-      "description": "should prevent non-admins from cancelling scheduled notifications",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.008,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-80",
-      "name": "should allow all authenticated users to view their reminders",
-      "description": "should allow all authenticated users to view their reminders",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-81",
-      "name": "should allow editors to view their reminders",
-      "description": "should allow editors to view their reminders",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-82",
-      "name": "should allow viewers to view their reminders",
-      "description": "should allow viewers to view their reminders",
+      "id": "test-18",
+      "name": "should allow all authenticated users to export PDF",
+      "description": "should allow all authenticated users to export PDF",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.005,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-83",
-      "name": "should include all required reminder fields",
-      "description": "should include all required reminder fields",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-84",
-      "name": "should only return incidents from user's organization",
-      "description": "should only return incidents from user's organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.094,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-85",
-      "name": "should allow users from different organizations to see only their incidents",
-      "description": "should allow users from different organizations to see only their incidents",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.009,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-86",
-      "name": "should allow access to incident from same organization",
-      "description": "should allow access to incident from same organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.005,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-87",
-      "name": "should deny access to incident from different organization",
-      "description": "should deny access to incident from different organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.008,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-88",
+      "id": "test-19",
       "name": "should return 404 for non-existent incident",
       "description": "should return 404 for non-existent incident",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-89",
-      "name": "should create incident with user's organization",
-      "description": "should create incident with user's organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.008,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-90",
-      "name": "should require authentication to create incidents",
-      "description": "should require authentication to create incidents",
+      "id": "test-20",
+      "name": "should return 404 for non-existent incident PDF export",
+      "description": "should return 404 for non-existent incident PDF export",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-91",
-      "name": "should validate required fields for incident creation",
-      "description": "should validate required fields for incident creation",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-92",
-      "name": "should allow updating incident from same organization",
-      "description": "should allow updating incident from same organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-93",
-      "name": "should deny updating incident from different organization",
-      "description": "should deny updating incident from different organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.005,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-94",
-      "name": "should allow deleting incident from same organization",
-      "description": "should allow deleting incident from same organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-95",
-      "name": "should deny deleting incident from different organization",
-      "description": "should deny deleting incident from different organization",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-96",
-      "name": "should require authentication to view incidents",
-      "description": "should require authentication to view incidents",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-97",
-      "name": "should require authentication to view single incident",
-      "description": "should require authentication to view single incident",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-98",
-      "name": "should require authentication to update incidents",
-      "description": "should require authentication to update incidents",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-99",
-      "name": "should require authentication to delete incidents",
-      "description": "should require authentication to delete incidents",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-100",
-      "name": "should reject registration without email and password",
-      "description": "should reject registration without email and password",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.012,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-101",
-      "name": "should reject registration with missing fields",
-      "description": "should reject registration with missing fields",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-102",
-      "name": "should reject registration with insufficient password complexity",
-      "description": "should reject registration with insufficient password complexity",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-103",
-      "name": "should reject registration with XSS attempt",
-      "description": "should reject registration with XSS attempt",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-104",
-      "name": "should successfully register user with valid credentials",
-      "description": "should successfully register user with valid credentials",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-105",
-      "name": "should reject login without credentials",
-      "description": "should reject login without credentials",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-106",
-      "name": "should successfully login with valid credentials",
-      "description": "should successfully login with valid credentials",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-107",
-      "name": "should successfully logout user",
-      "description": "should successfully logout user",
-      "category": "unit",
-      "status": "pass",
-      "executionTime": 0.004,
-      "lastRun": "2025-08-10T16:53:44.674Z"
-    },
-    {
-      "id": "test-108",
+      "id": "test-21",
       "name": "should accept valid email format",
       "description": "should accept valid email format",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.035,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.026,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-109",
+      "id": "test-22",
       "name": "should reject invalid email format",
       "description": "should reject invalid email format",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-110",
+      "id": "test-23",
       "name": "should reject multiple @ symbols",
       "description": "should reject multiple @ symbols",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-111",
+      "id": "test-24",
       "name": "should reject email without domain",
       "description": "should reject email without domain",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-112",
+      "id": "test-25",
       "name": "should reject email without local part",
       "description": "should reject email without local part",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-113",
+      "id": "test-26",
       "name": "should reject empty email",
       "description": "should reject empty email",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-114",
+      "id": "test-27",
       "name": "should trim trailing or leading whitespace",
       "description": "should trim trailing or leading whitespace",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-115",
+      "id": "test-28",
       "name": "should reject null email",
       "description": "should reject null email",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-116",
+      "id": "test-29",
       "name": "should reject non-string email",
       "description": "should reject non-string email",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.005,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-117",
+      "id": "test-30",
+      "name": "should calculate correct incident status counts",
+      "description": "should calculate correct incident status counts",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.006,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-31",
+      "name": "should calculate correct incident priority counts",
+      "description": "should calculate correct incident priority counts",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-32",
+      "name": "should identify high priority incidents correctly",
+      "description": "should identify high priority incidents correctly",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-33",
+      "name": "should calculate KEV count correctly",
+      "description": "should calculate KEV count correctly",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.005,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-34",
+      "name": "should identify high-risk threat actors correctly",
+      "description": "should identify high-risk threat actors correctly",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-35",
+      "name": "should generate correct pie chart data for incident status",
+      "description": "should generate correct pie chart data for incident status",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-36",
+      "name": "should generate correct bar chart data for incident priority",
+      "description": "should generate correct bar chart data for incident priority",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.007,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-37",
+      "name": "should only return data from user's organization",
+      "description": "should only return data from user's organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-38",
+      "name": "should require authentication to access dashboard metrics",
+      "description": "should require authentication to access dashboard metrics",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-39",
+      "name": "should require authentication to access chart data",
+      "description": "should require authentication to access chart data",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.004,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-40",
+      "name": "should display resolution status chart for critical CVEs",
+      "description": "should display resolution status chart for critical CVEs",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-41",
+      "name": "should require authentication to access critical CVE resolution chart",
+      "description": "should require authentication to access critical CVE resolution chart",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-42",
+      "name": "should search CVEs by software name in summary",
+      "description": "should search CVEs by software name in summary",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.014,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-43",
+      "name": "should return empty results for non-existent software",
+      "description": "should return empty results for non-existent software",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-44",
+      "name": "should limit search results",
+      "description": "should limit search results",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-45",
+      "name": "should perform case-insensitive search",
+      "description": "should perform case-insensitive search",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-46",
+      "name": "should require software parameter",
+      "description": "should require software parameter",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-47",
+      "name": "should handle empty software parameter",
+      "description": "should handle empty software parameter",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-48",
+      "name": "should filter CVEs by minimum severity score",
+      "description": "should filter CVEs by minimum severity score",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-49",
+      "name": "should filter CVEs by maximum severity score",
+      "description": "should filter CVEs by maximum severity score",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-50",
+      "name": "should filter CVEs by severity range",
+      "description": "should filter CVEs by severity range",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.007,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-51",
+      "name": "should sort CVEs by severity from highest to lowest by default",
+      "description": "should sort CVEs by severity from highest to lowest by default",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-52",
+      "name": "should sort CVEs by severity from lowest to highest when specified",
+      "description": "should sort CVEs by severity from lowest to highest when specified",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-53",
+      "name": "should combine search, filtering, and sorting correctly",
+      "description": "should combine search, filtering, and sorting correctly",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-54",
+      "name": "should handle invalid severity values gracefully",
+      "description": "should handle invalid severity values gracefully",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-55",
+      "name": "should allow admins to schedule security reminders",
+      "description": "should allow admins to schedule security reminders",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.025,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-56",
+      "name": "should prevent non-admins from scheduling notifications",
+      "description": "should prevent non-admins from scheduling notifications",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.005,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-57",
+      "name": "should require all mandatory fields for scheduling",
+      "description": "should require all mandatory fields for scheduling",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.008,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-58",
+      "name": "should validate priority values",
+      "description": "should validate priority values",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-59",
+      "name": "should reject past scheduled times",
+      "description": "should reject past scheduled times",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-60",
+      "name": "should allow admins to view scheduled notifications",
+      "description": "should allow admins to view scheduled notifications",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.007,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-61",
+      "name": "should prevent non-admins from viewing scheduled notifications",
+      "description": "should prevent non-admins from viewing scheduled notifications",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-62",
+      "name": "should allow admins to cancel scheduled notifications",
+      "description": "should allow admins to cancel scheduled notifications",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-63",
+      "name": "should prevent non-admins from cancelling scheduled notifications",
+      "description": "should prevent non-admins from cancelling scheduled notifications",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-64",
+      "name": "should allow all authenticated users to view their reminders",
+      "description": "should allow all authenticated users to view their reminders",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-65",
+      "name": "should allow editors to view their reminders",
+      "description": "should allow editors to view their reminders",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-66",
+      "name": "should allow viewers to view their reminders",
+      "description": "should allow viewers to view their reminders",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-67",
+      "name": "should include all required reminder fields",
+      "description": "should include all required reminder fields",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-68",
+      "name": "should reject registration without email and password",
+      "description": "should reject registration without email and password",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.017,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-69",
+      "name": "should reject registration with missing fields",
+      "description": "should reject registration with missing fields",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-70",
+      "name": "should reject registration with insufficient password complexity",
+      "description": "should reject registration with insufficient password complexity",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-71",
+      "name": "should reject registration with XSS attempt",
+      "description": "should reject registration with XSS attempt",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-72",
+      "name": "should successfully register user with valid credentials",
+      "description": "should successfully register user with valid credentials",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-73",
+      "name": "should reject login without credentials",
+      "description": "should reject login without credentials",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-74",
+      "name": "should successfully login with valid credentials",
+      "description": "should successfully login with valid credentials",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-75",
+      "name": "should successfully logout user",
+      "description": "should successfully logout user",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-76",
       "name": "should reject update with no fields provided",
       "description": "should reject update with no fields provided",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.009,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.01,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-118",
+      "id": "test-77",
       "name": "should reject update with existing email",
       "description": "should reject update with existing email",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.005,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-119",
+      "id": "test-78",
       "name": "should reject update with same password",
       "description": "should reject update with same password",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-120",
+      "id": "test-79",
       "name": "should allow successful user update",
       "description": "should allow successful user update",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-121",
+      "id": "test-80",
+      "name": "should accept valid password",
+      "description": "should accept valid password",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.034,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-81",
+      "name": "should accept minimum length",
+      "description": "should accept minimum length",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-82",
+      "name": "should reject invalid format",
+      "description": "should reject invalid format",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-83",
+      "name": "should require number",
+      "description": "should require number",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-84",
+      "name": "should require special char",
+      "description": "should require special char",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-85",
+      "name": "should reject empty password",
+      "description": "should reject empty password",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-86",
+      "name": "should reject non string password",
+      "description": "should reject non string password",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-87",
+      "name": "should reject role assignment by non-admin users",
+      "description": "should reject role assignment by non-admin users",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.034,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-88",
+      "name": "should reject role assignment with invalid role",
+      "description": "should reject role assignment with invalid role",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-89",
+      "name": "should reject role assignment for non-existent user",
+      "description": "should reject role assignment for non-existent user",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-90",
+      "name": "should reject role assignment for user in different organization",
+      "description": "should reject role assignment for user in different organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-91",
+      "name": "should reject admin trying to change their own role when they are the only admin",
+      "description": "should reject admin trying to change their own role when they are the only admin",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-92",
+      "name": "should allow admin to change their own role when there are other admins",
+      "description": "should allow admin to change their own role when there are other admins",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-93",
+      "name": "should allow admin to assign valid role to user in same organization",
+      "description": "should allow admin to assign valid role to user in same organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-94",
+      "name": "should allow admin to view all users in their organization",
+      "description": "should allow admin to view all users in their organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-95",
+      "name": "should allow admin to view specific user in their organization",
+      "description": "should allow admin to view specific user in their organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-96",
+      "name": "should reject admin viewing user from different organization",
+      "description": "should reject admin viewing user from different organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-97",
+      "name": "should show updated role after role assignment",
+      "description": "should show updated role after role assignment",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.004,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-98",
+      "name": "should remove html tags",
+      "description": "should remove html tags",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.025,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-99",
+      "name": "should remove html tags with attributes",
+      "description": "should remove html tags with attributes",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-100",
+      "name": "should remove self closing html tags",
+      "description": "should remove self closing html tags",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-101",
+      "name": "should prevent XSS",
+      "description": "should prevent XSS",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-102",
+      "name": "should prevent event handler injection",
+      "description": "should prevent event handler injection",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-103",
+      "name": "should prevent iframe injection",
+      "description": "should prevent iframe injection",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-104",
+      "name": "should handle empty strings",
+      "description": "should handle empty strings",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-105",
       "name": "should allow all roles to see CVE comments",
       "description": "should allow all roles to see CVE comments",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.03,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.025,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-122",
+      "id": "test-106",
       "name": "should allow all roles to add comments",
       "description": "should allow all roles to add comments",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.01,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-123",
+      "id": "test-107",
       "name": "should reject empty comments",
       "description": "should reject empty comments",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-124",
+      "id": "test-108",
       "name": "should allow users to delete their own comments",
       "description": "should allow users to delete their own comments",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.004,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-125",
+      "id": "test-109",
       "name": "should allow admins to delete any comment",
       "description": "should allow admins to delete any comment",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.003,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-126",
+      "id": "test-110",
       "name": "should allow admins to update incident status",
       "description": "should allow admins to update incident status",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-127",
+      "id": "test-111",
       "name": "should allow editors to update incident status",
       "description": "should allow editors to update incident status",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-128",
+      "id": "test-112",
       "name": "should prevent viewers from updating incident status",
       "description": "should prevent viewers from updating incident status",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-129",
+      "id": "test-113",
       "name": "should allow admins to delete incidents",
       "description": "should allow admins to delete incidents",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-130",
+      "id": "test-114",
       "name": "should allow editors to delete incidents",
       "description": "should allow editors to delete incidents",
       "category": "unit",
       "status": "pass",
-      "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-131",
+      "id": "test-115",
       "name": "should prevent viewers from deleting incidents",
       "description": "should prevent viewers from deleting incidents",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-132",
+      "id": "test-116",
       "name": "should handle non-existent incidents",
       "description": "should handle non-existent incidents",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.002,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
     },
     {
-      "id": "test-133",
+      "id": "test-117",
       "name": "should handle non-existent comments",
       "description": "should handle non-existent comments",
       "category": "unit",
       "status": "pass",
       "executionTime": 0.001,
-      "lastRun": "2025-08-10T16:53:44.674Z"
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-118",
+      "name": "should only return incidents from user's organization",
+      "description": "should only return incidents from user's organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.019,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-119",
+      "name": "should allow users from different organizations to see only their incidents",
+      "description": "should allow users from different organizations to see only their incidents",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-120",
+      "name": "should allow access to incident from same organization",
+      "description": "should allow access to incident from same organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-121",
+      "name": "should deny access to incident from different organization",
+      "description": "should deny access to incident from different organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-122",
+      "name": "should return 404 for non-existent incident",
+      "description": "should return 404 for non-existent incident",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-123",
+      "name": "should create incident with user's organization",
+      "description": "should create incident with user's organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.006,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-124",
+      "name": "should require authentication to create incidents",
+      "description": "should require authentication to create incidents",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-125",
+      "name": "should validate required fields for incident creation",
+      "description": "should validate required fields for incident creation",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.003,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-126",
+      "name": "should allow updating incident from same organization",
+      "description": "should allow updating incident from same organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-127",
+      "name": "should deny updating incident from different organization",
+      "description": "should deny updating incident from different organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-128",
+      "name": "should allow deleting incident from same organization",
+      "description": "should allow deleting incident from same organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-129",
+      "name": "should deny deleting incident from different organization",
+      "description": "should deny deleting incident from different organization",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-130",
+      "name": "should require authentication to view incidents",
+      "description": "should require authentication to view incidents",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-131",
+      "name": "should require authentication to view single incident",
+      "description": "should require authentication to view single incident",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-132",
+      "name": "should require authentication to update incidents",
+      "description": "should require authentication to update incidents",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.002,
+      "lastRun": "2025-08-10T21:29:33.288Z"
+    },
+    {
+      "id": "test-133",
+      "name": "should require authentication to delete incidents",
+      "description": "should require authentication to delete incidents",
+      "category": "unit",
+      "status": "pass",
+      "executionTime": 0.001,
+      "lastRun": "2025-08-10T21:29:33.288Z"
     }
   ],
   "summary": {
@@ -1203,6 +1203,6 @@
     "passedTests": 133,
     "failedTests": 0,
     "successRate": 100,
-    "lastUpdated": "2025-08-10T16:53:44.674Z"
+    "lastUpdated": "2025-08-10T21:29:33.288Z"
   }
 }
